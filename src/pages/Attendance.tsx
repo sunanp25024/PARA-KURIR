@@ -1,17 +1,51 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, CheckCircle, MapPin } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, MapPin, Navigation } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { toast } from '@/components/ui/use-toast';
 
 const Attendance = () => {
   const [attendanceStatus, setAttendanceStatus] = useState('not-checked-in');
   const [checkInTime, setCheckInTime] = useState('');
+  const [checkOutTime, setCheckOutTime] = useState('');
+  const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [attendanceHistory] = useState([
+    { date: '2025-06-13', checkIn: '08:15', checkOut: '17:30', status: 'Hadir' },
+    { date: '2025-06-12', checkIn: '08:20', checkOut: '17:25', status: 'Hadir' },
+    { date: '2025-06-11', checkIn: '08:30', checkOut: '17:20', status: 'Terlambat' },
+    { date: '2025-06-10', checkIn: '08:10', checkOut: '17:35', status: 'Hadir' }
+  ]);
+
+  useEffect(() => {
+    // Get current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.log('Error getting location:', error);
+        }
+      );
+    }
+  }, []);
 
   const handleCheckIn = () => {
+    if (!location) {
+      toast({
+        title: "Lokasi Diperlukan",
+        description: "Harap aktifkan GPS untuk check-in",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const now = new Date().toLocaleTimeString('id-ID');
     setCheckInTime(now);
     setAttendanceStatus('checked-in');
@@ -22,12 +56,32 @@ const Attendance = () => {
   };
 
   const handleCheckOut = () => {
+    if (!location) {
+      toast({
+        title: "Lokasi Diperlukan",
+        description: "Harap aktifkan GPS untuk check-out",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const now = new Date().toLocaleTimeString('id-ID');
+    setCheckOutTime(now);
     setAttendanceStatus('checked-out');
     toast({
       title: "Check-out Berhasil",
       description: `Anda telah check-out pada ${now}`,
     });
+  };
+
+  const getWorkingHours = () => {
+    if (checkInTime && checkOutTime) {
+      const checkIn = new Date(`2025-06-14 ${checkInTime}`);
+      const checkOut = new Date(`2025-06-14 ${checkOutTime}`);
+      const diff = (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
+      return diff.toFixed(1);
+    }
+    return '0';
   };
 
   return (
@@ -57,10 +111,13 @@ const Attendance = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <span>Status:</span>
-                <Badge variant={attendanceStatus === 'checked-in' ? 'default' : 'secondary'}>
+                <Badge variant={
+                  attendanceStatus === 'checked-in' ? 'default' : 
+                  attendanceStatus === 'checked-out' ? 'default' : 'secondary'
+                }>
                   {attendanceStatus === 'not-checked-in' && 'Belum Check-in'}
-                  {attendanceStatus === 'checked-in' && 'Sudah Check-in'}
-                  {attendanceStatus === 'checked-out' && 'Sudah Check-out'}
+                  {attendanceStatus === 'checked-in' && 'Sedang Bekerja'}
+                  {attendanceStatus === 'checked-out' && 'Selesai Kerja'}
                 </Badge>
               </div>
 
@@ -71,11 +128,25 @@ const Attendance = () => {
                 </div>
               )}
 
+              {checkOutTime && (
+                <div className="flex items-center justify-between">
+                  <span>Waktu Check-out:</span>
+                  <span className="font-medium">{checkOutTime}</span>
+                </div>
+              )}
+
+              {checkInTime && checkOutTime && (
+                <div className="flex items-center justify-between">
+                  <span>Total Jam Kerja:</span>
+                  <span className="font-medium">{getWorkingHours()} jam</span>
+                </div>
+              )}
+
               <div className="pt-4">
                 {attendanceStatus === 'not-checked-in' && (
-                  <Button onClick={handleCheckIn} className="w-full">
+                  <Button onClick={handleCheckIn} className="w-full" disabled={!location}>
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    Check-in Sekarang
+                    {location ? 'Check-in Sekarang' : 'Menunggu GPS...'}
                   </Button>
                 )}
                 
@@ -99,7 +170,7 @@ const Attendance = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
-                Lokasi Kerja
+                Lokasi & GPS
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -109,9 +180,22 @@ const Attendance = () => {
                   <p className="text-sm text-gray-600">Jakarta Selatan</p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="font-medium">Koordinat GPS</p>
-                  <p className="text-sm text-gray-600">-6.2088, 106.8456</p>
+                  <p className="font-medium">Status GPS</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className={`w-3 h-3 rounded-full ${location ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                    <span className="text-sm">{location ? 'Aktif' : 'Tidak Aktif'}</span>
+                  </div>
                 </div>
+                {location && (
+                  <div className="p-3 bg-green-50 rounded-lg">
+                    <p className="font-medium">Koordinat Saat Ini</p>
+                    <p className="text-sm text-gray-600">{location.lat.toFixed(6)}, {location.lng.toFixed(6)}</p>
+                  </div>
+                )}
+                <Button variant="outline" className="w-full" onClick={() => window.location.reload()}>
+                  <Navigation className="h-4 w-4 mr-2" />
+                  Refresh Lokasi
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -121,13 +205,30 @@ const Attendance = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Riwayat Kehadiran
+              Riwayat Kehadiran (7 Hari Terakhir)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8">
-              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">Riwayat kehadiran akan muncul di sini</p>
+            <div className="space-y-3">
+              {attendanceHistory.map((record, index) => (
+                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <p className="font-medium">
+                      {new Date(record.date).toLocaleDateString('id-ID', { 
+                        weekday: 'long', 
+                        day: 'numeric',
+                        month: 'long'
+                      })}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Check-in: {record.checkIn} | Check-out: {record.checkOut}
+                    </p>
+                  </div>
+                  <Badge variant={record.status === 'Hadir' ? 'default' : 'secondary'}>
+                    {record.status}
+                  </Badge>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
