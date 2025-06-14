@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Package, 
   CheckCircle, 
@@ -10,10 +11,16 @@ import {
   Users,
   DollarSign,
   Bell,
-  AlertCircle
+  AlertCircle,
+  Camera,
+  Scan
 } from 'lucide-react';
 import Layout from '@/components/Layout';
-import PackageInput from '@/components/PackageInput';
+import DailyPackageInput from '@/components/DailyPackageInput';
+import ScanPackageManager from '@/components/ScanPackageManager';
+import DeliveryTracking from '@/components/DeliveryTracking';
+import PendingReturnPackages from '@/components/PendingReturnPackages';
+import DailyPerformanceSummary from '@/components/DailyPerformanceSummary';
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
@@ -58,11 +65,11 @@ const Dashboard = () => {
 
 const KurirDashboard = () => {
   const [todayStats] = useState({
-    totalPackages: 8,
-    delivered: 6,
-    pending: 2,
-    failed: 0,
-    successRate: 75
+    totalPackages: 15,
+    delivered: 12,
+    pending: 0,
+    failed: 3,
+    successRate: 80
   });
 
   return (
@@ -93,12 +100,12 @@ const KurirDashboard = () => {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <CardTitle className="text-sm font-medium">Return</CardTitle>
             <Clock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{todayStats.pending}</div>
-            <p className="text-xs text-muted-foreground">Paket belum terkirim</p>
+            <div className="text-2xl font-bold">{todayStats.failed}</div>
+            <p className="text-xs text-muted-foreground">Paket dikembalikan</p>
           </CardContent>
         </Card>
         
@@ -114,18 +121,47 @@ const KurirDashboard = () => {
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Input Paket Hari Ini</CardTitle>
-            <CardDescription>Kelola paket yang akan dikirim</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PackageInput />
-          </CardContent>
-        </Card>
+      {/* Main Workflow Tabs */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Workflow Harian Kurir</CardTitle>
+          <CardDescription>Kelola semua aktivitas pengiriman Anda</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="input" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="input">Input Paket</TabsTrigger>
+              <TabsTrigger value="scan">Scan & Kelola</TabsTrigger>
+              <TabsTrigger value="delivery">Pengantaran</TabsTrigger>
+              <TabsTrigger value="return">Pending/Return</TabsTrigger>
+              <TabsTrigger value="summary">Performa</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="input" className="mt-6">
+              <DailyPackageInput />
+            </TabsContent>
+            
+            <TabsContent value="scan" className="mt-6">
+              <ScanPackageManager />
+            </TabsContent>
+            
+            <TabsContent value="delivery" className="mt-6">
+              <DeliveryTracking />
+            </TabsContent>
+            
+            <TabsContent value="return" className="mt-6">
+              <PendingReturnPackages />
+            </TabsContent>
+            
+            <TabsContent value="summary" className="mt-6">
+              <DailyPerformanceSummary />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
+      {/* Quick Actions for other roles */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Aktivitas Terbaru</CardTitle>
@@ -135,37 +171,48 @@ const KurirDashboard = () => {
               <CheckCircle className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm font-medium">Paket terkirim</p>
-                <p className="text-xs text-gray-600">Ahmad Kurniawan - 10:30</p>
+                <p className="text-xs text-gray-600">PKG123456789 - 10:30</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-              <Package className="h-5 w-5 text-blue-600" />
+              <Camera className="h-5 w-5 text-blue-600" />
               <div>
-                <p className="text-sm font-medium">Paket baru ditambahkan</p>
-                <p className="text-xs text-gray-600">Siti Nurhaliza - 09:15</p>
+                <p className="text-sm font-medium">Foto bukti diambil</p>
+                <p className="text-xs text-gray-600">PKG987654321 - 09:15</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
-              <Clock className="h-5 w-5 text-yellow-600" />
+              <Scan className="h-5 w-5 text-yellow-600" />
               <div>
-                <p className="text-sm font-medium">Menunggu pickup</p>
-                <p className="text-xs text-gray-600">Budi Santoso - 08:45</p>
+                <p className="text-sm font-medium">Paket di-scan</p>
+                <p className="text-xs text-gray-600">PKG555444333 - 08:45</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Tips & Motivasi</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm font-medium text-blue-800">💡 Tip Hari Ini</p>
+                <p className="text-sm text-blue-600">
+                  Pastikan selalu mengambil foto bukti pengiriman yang jelas dan verifikasi nama penerima
+                </p>
+              </div>
+              <div className="p-3 bg-green-50 rounded-lg">
+                <p className="text-sm font-medium text-green-800">🎯 Target Harian</p>
+                <p className="text-sm text-green-600">
+                  Anda sudah mencapai {todayStats.successRate}% dari target. Keep going!
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Motivasi */}
-      <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-2">Semangat Kerja! 🚀</h3>
-          <p className="text-blue-100">
-            Anda sudah menyelesaikan {todayStats.delivered} dari {todayStats.totalPackages} paket hari ini. 
-            Terus pertahankan kinerja yang excellent!
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 };
