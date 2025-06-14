@@ -1,11 +1,12 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Camera, CheckCircle, Package } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Camera, CheckCircle, Package, AlertTriangle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 interface DeliveryItem {
@@ -23,22 +24,40 @@ const DeliveryTracking = () => {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [recipientName, setRecipientName] = useState('');
   const [photoTaken, setPhotoTaken] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load scanned packages from localStorage
-  React.useEffect(() => {
-    const scannedPackages = JSON.parse(localStorage.getItem('scannedPackages') || '[]');
-    const items: DeliveryItem[] = scannedPackages.map((pkg: any) => ({
-      id: pkg.id,
-      trackingNumber: pkg.trackingNumber,
-      isCOD: pkg.isCOD,
-      status: 'in-delivery'
-    }));
-    setDeliveryItems(items);
+  // Load delivery packages from localStorage
+  useEffect(() => {
+    const deliveryPackages = localStorage.getItem('deliveryPackages');
+    const existingDelivery = localStorage.getItem('deliveryItems');
+    
+    if (existingDelivery) {
+      // Load existing delivery items
+      const items = JSON.parse(existingDelivery);
+      setDeliveryItems(items.map((item: any) => ({
+        ...item,
+        deliveredAt: item.deliveredAt ? new Date(item.deliveredAt) : undefined
+      })));
+    } else if (deliveryPackages) {
+      // Initialize delivery items from scanned packages
+      const packages = JSON.parse(deliveryPackages);
+      const items: DeliveryItem[] = packages.map((pkg: any) => ({
+        id: pkg.id,
+        trackingNumber: pkg.trackingNumber,
+        isCOD: pkg.isCOD,
+        status: 'in-delivery'
+      }));
+      setDeliveryItems(items);
+    }
   }, []);
 
+  useEffect(() => {
+    // Save delivery items to localStorage
+    if (deliveryItems.length > 0) {
+      localStorage.setItem('deliveryItems', JSON.stringify(deliveryItems));
+    }
+  }, [deliveryItems]);
+
   const handleTakePhoto = () => {
-    // Simulate taking photo
     setPhotoTaken(true);
     toast({
       title: "Foto Berhasil Diambil",
@@ -93,11 +112,22 @@ const DeliveryTracking = () => {
           <CardDescription>Kelola paket yang sedang dalam proses pengiriman</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {inDeliveryItems.length === 0 ? (
+          {deliveryItems.length === 0 && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Belum ada paket untuk dikirim. Silakan selesaikan proses scan terlebih dahulu di tab "Scan & Kelola".
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {inDeliveryItems.length === 0 && deliveredItems.length > 0 && (
             <div className="text-center py-8 text-gray-500">
-              Tidak ada paket dalam pengantaran
+              Semua paket sudah terkirim
             </div>
-          ) : (
+          )}
+
+          {inDeliveryItems.length > 0 && (
             <div className="space-y-3">
               {inDeliveryItems.map((item) => (
                 <div 

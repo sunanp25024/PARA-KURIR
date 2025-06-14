@@ -1,50 +1,92 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Package, AlertTriangle } from 'lucide-react';
+import { Package, AlertTriangle, CheckCircle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 const DailyPackageInput = () => {
-  const [packageData, setPackageData] = useState({
-    totalPackages: 0,
-    codPackages: 0,
-    nonCodPackages: 0
-  });
+  const [totalPackages, setTotalPackages] = useState('');
+  const [codPackages, setCodPackages] = useState('');
+  const [nonCodPackages, setNonCodPackages] = useState('');
+  const [isDataSaved, setIsDataSaved] = useState(false);
 
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  useEffect(() => {
+    // Load existing data
+    const savedData = localStorage.getItem('dailyPackageData');
+    if (savedData) {
+      const data = JSON.parse(savedData);
+      setTotalPackages(data.totalPackages.toString());
+      setCodPackages(data.codPackages.toString());
+      setNonCodPackages(data.nonCodPackages.toString());
+      setIsDataSaved(true);
+    }
+  }, []);
 
-  const handleInputChange = (field: string, value: number) => {
-    setPackageData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  const handleSaveData = () => {
+    const total = parseInt(totalPackages) || 0;
+    const cod = parseInt(codPackages) || 0;
+    const nonCod = parseInt(nonCodPackages) || 0;
 
-  const isDataSynced = packageData.codPackages + packageData.nonCodPackages === packageData.totalPackages;
-  const showWarning = packageData.totalPackages > 0 && !isDataSynced;
-
-  const handleSubmit = () => {
-    if (!isDataSynced) {
+    if (total === 0) {
       toast({
-        title: "Data Tidak Sinkron",
-        description: "Total COD + Non COD harus sama dengan Total Paket",
+        title: "Error",
+        description: "Total paket harus lebih dari 0",
         variant: "destructive"
       });
       return;
     }
 
-    setIsSubmitted(true);
+    if (cod + nonCod !== total) {
+      toast({
+        title: "Error Sinkronisasi",
+        description: `Total COD (${cod}) + Non COD (${nonCod}) = ${cod + nonCod} tidak sama dengan Total Paket (${total})`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const packageData = {
+      totalPackages: total,
+      codPackages: cod,
+      nonCodPackages: nonCod,
+      savedAt: new Date().toISOString()
+    };
+
     localStorage.setItem('dailyPackageData', JSON.stringify(packageData));
+    
+    // Clear any existing scanned packages when new data is input
+    localStorage.removeItem('scannedPackages');
+    
+    setIsDataSaved(true);
     
     toast({
       title: "Data Tersimpan",
-      description: "Data input paket harian berhasil disimpan",
+      description: `Total paket hari ini: ${total} (COD: ${cod}, Non COD: ${nonCod})`,
     });
   };
+
+  const handleReset = () => {
+    setTotalPackages('');
+    setCodPackages('');
+    setNonCodPackages('');
+    setIsDataSaved(false);
+    localStorage.removeItem('dailyPackageData');
+    localStorage.removeItem('scannedPackages');
+    
+    toast({
+      title: "Data Direset",
+      description: "Semua data paket harian telah dihapus",
+    });
+  };
+
+  const total = parseInt(totalPackages) || 0;
+  const cod = parseInt(codPackages) || 0;
+  const nonCod = parseInt(nonCodPackages) || 0;
+  const isValid = total > 0 && (cod + nonCod === total);
 
   return (
     <Card>
@@ -53,71 +95,93 @@ const DailyPackageInput = () => {
           <Package className="h-5 w-5" />
           Data Input Paket Harian
         </CardTitle>
-        <CardDescription>Input total paket yang akan dibawa hari ini</CardDescription>
+        <CardDescription>Input jumlah total paket yang akan dikirim hari ini</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <Label htmlFor="totalPackages">Total Paket</Label>
+            <Label htmlFor="total">Total Paket</Label>
             <Input
-              id="totalPackages"
+              id="total"
               type="number"
-              value={packageData.totalPackages}
-              onChange={(e) => handleInputChange('totalPackages', Number(e.target.value))}
+              value={totalPackages}
+              onChange={(e) => setTotalPackages(e.target.value)}
               placeholder="0"
-              disabled={isSubmitted}
+              disabled={isDataSaved}
             />
           </div>
           <div>
-            <Label htmlFor="codPackages">Paket COD</Label>
+            <Label htmlFor="cod">Paket COD</Label>
             <Input
-              id="codPackages"
+              id="cod"
               type="number"
-              value={packageData.codPackages}
-              onChange={(e) => handleInputChange('codPackages', Number(e.target.value))}
+              value={codPackages}
+              onChange={(e) => setCodPackages(e.target.value)}
               placeholder="0"
-              disabled={isSubmitted}
+              disabled={isDataSaved}
             />
           </div>
           <div>
-            <Label htmlFor="nonCodPackages">Paket Non COD</Label>
+            <Label htmlFor="nonCod">Paket Non COD</Label>
             <Input
-              id="nonCodPackages"
+              id="nonCod"
               type="number"
-              value={packageData.nonCodPackages}
-              onChange={(e) => handleInputChange('nonCodPackages', Number(e.target.value))}
+              value={nonCodPackages}
+              onChange={(e) => setNonCodPackages(e.target.value)}
               placeholder="0"
-              disabled={isSubmitted}
+              disabled={isDataSaved}
             />
           </div>
         </div>
 
-        {showWarning && (
+        {/* Validation Alert */}
+        {total > 0 && !isValid && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Peringatan: Total COD ({packageData.codPackages}) + Non COD ({packageData.nonCodPackages}) = {packageData.codPackages + packageData.nonCodPackages} 
-              tidak sama dengan Total Paket ({packageData.totalPackages})
+              Jumlah tidak sesuai! COD ({cod}) + Non COD ({nonCod}) = {cod + nonCod}, 
+              seharusnya sama dengan Total Paket ({total})
             </AlertDescription>
           </Alert>
         )}
 
-        {isDataSynced && packageData.totalPackages > 0 && (
+        {isValid && !isDataSaved && (
           <Alert>
-            <Package className="h-4 w-4" />
+            <CheckCircle className="h-4 w-4" />
             <AlertDescription>
-              Data tersinkronisasi dengan benar: {packageData.totalPackages} paket total
+              Data valid! Total: {total}, COD: {cod}, Non COD: {nonCod}
             </AlertDescription>
           </Alert>
         )}
 
-        <Button 
-          onClick={handleSubmit} 
-          disabled={!isDataSynced || packageData.totalPackages === 0 || isSubmitted}
-          className="w-full"
-        >
-          {isSubmitted ? 'Data Sudah Disimpan' : 'Simpan Data Paket Harian'}
-        </Button>
+        {isDataSaved && (
+          <Alert>
+            <CheckCircle className="h-4 w-4" />
+            <AlertDescription>
+              Data paket harian sudah tersimpan. Total: {total}, COD: {cod}, Non COD: {nonCod}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className="flex gap-2">
+          {!isDataSaved ? (
+            <Button 
+              onClick={handleSaveData} 
+              disabled={!isValid}
+              className="flex-1"
+            >
+              Simpan Data Paket
+            </Button>
+          ) : (
+            <Button 
+              onClick={handleReset} 
+              variant="outline"
+              className="flex-1"
+            >
+              Reset & Input Ulang
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
