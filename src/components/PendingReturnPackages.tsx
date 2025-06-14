@@ -291,7 +291,7 @@ const PendingReturnPackages = () => {
               ))}
             </div>
           </CardContent>
-        </CardContent>
+        </Card>
       )}
     </div>
   );
