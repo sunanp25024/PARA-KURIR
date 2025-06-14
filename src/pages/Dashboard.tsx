@@ -9,7 +9,8 @@ import {
   Clock, 
   TrendingUp, 
   Users,
-  DollarSign
+  DollarSign,
+  Bell
 } from 'lucide-react';
 import Layout from '@/components/Layout';
 
