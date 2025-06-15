@@ -4,7 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, User, Upload, Download, Eye } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Plus, Search, Edit, Trash2, User, Upload, Download, Eye, MoreHorizontal, MapPin } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import Layout from '@/components/Layout';
 import { toast } from '@/hooks/use-toast';
 import ExcelImportManager from '@/components/ExcelImportManager';
@@ -22,6 +30,7 @@ const ManageKurir = () => {
       status: 'Aktif',
       performance: '95%',
       area: 'Jakarta Selatan',
+      workLocation: 'Kantor Pusat - Jl. Sudirman',
       joinDate: '2024-01-15'
     },
     {
@@ -32,6 +41,7 @@ const ManageKurir = () => {
       status: 'Aktif',
       performance: '88%',
       area: 'Jakarta Timur',
+      workLocation: 'Cabang Cakung - Jl. Raya Cakung',
       joinDate: '2024-02-20'
     },
     {
@@ -42,6 +52,7 @@ const ManageKurir = () => {
       status: 'Tidak Aktif',
       performance: '76%',
       area: 'Jakarta Utara',
+      workLocation: 'Cabang Kelapa Gading - Mall Kelapa Gading',
       joinDate: '2024-03-10'
     },
     {
@@ -52,7 +63,19 @@ const ManageKurir = () => {
       status: 'Aktif',
       performance: '92%',
       area: 'Jakarta Barat',
+      workLocation: 'Cabang Taman Anggrek - Central Park',
       joinDate: '2024-01-25'
+    },
+    {
+      id: 'KURIR004',
+      name: 'Dedi Rahman',
+      email: 'dedi@example.com',
+      phone: '081234567894',
+      status: 'Aktif',
+      performance: '85%',
+      area: 'Jakarta Pusat',
+      workLocation: 'Kantor Pusat - Menara BCA',
+      joinDate: '2024-03-01'
     }
   ]);
 
@@ -61,14 +84,13 @@ const ManageKurir = () => {
       title: "Form Tambah Kurir",
       description: "Membuka form untuk menambahkan kurir baru",
     });
-    // Simulate opening add form
     console.log("Opening add courier form");
   };
 
   const handleDownloadTemplate = () => {
-    const templateData = `ID Kurir,Nama,Email,Telepon,Area,Status,Tanggal Bergabung
-KURIR004,Nama Kurir,email@example.com,081234567890,Jakarta Selatan,Aktif,2024-12-15
-KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-15`;
+    const templateData = `ID Kurir,Nama,Email,Telepon,Area,Lokasi Kerja,Status,Tanggal Bergabung
+KURIR004,Nama Kurir,email@example.com,081234567890,Jakarta Selatan,Kantor Pusat - Jl. Sudirman,Aktif,2024-12-15
+KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakung - Jl. Raya Cakung,Aktif,2024-12-15`;
     
     downloadFile(templateData, 'template_kurir.csv', 'text/csv;charset=utf-8;');
     
@@ -107,7 +129,9 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-1
   const filteredKurirs = kurirs.filter(kurir =>
     kurir.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     kurir.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    kurir.email.toLowerCase().includes(searchTerm.toLowerCase())
+    kurir.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    kurir.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    kurir.workLocation.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -166,7 +190,7 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-1
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Cari kurir berdasarkan nama, ID, atau email..."
+                  placeholder="Cari kurir berdasarkan nama, ID, email, area, atau lokasi kerja..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -174,44 +198,84 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-1
               </div>
             </div>
 
-            <div className="space-y-4">
-              {filteredKurirs.map((kurir) => (
-                <div key={kurir.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
-                      <User className="h-6 w-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-lg">{kurir.name}</p>
-                      <p className="text-sm text-gray-600">{kurir.id}</p>
-                      <p className="text-sm text-gray-500">{kurir.email}</p>
-                      <p className="text-xs text-gray-400">{kurir.phone}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-6">
-                    <div className="text-right">
-                      <Badge variant={kurir.status === 'Aktif' ? 'default' : 'secondary'} className="mb-1">
-                        {kurir.status}
-                      </Badge>
-                      <p className="text-sm text-gray-500">Performa: {kurir.performance}</p>
-                      <p className="text-sm text-gray-500">Area: {kurir.area}</p>
-                      <p className="text-xs text-gray-400">Bergabung: {kurir.joinDate}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleViewDetails(kurir)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleEditKurir(kurir)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleDeleteKurir(kurir)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Kurir</TableHead>
+                    <TableHead>Area</TableHead>
+                    <TableHead>Lokasi Kerja</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Performance</TableHead>
+                    <TableHead>Bergabung</TableHead>
+                    <TableHead className="w-[50px]">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredKurirs.map((kurir) => (
+                    <TableRow key={kurir.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-purple-100 text-purple-600">
+                              {kurir.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{kurir.name}</p>
+                            <p className="text-sm text-gray-500">{kurir.id}</p>
+                            <p className="text-sm text-gray-500">{kurir.email}</p>
+                            <p className="text-xs text-gray-400">{kurir.phone}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-medium">{kurir.area}</span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm">{kurir.workLocation}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={kurir.status === 'Aktif' ? 'default' : 'secondary'}>
+                          {kurir.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-medium text-green-600">{kurir.performance}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-gray-500">{kurir.joinDate}</span>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleViewDetails(kurir)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Lihat Detail
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditKurir(kurir)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteKurir(kurir)} className="text-red-600">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Hapus
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
               
               {filteredKurirs.length === 0 && (
                 <div className="text-center py-8">
