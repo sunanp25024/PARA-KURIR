@@ -87,7 +87,14 @@ const Dashboard = () => {
     return (
       <Layout>
         <WorkflowProvider>
-          <CourierDashboardContent />
+          <SidebarProvider>
+            <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50/30">
+              <CourierSidebar />
+              <main className="flex-1 w-full overflow-auto">
+                <CourierWorkflowMain />
+              </main>
+            </div>
+          </SidebarProvider>
         </WorkflowProvider>
       </Layout>
     );

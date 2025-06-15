@@ -196,60 +196,71 @@ const CourierWorkflowMain = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto p-6 space-y-8">
+    <div className="flex-1 w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
+      <div className="w-full max-w-none mx-auto p-4 lg:p-6 xl:p-8 space-y-6">
         {/* Header */}
-        <div className="text-center py-8">
-          <h1 className="text-3xl font-bold text-blue-600 mb-2">
+        <div className="w-full text-center py-6 lg:py-8">
+          <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-3">
             Workflow Harian Kurir
           </h1>
-          <p className="text-gray-600">Kelola paket harian Anda dengan mudah dan efisien</p>
+          <p className="text-slate-600 text-sm lg:text-base xl:text-lg max-w-2xl mx-auto">
+            Kelola paket harian Anda dengan mudah dan efisien
+          </p>
         </div>
 
-        {/* Progress Section */}
-        <Card className="bg-white shadow-lg">
-          <CardContent className="p-8">
+        {/* Progress Section - Full Width with Better Spacing */}
+        <Card className="w-full bg-white/90 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+          <CardContent className="p-6 lg:p-8">
             {/* Progress Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">Progress Harian</h2>
-              <span className="text-3xl font-bold text-blue-600">{Math.round(getStepProgress())}%</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+              <h2 className="text-lg lg:text-xl font-semibold text-slate-800">Progress Harian</h2>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  {Math.round(getStepProgress())}%
+                </span>
+                <div className="text-xs text-slate-500">
+                  Step {['input', 'scan', 'delivery', 'pending', 'performance'].indexOf(currentStep) + 1}/5
+                </div>
+              </div>
             </div>
             
             {/* Progress Bar */}
-            <Progress value={getStepProgress()} className="h-3 mb-8" />
+            <div className="mb-8">
+              <Progress value={getStepProgress()} className="h-3 bg-slate-100" />
+            </div>
             
-            {/* Step Cards */}
-            <div className="grid grid-cols-5 gap-4">
+            {/* Step Cards - Responsive Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
               {steps.map((step) => {
                 const status = getStepStatus(step.key);
                 return (
                   <div 
                     key={step.key}
-                    className={`relative p-6 rounded-2xl border-2 transition-all duration-300 ${
+                    className={`relative p-4 lg:p-6 rounded-xl border-2 transition-all duration-300 ${
                       status === 'active' 
                         ? 'bg-blue-50 border-blue-200 shadow-lg scale-105' 
                         : status === 'completed'
                         ? 'bg-green-50 border-green-200 shadow-md'
-                        : 'bg-gray-50 border-gray-200'
+                        : 'bg-slate-50 border-slate-200'
                     }`}
                   >
                     {/* Icon */}
-                    <div className="flex justify-center mb-4">
+                    <div className="flex justify-center mb-3 lg:mb-4">
                       {getStepIcon(step.key, status)}
                     </div>
                     
                     {/* Label */}
-                    <div className="text-sm font-semibold text-gray-700 text-center mb-3">
+                    <div className="text-xs lg:text-sm font-semibold text-slate-700 text-center mb-2 lg:mb-3 leading-tight">
                       {step.label}
                     </div>
                     
                     {/* Count Badge */}
                     {step.count !== '' && (
                       <div className="flex justify-center">
-                        <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                        <div className={`px-2 lg:px-3 py-1 rounded-full text-xs lg:text-sm font-bold ${
                           status === 'completed' ? 'bg-green-100 text-green-700' :
                           status === 'active' ? 'bg-blue-100 text-blue-700' :
-                          'bg-gray-100 text-gray-600'
+                          'bg-slate-100 text-slate-600'
                         }`}>
                           {step.count}
                         </div>
@@ -263,19 +274,21 @@ const CourierWorkflowMain = () => {
         </Card>
 
         {/* Current Step Section */}
-        <Card className="bg-white shadow-lg">
+        <Card className="w-full bg-white/90 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-3 text-xl text-gray-800">
-              {getStepIcon(currentStep, 'active')}
-              <span>
-                {currentStep === 'input' && 'Input Data Paket'}
-                {currentStep === 'scan' && 'Scan & Kelola Paket'}
-                {currentStep === 'delivery' && 'Proses Pengantaran'}
-                {currentStep === 'pending' && 'Kelola Paket Pending'}
-                {currentStep === 'performance' && 'Ringkasan Performa'}
-              </span>
-              <div className="ml-auto">
-                <Badge variant="secondary" className="text-sm">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-3 text-lg lg:text-xl text-slate-800">
+              <div className="flex items-center gap-3">
+                {getStepIcon(currentStep, 'active')}
+                <span>
+                  {currentStep === 'input' && 'Input Data Paket'}
+                  {currentStep === 'scan' && 'Scan & Kelola Paket'}
+                  {currentStep === 'delivery' && 'Proses Pengantaran'}
+                  {currentStep === 'pending' && 'Kelola Paket Pending'}
+                  {currentStep === 'performance' && 'Ringkasan Performa'}
+                </span>
+              </div>
+              <div className="sm:ml-auto">
+                <Badge variant="secondary" className="text-xs lg:text-sm">
                   Step {['input', 'scan', 'delivery', 'pending', 'performance'].indexOf(currentStep) + 1}/5
                 </Badge>
               </div>
@@ -283,8 +296,8 @@ const CourierWorkflowMain = () => {
           </CardHeader>
         </Card>
 
-        {/* Main Content */}
-        <div className="min-h-[400px]">
+        {/* Main Content - Full Width */}
+        <div className="w-full min-h-[400px]">
           {getStepComponent()}
         </div>
       </div>
