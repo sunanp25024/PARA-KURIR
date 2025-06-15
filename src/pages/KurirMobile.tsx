@@ -85,9 +85,16 @@ const KurirMobile = () => {
   };
 
   const handleDownloadAPK = () => {
-    // Simulasi download APK
+    // Show info about placeholder APK
+    toast({
+      title: "Info APK",
+      description: "File APK ini adalah placeholder. Untuk APK yang bisa diinstall, silakan build dengan Capacitor di local machine Anda.",
+      duration: 5000,
+    });
+    
+    // Still trigger download for demonstration
     const link = document.createElement('a');
-    link.href = '/insan-mobile-kurir.apk'; // Path ke file APK
+    link.href = '/insan-mobile-kurir.apk';
     link.download = 'INSAN-MOBILE-Kurir.apk';
     document.body.appendChild(link);
     link.click();
@@ -119,14 +126,14 @@ const KurirMobile = () => {
             </Button>
           </div>
           
-          {/* Download APK Button */}
+          {/* Download APK Button with Info */}
           <div className="flex gap-2">
             <Button
               onClick={handleDownloadAPK}
               className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
             >
               <Download className="mr-2 h-4 w-4" />
-              Download APK
+              Download APK (Demo)
             </Button>
             <Button
               variant="outline"
@@ -149,6 +156,13 @@ const KurirMobile = () => {
             >
               <Smartphone className="h-4 w-4" />
             </Button>
+          </div>
+          
+          {/* Info about APK */}
+          <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-xs text-yellow-800">
+              <strong>Info:</strong> File APK ini adalah demo. Untuk APK yang bisa diinstall, butuh build dengan Capacitor di local machine.
+            </p>
           </div>
         </CardContent>
       </Card>
