@@ -847,9 +847,55 @@ const MasterAdminDashboard = () => {
     successRateNational: 89
   });
 
+  const [activeSection, setActiveSection] = useState('overview');
+
+  // Sample active features
+  const handleFeatureClick = (feature: string) => {
+    console.log(`Aktivasi fitur: ${feature}`);
+    toast({
+      title: "Fitur Aktif",
+      description: `${feature} berhasil diaktifkan`,
+    });
+  };
+
+  const quickActions = [
+    { id: 'add-user', label: 'Tambah User', icon: Users, color: 'bg-blue-500' },
+    { id: 'bulk-message', label: 'Kirim Broadcast', icon: Send, color: 'bg-green-500' },
+    { id: 'export-data', label: 'Export Data', icon: Download, color: 'bg-purple-500' },
+    { id: 'system-settings', label: 'Pengaturan Sistem', icon: Settings, color: 'bg-orange-500' },
+  ];
+
   return (
     <div className="space-y-6">
       <FilterSection role="master-admin" />
+      
+      {/* Enhanced Quick Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+          <CardDescription>Aksi cepat untuk management sistem</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {quickActions.map((action) => {
+              const IconComponent = action.icon;
+              return (
+                <Button
+                  key={action.id}
+                  variant="outline"
+                  className="h-20 flex flex-col gap-2"
+                  onClick={() => handleFeatureClick(action.label)}
+                >
+                  <div className={`h-8 w-8 rounded-full ${action.color} flex items-center justify-center`}>
+                    <IconComponent className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="text-sm">{action.label}</span>
+                </Button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
       
       {/* National Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
@@ -920,39 +966,153 @@ const MasterAdminDashboard = () => {
         </Card>
       </div>
 
-      {/* New Real-time Monitoring Sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RealtimeAttendanceActivity />
-        <CourierPerformanceSummary />
-      </div>
-
-      {/* National Performance Charts */}
-      <Tabs defaultValue="national" className="w-full">
-        <TabsList>
-          <TabsTrigger value="national">Nasional</TabsTrigger>
-          <TabsTrigger value="regional">Regional</TabsTrigger>
-          <TabsTrigger value="monthly">Bulanan</TabsTrigger>
+      {/* Management Tabs */}
+      <Tabs value={activeSection} onValueChange={setActiveSection} className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="messaging">Messaging</TabsTrigger>
+          <TabsTrigger value="import">Import Excel</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="approvals">Persetujuan</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="national" className="space-y-6">
+        <TabsContent value="overview" className="space-y-6">
+          {/* New Real-time Monitoring Sections */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RealtimeAttendanceActivity />
+            <CourierPerformanceSummary />
+          </div>
+
+          {/* National Performance Charts */}
+          <Tabs defaultValue="national" className="w-full">
+            <TabsList>
+              <TabsTrigger value="national">Nasional</TabsTrigger>
+              <TabsTrigger value="regional">Regional</TabsTrigger>
+              <TabsTrigger value="monthly">Bulanan</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="national" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Performa Nasional Harian</CardTitle>
+                    <CardDescription>Data pengiriman seluruh Indonesia</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={chartConfig} className="h-[350px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={dailyData}>
+                          <XAxis dataKey="date" />
+                          <YAxis />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Line type="monotone" dataKey="terkirim" stroke="#10b981" strokeWidth={3} />
+                          <Line type="monotone" dataKey="pending" stroke="#f59e0b" strokeWidth={2} />
+                          <Line type="monotone" dataKey="return" stroke="#ef4444" strokeWidth={2} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Distribusi Status Nasional</CardTitle>
+                    <CardDescription>Persentase status pengiriman</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={chartConfig} className="h-[350px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RechartsePie>
+                          <Pie
+                            data={performanceData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={80}
+                            outerRadius={120}
+                            dataKey="value"
+                            label={({ name, value }) => `${name}: ${value}%`}
+                          >
+                            {performanceData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <ChartTooltip />
+                        </RechartsePie>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="regional" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Performa Per Wilayah</CardTitle>
+                  <CardDescription>Monitoring kinerja seluruh wilayah</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { region: 'Jakarta', admin: 1, pic: 3, kurir: 25, delivered: 1250, rate: 89 },
+                      { region: 'Bandung', admin: 1, pic: 2, kurir: 8, delivered: 420, rate: 85 },
+                      { region: 'Surabaya', admin: 1, pic: 2, kurir: 8, delivered: 380, rate: 87 },
+                      { region: 'Medan', admin: 0, pic: 1, kurir: 4, delivered: 180, rate: 82 }
+                    ].map((region, index) => (
+                      <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => handleFeatureClick(`Detail ${region.region}`)}>
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <MapPin className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-lg">{region.region}</p>
+                            <p className="text-sm text-gray-600">
+                              {region.admin} Admin • {region.pic} PIC • {region.kurir} Kurir
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-xl">{region.delivered}</p>
+                          <p className="text-sm text-gray-600">paket hari ini</p>
+                          <Badge variant={region.rate >= 85 ? 'default' : 'secondary'} className="mt-1">
+                            {region.rate}%
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
+
+        <TabsContent value="messaging" className="space-y-6">
+          <MessagingSystem />
+        </TabsContent>
+
+        <TabsContent value="import" className="space-y-6">
+          <ExcelImportManager />
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Performa Nasional Harian</CardTitle>
-                <CardDescription>Data pengiriman seluruh Indonesia</CardDescription>
+                <CardTitle>Trend Produktivitas</CardTitle>
               </CardHeader>
               <CardContent>
-                <ChartContainer config={chartConfig} className="h-[350px]">
+                <ChartContainer config={chartConfig} className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={dailyData}>
-                      <XAxis dataKey="date" />
+                    <BarChart data={monthlyData}>
+                      <XAxis dataKey="month" />
                       <YAxis />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="terkirim" stroke="#10b981" strokeWidth={3} />
-                      <Line type="monotone" dataKey="pending" stroke="#f59e0b" strokeWidth={2} />
-                      <Line type="monotone" dataKey="return" stroke="#ef4444" strokeWidth={2} />
-                    </LineChart>
+                      <Bar dataKey="total" fill="#3b82f6" />
+                      <Bar dataKey="terkirim" fill="#10b981" />
+                      <Bar dataKey="return" fill="#ef4444" />
+                    </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
               </CardContent>
@@ -960,133 +1120,89 @@ const MasterAdminDashboard = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Distribusi Status Nasional</CardTitle>
-                <CardDescription>Persentase status pengiriman</CardDescription>
+                <CardTitle>Performa Live</CardTitle>
+                <CardDescription>Update real-time setiap 30 detik</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer config={chartConfig} className="h-[350px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsePie>
-                      <Pie
-                        data={performanceData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={80}
-                        outerRadius={120}
-                        dataKey="value"
-                        label={({ name, value }) => `${name}: ${value}%`}
-                      >
-                        {performanceData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <ChartTooltip />
-                    </RechartsePie>
-                  </ResponsiveContainer>
-                </ChartContainer>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                    <span>Paket Terkirim</span>
+                    <span className="font-bold text-green-600">+15</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                    <span>Kurir Online</span>
+                    <span className="font-bold text-blue-600">42/45</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                    <span>Rate Sukses</span>
+                    <span className="font-bold text-purple-600">89.2%</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
-        <TabsContent value="regional" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Performa Per Wilayah</CardTitle>
-              <CardDescription>Monitoring kinerja seluruh wilayah</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  { region: 'Jakarta', admin: 1, pic: 3, kurir: 25, delivered: 1250, rate: 89 },
-                  { region: 'Bandung', admin: 1, pic: 2, kurir: 8, delivered: 420, rate: 85 },
-                  { region: 'Surabaya', admin: 1, pic: 2, kurir: 8, delivered: 380, rate: 87 },
-                  { region: 'Medan', admin: 0, pic: 1, kurir: 4, delivered: 180, rate: 82 }
-                ].map((region, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <MapPin className="h-6 w-6 text-white" />
-                      </div>
+        <TabsContent value="approvals" className="space-y-6">
+          {/* Real-time Monitoring & Approvals */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Persetujuan Menunggu</CardTitle>
+                <CardDescription>Requires immediate attention</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { type: 'Admin', action: 'Tambah Kurir Baru', requester: 'ADMIN001', priority: 'High' },
+                    { type: 'Admin', action: 'Update Area PIC', requester: 'ADMIN002', priority: 'Medium' },
+                    { type: 'PIC', action: 'Request Tambah Kurir', requester: 'PIC005', priority: 'Low' }
+                  ].map((approval, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
                       <div>
-                        <p className="font-bold text-lg">{region.region}</p>
-                        <p className="text-sm text-gray-600">
-                          {region.admin} Admin • {region.pic} PIC • {region.kurir} Kurir
-                        </p>
+                        <p className="font-medium">{approval.type} - {approval.action}</p>
+                        <p className="text-sm text-gray-600">Dari: {approval.requester}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge variant={approval.priority === 'High' ? 'destructive' : approval.priority === 'Medium' ? 'secondary' : 'outline'}>
+                          {approval.priority}
+                        </Badge>
+                        <Button size="sm" variant="outline" onClick={() => handleFeatureClick('Tolak Approval')}>Tolak</Button>
+                        <Button size="sm" onClick={() => handleFeatureClick('Setujui Approval')}>Setuju</Button>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-xl">{region.delivered}</p>
-                      <p className="text-sm text-gray-600">paket hari ini</p>
-                      <Badge variant={region.rate >= 85 ? 'default' : 'secondary'} className="mt-1">
-                        {region.rate}%
-                      </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Real-time System Activity</CardTitle>
+                <CardDescription>Live monitoring seluruh sistem</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { activity: 'ADMIN002 menambahkan PIC baru', time: '2 menit lalu', type: 'admin' },
+                    { activity: '15 kurir check-in untuk shift pagi', time: '5 menit lalu', type: 'attendance' },
+                    { activity: 'PIC Jakarta Selatan update target harian', time: '8 menit lalu', type: 'update' },
+                    { activity: 'System backup completed successfully', time: '15 menit lalu', type: 'system' }
+                  ].map((activity, index) => (
+                    <div key={index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 cursor-pointer" onClick={() => handleFeatureClick('Detail Activity')}>
+                      <Activity className="h-5 w-5 text-blue-600" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{activity.activity}</p>
+                        <p className="text-xs text-gray-600">{activity.time}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
-
-      {/* Real-time Monitoring & Approvals */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Persetujuan Menunggu</CardTitle>
-            <CardDescription>Requires immediate attention</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[
-                { type: 'Admin', action: 'Tambah Kurir Baru', requester: 'ADMIN001', priority: 'High' },
-                { type: 'Admin', action: 'Update Area PIC', requester: 'ADMIN002', priority: 'Medium' },
-                { type: 'PIC', action: 'Request Tambah Kurir', requester: 'PIC005', priority: 'Low' }
-              ].map((approval, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
-                  <div>
-                    <p className="font-medium">{approval.type} - {approval.action}</p>
-                    <p className="text-sm text-gray-600">Dari: {approval.requester}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Badge variant={approval.priority === 'High' ? 'destructive' : approval.priority === 'Medium' ? 'secondary' : 'outline'}>
-                      {approval.priority}
-                    </Badge>
-                    <Button size="sm" variant="outline">Tolak</Button>
-                    <Button size="sm">Setuju</Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Real-time System Activity</CardTitle>
-            <CardDescription>Live monitoring seluruh sistem</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[
-                { activity: 'ADMIN002 menambahkan PIC baru', time: '2 menit lalu', type: 'admin' },
-                { activity: '15 kurir check-in untuk shift pagi', time: '5 menit lalu', type: 'attendance' },
-                { activity: 'PIC Jakarta Selatan update target harian', time: '8 menit lalu', type: 'update' },
-                { activity: 'System backup completed successfully', time: '15 menit lalu', type: 'system' }
-              ].map((activity, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                  <Activity className="h-5 w-5 text-blue-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{activity.activity}</p>
-                    <p className="text-xs text-gray-600">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };
