@@ -56,84 +56,104 @@ export interface DailySummary {
 class CourierService {
   // Profile management
   async getCourierProfile(courierId: string): Promise<CourierProfile | null> {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', courierId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('profiles' as any)
+        .select('*')
+        .eq('id', courierId)
+        .single();
 
-    if (error) {
+      if (error) {
+        console.error('Error fetching courier profile:', error);
+        return null;
+      }
+
+      return data as CourierProfile;
+    } catch (error) {
       console.error('Error fetching courier profile:', error);
       return null;
     }
-
-    return data;
   }
 
   async updateCourierProfile(courierId: string, updates: Partial<CourierProfile>): Promise<boolean> {
-    const { error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', courierId);
+    try {
+      const { error } = await supabase
+        .from('profiles' as any)
+        .update(updates)
+        .eq('id', courierId);
 
-    if (error) {
+      if (error) {
+        console.error('Error updating courier profile:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
       console.error('Error updating courier profile:', error);
       return false;
     }
-
-    return true;
   }
 
   // Package management
   async createDailyPackages(packages: Omit<DailyPackage, 'id' | 'created_at' | 'updated_at'>[]): Promise<boolean> {
-    const { error } = await supabase
-      .from('daily_packages')
-      .insert(packages);
+    try {
+      const { error } = await supabase
+        .from('daily_packages' as any)
+        .insert(packages);
 
-    if (error) {
+      if (error) {
+        console.error('Error creating daily packages:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
       console.error('Error creating daily packages:', error);
       return false;
     }
-
-    return true;
   }
 
   async getDailyPackages(courierId: string, date?: string): Promise<DailyPackage[]> {
-    let query = supabase
-      .from('daily_packages')
-      .select('*')
-      .eq('courier_id', courierId)
-      .order('created_at', { ascending: true });
+    try {
+      let query = supabase
+        .from('daily_packages' as any)
+        .select('*')
+        .eq('courier_id', courierId)
+        .order('created_at', { ascending: true });
 
-    if (date) {
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
+      if (date) {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
 
-      query = query
-        .gte('created_at', startOfDay.toISOString())
-        .lte('created_at', endOfDay.toISOString());
-    } else {
-      // Default to today's packages
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const endOfToday = new Date();
-      endOfToday.setHours(23, 59, 59, 999);
+        query = query
+          .gte('created_at', startOfDay.toISOString())
+          .lte('created_at', endOfDay.toISOString());
+      } else {
+        // Default to today's packages
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const endOfToday = new Date();
+        endOfToday.setHours(23, 59, 59, 999);
 
-      query = query
-        .gte('created_at', today.toISOString())
-        .lte('created_at', endOfToday.toISOString());
-    }
+        query = query
+          .gte('created_at', today.toISOString())
+          .lte('created_at', endOfToday.toISOString());
+      }
 
-    const { data, error } = await query;
+      const { data, error } = await query;
 
-    if (error) {
+      if (error) {
+        console.error('Error fetching daily packages:', error);
+        return [];
+      }
+
+      return (data || []) as DailyPackage[];
+    } catch (error) {
       console.error('Error fetching daily packages:', error);
       return [];
     }
-
-    return data || [];
   }
 
   async updatePackageStatus(
@@ -141,65 +161,80 @@ class CourierService {
     status: DailyPackage['status'], 
     additionalData: Partial<DailyPackage> = {}
   ): Promise<boolean> {
-    const updateData = {
-      status,
-      updated_at: new Date().toISOString(),
-      ...additionalData
-    };
+    try {
+      const updateData = {
+        status,
+        updated_at: new Date().toISOString(),
+        ...additionalData
+      };
 
-    // Set specific timestamps based on status
-    if (status === 'scanned') {
-      updateData.scan_time = new Date().toISOString();
-    } else if (status === 'in_delivery') {
-      updateData.delivery_started_at = new Date().toISOString();
-    } else if (status === 'delivered') {
-      updateData.delivered_at = new Date().toISOString();
-    } else if (status === 'returned') {
-      updateData.returned_at = new Date().toISOString();
-    }
+      // Set specific timestamps based on status
+      if (status === 'scanned') {
+        updateData.scan_time = new Date().toISOString();
+      } else if (status === 'in_delivery') {
+        updateData.delivery_started_at = new Date().toISOString();
+      } else if (status === 'delivered') {
+        updateData.delivered_at = new Date().toISOString();
+      } else if (status === 'returned') {
+        updateData.returned_at = new Date().toISOString();
+      }
 
-    const { error } = await supabase
-      .from('daily_packages')
-      .update(updateData)
-      .eq('id', packageId);
+      const { error } = await supabase
+        .from('daily_packages' as any)
+        .update(updateData)
+        .eq('id', packageId);
 
-    if (error) {
+      if (error) {
+        console.error('Error updating package status:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
       console.error('Error updating package status:', error);
       return false;
     }
-
-    return true;
   }
 
   async deletePackage(packageId: string): Promise<boolean> {
-    const { error } = await supabase
-      .from('daily_packages')
-      .delete()
-      .eq('id', packageId);
+    try {
+      const { error } = await supabase
+        .from('daily_packages' as any)
+        .delete()
+        .eq('id', packageId);
 
-    if (error) {
+      if (error) {
+        console.error('Error deleting package:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
       console.error('Error deleting package:', error);
       return false;
     }
-
-    return true;
   }
 
   // Summary management
   async getDailySummary(courierId: string, date: string): Promise<DailySummary | null> {
-    const { data, error } = await supabase
-      .from('daily_summaries')
-      .select('*')
-      .eq('courier_id', courierId)
-      .eq('date', date)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('daily_summaries' as any)
+        .select('*')
+        .eq('courier_id', courierId)
+        .eq('date', date)
+        .single();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+        console.error('Error fetching daily summary:', error);
+        return null;
+      }
+
+      return data as DailySummary;
+    } catch (error) {
       console.error('Error fetching daily summary:', error);
       return null;
     }
-
-    return data;
   }
 
   async updateDailySummary(courierId: string, date: string): Promise<boolean> {
@@ -227,29 +262,34 @@ class CourierService {
     status: DailyPackage['status'], 
     additionalData: Partial<DailyPackage> = {}
   ): Promise<boolean> {
-    const updateData = {
-      status,
-      updated_at: new Date().toISOString(),
-      ...additionalData
-    };
+    try {
+      const updateData = {
+        status,
+        updated_at: new Date().toISOString(),
+        ...additionalData
+      };
 
-    if (status === 'scanned') {
-      updateData.scan_time = new Date().toISOString();
-    } else if (status === 'in_delivery') {
-      updateData.delivery_started_at = new Date().toISOString();
-    }
+      if (status === 'scanned') {
+        updateData.scan_time = new Date().toISOString();
+      } else if (status === 'in_delivery') {
+        updateData.delivery_started_at = new Date().toISOString();
+      }
 
-    const { error } = await supabase
-      .from('daily_packages')
-      .update(updateData)
-      .in('id', packageIds);
+      const { error } = await supabase
+        .from('daily_packages' as any)
+        .update(updateData)
+        .in('id', packageIds);
 
-    if (error) {
+      if (error) {
+        console.error('Error bulk updating package status:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
       console.error('Error bulk updating package status:', error);
       return false;
     }
-
-    return true;
   }
 
   // Real-time subscriptions
