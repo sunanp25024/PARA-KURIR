@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,6 +45,7 @@ import ExcelImportManager from '@/components/ExcelImportManager';
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -115,213 +117,278 @@ const performanceData = [
   { name: "Pending", value: 5, color: "#f59e0b" },
 ];
 
-const FilterSection = ({ role }: { role: string }) => (
-  <Card className="mb-6">
-    <CardHeader>
-      <CardTitle className="flex items-center gap-2">
-        <Filter className="h-5 w-5" />
-        Filter & Pencarian
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Pilih Wilayah" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="jakarta">Jakarta</SelectItem>
-            <SelectItem value="bandung">Bandung</SelectItem>
-            <SelectItem value="surabaya">Surabaya</SelectItem>
-            <SelectItem value="medan">Medan</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Pilih Area" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="jaksel">Jakarta Selatan</SelectItem>
-            <SelectItem value="jakut">Jakarta Utara</SelectItem>
-            <SelectItem value="jaktim">Jakarta Timur</SelectItem>
-            <SelectItem value="jakbar">Jakarta Barat</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="aktif">Aktif</SelectItem>
-            <SelectItem value="tidak-aktif">Tidak Aktif</SelectItem>
-            <SelectItem value="cuti">Cuti</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          <Input placeholder="Cari ID Kurir..." className="pl-10" />
+const FilterSection = ({ role }: { role: string }) => {
+  const { toast } = useToast();
+  const [filters, setFilters] = useState({
+    wilayah: '',
+    area: '',
+    status: '',
+    kurirId: '',
+    nama: ''
+  });
+
+  const handleSearch = () => {
+    console.log('Searching with filters:', filters);
+    toast({
+      title: "Pencarian Berhasil",
+      description: `Filter diterapkan untuk ${role}. Menampilkan hasil pencarian.`,
+    });
+  };
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  return (
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Filter className="h-5 w-5" />
+          Filter & Pencarian
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <Select onValueChange={(value) => handleFilterChange('wilayah', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih Wilayah" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="jakarta">Jakarta</SelectItem>
+              <SelectItem value="bandung">Bandung</SelectItem>
+              <SelectItem value="surabaya">Surabaya</SelectItem>
+              <SelectItem value="medan">Medan</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select onValueChange={(value) => handleFilterChange('area', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih Area" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="jaksel">Jakarta Selatan</SelectItem>
+              <SelectItem value="jakut">Jakarta Utara</SelectItem>
+              <SelectItem value="jaktim">Jakarta Timur</SelectItem>
+              <SelectItem value="jakbar">Jakarta Barat</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select onValueChange={(value) => handleFilterChange('status', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="aktif">Aktif</SelectItem>
+              <SelectItem value="tidak-aktif">Tidak Aktif</SelectItem>
+              <SelectItem value="cuti">Cuti</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input 
+              placeholder="Cari ID Kurir..." 
+              className="pl-10" 
+              onChange={(e) => handleFilterChange('kurirId', e.target.value)}
+            />
+          </div>
+          
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input 
+              placeholder="Cari Nama..." 
+              className="pl-10" 
+              onChange={(e) => handleFilterChange('nama', e.target.value)}
+            />
+          </div>
+          
+          <Button className="w-full" onClick={handleSearch}>
+            <Search className="h-4 w-4 mr-2" />
+            Cari
+          </Button>
         </div>
-        
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          <Input placeholder="Cari Nama..." className="pl-10" />
-        </div>
-        
-        <Button className="w-full">
-          <Search className="h-4 w-4 mr-2" />
-          Cari
-        </Button>
-      </div>
-    </CardContent>
-  </Card>
-);
+      </CardContent>
+    </Card>
+  );
+};
 
 // Real-time Attendance Activity Component
-const RealtimeAttendanceActivity = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="flex items-center gap-2">
-        <Activity className="h-5 w-5 text-blue-600" />
-        Aktivitas Absensi Terkini
-      </CardTitle>
-      <CardDescription>Update check-in/out kurir. Termasuk lokasi kerja kurir.</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <div className="space-y-4">
-        {[
-          { 
-            name: 'Budi Santoso', 
-            id: 'PISTEST2025',
-            action: 'check-out',
-            location: 'Jakarta Pusat Hub (Thamrin)',
-            time: 'sekitar 6 jam',
-            icon: LogOut,
-            color: 'text-red-600'
-          },
-          { 
-            name: 'Charlie Van Houten', 
-            id: 'KURIR003',
-            action: 'melaporkan keterlambatan',
-            location: 'Surabaya Timur Hub (Cawang)',
-            time: 'sekitar 2 jam yang lalu',
-            icon: Clock,
-            color: 'text-yellow-600'
-          },
-          { 
-            name: 'Ani Yudhoyono', 
-            id: 'KURIR002',
-            action: 'check-in',
-            location: 'Bandung Kota Hub (Kota)',
-            time: 'sekitar 3 jam yang lalu',
-            icon: LogIn,
-            color: 'text-green-600'
-          },
-          { 
-            name: 'Budi Santoso', 
-            id: 'PISTEST2025',
-            action: 'check-in',
-            location: 'Jakarta Pusat Hub (Thamrin)',
-            time: 'sekitar 3 jam yang lalu',
-            icon: LogIn,
-            color: 'text-green-600'
-          }
-        ].map((activity, index) => {
-          const IconComponent = activity.icon;
-          return (
-            <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-              <IconComponent className={`h-5 w-5 mt-0.5 ${activity.color}`} />
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{activity.name}</span>
-                  <Badge variant="outline" className="text-xs">{activity.id}</Badge>
+const RealtimeAttendanceActivity = () => {
+  const { toast } = useToast();
+  const [activities, setActivities] = useState([
+    { 
+      name: 'Budi Santoso', 
+      id: 'PISTEST2025',
+      action: 'check-out',
+      location: 'Jakarta Pusat Hub (Thamrin)',
+      time: 'sekitar 6 jam',
+      icon: LogOut,
+      color: 'text-red-600'
+    },
+    { 
+      name: 'Charlie Van Houten', 
+      id: 'KURIR003',
+      action: 'melaporkan keterlambatan',
+      location: 'Surabaya Timur Hub (Cawang)',
+      time: 'sekitar 2 jam yang lalu',
+      icon: Clock,
+      color: 'text-yellow-600'
+    },
+    { 
+      name: 'Ani Yudhoyono', 
+      id: 'KURIR002',
+      action: 'check-in',
+      location: 'Bandung Kota Hub (Kota)',
+      time: 'sekitar 3 jam yang lalu',
+      icon: LogIn,
+      color: 'text-green-600'
+    },
+    { 
+      name: 'Budi Santoso', 
+      id: 'PISTEST2025',
+      action: 'check-in',
+      location: 'Jakarta Pusat Hub (Thamrin)',
+      time: 'sekitar 3 jam yang lalu',
+      icon: LogIn,
+      color: 'text-green-600'
+    }
+  ]);
+
+  const handleActivityClick = (activity: any) => {
+    console.log('Activity clicked:', activity);
+    toast({
+      title: "Detail Aktivitas",
+      description: `Menampilkan detail aktivitas ${activity.name}`,
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Activity className="h-5 w-5 text-blue-600" />
+          Aktivitas Absensi Terkini
+        </CardTitle>
+        <CardDescription>Update check-in/out kurir. Termasuk lokasi kerja kurir.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {activities.map((activity, index) => {
+            const IconComponent = activity.icon;
+            return (
+              <div 
+                key={index} 
+                className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                onClick={() => handleActivityClick(activity)}
+              >
+                <IconComponent className={`h-5 w-5 mt-0.5 ${activity.color}`} />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{activity.name}</span>
+                    <Badge variant="outline" className="text-xs">{activity.id}</Badge>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {activity.action} di {activity.location}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    dalam waktu {activity.time}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">
-                  {activity.action} di {activity.location}
-                </p>
-                <p className="text-xs text-gray-500">
-                  dalam waktu {activity.time}
-                </p>
               </div>
-            </div>
-          );
-        })}
-      </div>
-    </CardContent>
-  </Card>
-);
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 // Courier Performance Summary Component
-const CourierPerformanceSummary = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="flex items-center gap-2">
-        <BarChart3 className="h-5 w-5 text-green-600" />
-        Ringkasan Penyelesaian Kerja Kurir
-      </CardTitle>
-      <CardDescription>Laporan ringkas setelah kurir menyelesaikan tugas harian.</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <div className="space-y-4">
-        {[
-          {
-            name: 'Ani Yudhoyono',
-            id: 'KURIR002',
-            hub: 'Bandung Kota Hub (Kota)',
-            delivered: 45,
-            success: 40,
-            return: 5,
-            pending: 0,
-            time: '7 jam'
-          },
-          {
-            name: 'Budi Santoso',
-            id: 'PISTEST2025',
-            hub: 'Jakarta Pusat Hub (Thamrin)',
-            delivered: 50,
-            success: 48,
-            return: 2,
-            pending: 0,
-            time: '6 jam'
-          },
-          {
-            name: 'Dewi Persik',
-            id: 'KURIR004',
-            hub: 'Medan Barat Hub',
-            delivered: 55,
-            success: 55,
-            return: 0,
-            pending: 0,
-            time: '17 jam yang lalu'
-          }
-        ].map((kurir, index) => (
-          <div key={index} className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-            <BarChart3 className="h-5 w-5 mt-0.5 text-blue-600" />
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-medium">{kurir.name}</span>
-                <Badge variant="outline" className="text-xs">{kurir.id}</Badge>
+const CourierPerformanceSummary = () => {
+  const { toast } = useToast();
+  const [kurirData, setKurirData] = useState([
+    {
+      name: 'Ani Yudhoyono',
+      id: 'KURIR002',
+      hub: 'Bandung Kota Hub (Kota)',
+      delivered: 45,
+      success: 40,
+      return: 5,
+      pending: 0,
+      time: '7 jam'
+    },
+    {
+      name: 'Budi Santoso',
+      id: 'PISTEST2025',
+      hub: 'Jakarta Pusat Hub (Thamrin)',
+      delivered: 50,
+      success: 48,
+      return: 2,
+      pending: 0,
+      time: '6 jam'
+    },
+    {
+      name: 'Dewi Persik',
+      id: 'KURIR004',
+      hub: 'Medan Barat Hub',
+      delivered: 55,
+      success: 55,
+      return: 0,
+      pending: 0,
+      time: '17 jam yang lalu'
+    }
+  ]);
+
+  const handleKurirClick = (kurir: any) => {
+    console.log('Kurir performance clicked:', kurir);
+    toast({
+      title: "Detail Performance",
+      description: `Menampilkan detail performance ${kurir.name}`,
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <BarChart3 className="h-5 w-5 text-green-600" />
+          Ringkasan Penyelesaian Kerja Kurir
+        </CardTitle>
+        <CardDescription>Laporan ringkas setelah kurir menyelesaikan tugas harian.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {kurirData.map((kurir, index) => (
+            <div 
+              key={index} 
+              className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500 hover:bg-blue-100 cursor-pointer transition-colors"
+              onClick={() => handleKurirClick(kurir)}
+            >
+              <BarChart3 className="h-5 w-5 mt-0.5 text-blue-600" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-medium">{kurir.name}</span>
+                  <Badge variant="outline" className="text-xs">{kurir.id}</Badge>
+                </div>
+                <p className="text-sm text-gray-600 mb-2">Dari Hub: <span className="font-medium text-blue-600">{kurir.hub}</span></p>
+                <div className="text-sm">
+                  <span>Menyelesaikan pekerjaan: </span>
+                  <span className="font-bold">{kurir.delivered}</span>
+                  <span> paket dibawa, </span>
+                  <span className="font-bold text-green-600">{kurir.success}</span>
+                  <span> terkirim, </span>
+                  <span className="font-bold text-red-600">{kurir.return}</span>
+                  <span> retur/pending.</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">dalam waktu sekitar {kurir.time}</p>
               </div>
-              <p className="text-sm text-gray-600 mb-2">Dari Hub: <span className="font-medium text-blue-600">{kurir.hub}</span></p>
-              <div className="text-sm">
-                <span>Menyelesaikan pekerjaan: </span>
-                <span className="font-bold">{kurir.delivered}</span>
-                <span> paket dibawa, </span>
-                <span className="font-bold text-green-600">{kurir.success}</span>
-                <span> terkirim, </span>
-                <span className="font-bold text-red-600">{kurir.return}</span>
-                <span> retur/pending.</span>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">dalam waktu sekitar {kurir.time}</p>
             </div>
-          </div>
-        ))}
-      </div>
-    </CardContent>
-  </Card>
-);
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 const KurirDashboard = () => {
   const [todayStats] = useState({
@@ -332,11 +399,21 @@ const KurirDashboard = () => {
     successRate: 80
   });
 
+  const { toast } = useToast();
+
+  const handleActivityClick = (activity: string) => {
+    console.log('Activity clicked:', activity);
+    toast({
+      title: "Aktivitas",
+      description: `${activity} berhasil dicatat`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleActivityClick('Total Paket')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Paket Hari Ini</CardTitle>
             <Package className="h-4 w-4 text-blue-600" />
@@ -347,7 +424,7 @@ const KurirDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleActivityClick('Paket Terkirim')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Terkirim</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
@@ -358,7 +435,7 @@ const KurirDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleActivityClick('Paket Return')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Return</CardTitle>
             <Clock className="h-4 w-4 text-yellow-600" />
@@ -369,7 +446,7 @@ const KurirDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleActivityClick('Rate Sukses')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Rate Sukses</CardTitle>
             <TrendingUp className="h-4 w-4 text-purple-600" />
@@ -427,21 +504,21 @@ const KurirDashboard = () => {
             <CardTitle>Aktivitas Terbaru</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 cursor-pointer transition-colors" onClick={() => handleActivityClick('Paket Terkirim')}>
               <CheckCircle className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm font-medium">Paket terkirim</p>
                 <p className="text-xs text-gray-600">PKG123456789 - 10:30</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 cursor-pointer transition-colors" onClick={() => handleActivityClick('Foto Bukti')}>
               <Camera className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm font-medium">Foto bukti diambil</p>
                 <p className="text-xs text-gray-600">PKG987654321 - 09:15</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
+            <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 cursor-pointer transition-colors" onClick={() => handleActivityClick('Scan Paket')}>
               <Scan className="h-5 w-5 text-yellow-600" />
               <div>
                 <p className="text-sm font-medium">Paket di-scan</p>
@@ -493,7 +570,7 @@ const PICDashboard = () => {
       
       {/* Enhanced Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Paket Terkirim</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
@@ -504,7 +581,7 @@ const PICDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Kurir Aktif</CardTitle>
             <Users className="h-4 w-4 text-blue-600" />
@@ -515,7 +592,7 @@ const PICDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Absensi Hari Ini</CardTitle>
             <UserCheck className="h-4 w-4 text-purple-600" />
@@ -526,7 +603,7 @@ const PICDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total COD</CardTitle>
             <DollarSign className="h-4 w-4 text-green-600" />
@@ -537,7 +614,7 @@ const PICDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Rate Sukses</CardTitle>
             <TrendingUp className="h-4 w-4 text-purple-600" />
@@ -673,13 +750,23 @@ const AdminDashboard = () => {
     totalPackagesNational: 2150
   });
 
+  const { toast } = useToast();
+
+  const handleAreaClick = (area: any) => {
+    console.log('Area clicked:', area);
+    toast({
+      title: "Detail Area",
+      description: `Menampilkan detail area ${area.area}`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <FilterSection role="admin" />
       
       {/* Enhanced Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Paket Terkirim</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
@@ -690,7 +777,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Kurir</CardTitle>
             <Users className="h-4 w-4 text-blue-600" />
@@ -701,7 +788,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Absensi Hari Ini</CardTitle>
             <UserCheck className="h-4 w-4 text-purple-600" />
@@ -712,7 +799,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Approval</CardTitle>
             <Clock className="h-4 w-4 text-yellow-600" />
@@ -723,7 +810,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Rate Sukses</CardTitle>
             <TrendingUp className="h-4 w-4 text-purple-600" />
@@ -816,7 +903,11 @@ const AdminDashboard = () => {
                   { area: 'Jakarta Barat', kurir: 4, delivered: 165, rate: 82 },
                   { area: 'Jakarta Utara', kurir: 3, delivered: 125, rate: 78 }
                 ].map((area, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div 
+                    key={index} 
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => handleAreaClick(area)}
+                  >
                     <div className="flex items-center gap-3">
                       <MapPin className="h-5 w-5 text-blue-600" />
                       <div>
@@ -865,6 +956,22 @@ const MasterAdminDashboard = () => {
     });
   };
 
+  const handleApprovalAction = (action: string, item: any) => {
+    console.log(`${action} approval:`, item);
+    toast({
+      title: `${action} Berhasil`,
+      description: `${action} untuk ${item.action} telah diproses`,
+    });
+  };
+
+  const handleRegionClick = (region: any) => {
+    console.log('Region clicked:', region);
+    toast({
+      title: "Detail Wilayah",
+      description: `Menampilkan detail wilayah ${region.region}`,
+    });
+  };
+
   const quickActions = [
     { id: 'add-user', label: 'Tambah User', icon: Users, color: 'bg-blue-500' },
     { id: 'bulk-message', label: 'Kirim Broadcast', icon: Send, color: 'bg-green-500' },
@@ -890,7 +997,7 @@ const MasterAdminDashboard = () => {
                 <Button
                   key={action.id}
                   variant="outline"
-                  className="h-20 flex flex-col gap-2"
+                  className="h-20 flex flex-col gap-2 hover:shadow-md transition-shadow"
                   onClick={() => handleFeatureClick(action.label)}
                 >
                   <div className={`h-8 w-8 rounded-full ${action.color} flex items-center justify-center`}>
@@ -906,7 +1013,7 @@ const MasterAdminDashboard = () => {
       
       {/* National Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleFeatureClick('Paket Nasional')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Paket Nasional</CardTitle>
             <Package className="h-4 w-4 text-green-600" />
@@ -917,7 +1024,7 @@ const MasterAdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleFeatureClick('Total Admin')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Admin</CardTitle>
             <Users className="h-4 w-4 text-blue-600" />
@@ -928,7 +1035,7 @@ const MasterAdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleFeatureClick('Total PIC')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total PIC</CardTitle>
             <Users className="h-4 w-4 text-green-600" />
@@ -939,7 +1046,7 @@ const MasterAdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleFeatureClick('Total Kurir')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Kurir</CardTitle>
             <Users className="h-4 w-4 text-purple-600" />
@@ -950,7 +1057,7 @@ const MasterAdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleFeatureClick('Absensi Nasional')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Absensi Nasional</CardTitle>
             <UserCheck className="h-4 w-4 text-indigo-600" />
@@ -961,7 +1068,7 @@ const MasterAdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleFeatureClick('Persetujuan')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Persetujuan</CardTitle>
             <Bell className="h-4 w-4 text-red-600" />
@@ -1067,7 +1174,11 @@ const MasterAdminDashboard = () => {
                       { region: 'Surabaya', admin: 1, pic: 2, kurir: 8, delivered: 380, rate: 87 },
                       { region: 'Medan', admin: 0, pic: 1, kurir: 4, delivered: 180, rate: 82 }
                     ].map((region, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => handleFeatureClick(`Detail ${region.region}`)}>
+                      <div 
+                        key={index} 
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors" 
+                        onClick={() => handleRegionClick(region)}
+                      >
                         <div className="flex items-center gap-4">
                           <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                             <MapPin className="h-6 w-6 text-white" />
@@ -1132,15 +1243,15 @@ const MasterAdminDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg hover:bg-green-100 cursor-pointer transition-colors" onClick={() => handleFeatureClick('Paket Terkirim Live')}>
                     <span>Paket Terkirim</span>
                     <span className="font-bold text-green-600">+15</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100 cursor-pointer transition-colors" onClick={() => handleFeatureClick('Kurir Online')}>
                     <span>Kurir Online</span>
                     <span className="font-bold text-blue-600">42/45</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg hover:bg-purple-100 cursor-pointer transition-colors" onClick={() => handleFeatureClick('Rate Sukses Live')}>
                     <span>Rate Sukses</span>
                     <span className="font-bold text-purple-600">89.2%</span>
                   </div>
@@ -1174,8 +1285,8 @@ const MasterAdminDashboard = () => {
                         <Badge variant={approval.priority === 'High' ? 'destructive' : approval.priority === 'Medium' ? 'secondary' : 'outline'}>
                           {approval.priority}
                         </Badge>
-                        <Button size="sm" variant="outline" onClick={() => handleFeatureClick('Tolak Approval')}>Tolak</Button>
-                        <Button size="sm" onClick={() => handleFeatureClick('Setujui Approval')}>Setuju</Button>
+                        <Button size="sm" variant="outline" onClick={() => handleApprovalAction('Tolak', approval)}>Tolak</Button>
+                        <Button size="sm" onClick={() => handleApprovalAction('Setuju', approval)}>Setuju</Button>
                       </div>
                     </div>
                   ))}
@@ -1196,7 +1307,11 @@ const MasterAdminDashboard = () => {
                     { activity: 'PIC Jakarta Selatan update target harian', time: '8 menit lalu', type: 'update' },
                     { activity: 'System backup completed successfully', time: '15 menit lalu', type: 'system' }
                   ].map((activity, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 cursor-pointer" onClick={() => handleFeatureClick('Detail Activity')}>
+                    <div 
+                      key={index} 
+                      className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 cursor-pointer transition-colors" 
+                      onClick={() => handleFeatureClick('Detail Activity')}
+                    >
                       <Activity className="h-5 w-5 text-blue-600" />
                       <div className="flex-1">
                         <p className="text-sm font-medium">{activity.activity}</p>
