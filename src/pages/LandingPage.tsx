@@ -98,15 +98,15 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
-      <header className="bg-white shadow-lg border-b backdrop-blur-sm bg-white/95 sticky top-0 z-50">
+      <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-white/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-3 rounded-xl shadow-lg">
+              <div className="bg-white/20 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/30">
                 <img 
                   src="/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png" 
                   alt="PARA Logo" 
-                  className="h-10 w-10 object-contain"
+                  className="h-10 w-10 object-contain opacity-90"
                 />
               </div>
               <div>
@@ -149,8 +149,8 @@ const LandingPage = () => {
           {/* Stats Section */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 max-w-4xl mx-auto">
             {stats.map((stat, index) => (
-              <div key={index} className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
-                <div className="bg-gradient-to-r from-indigo-100 to-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <div key={index} className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/30">
+                <div className="bg-gradient-to-r from-indigo-100/80 to-blue-100/80 backdrop-blur-sm w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3">
                   <stat.icon className="h-6 w-6 text-indigo-600" />
                 </div>
                 <div className="text-2xl font-bold text-gray-900 mb-1">{stat.number}</div>
@@ -181,11 +181,11 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-white relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-50/50 to-white -z-10"></div>
+      <section className="py-24 bg-white/50 backdrop-blur-sm relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-50/30 to-white/30 -z-10"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <Badge className="mb-4 bg-indigo-100 text-indigo-700 px-4 py-2">
+            <Badge className="mb-4 bg-indigo-100/80 backdrop-blur-sm text-indigo-700 px-4 py-2 border border-white/30">
               Fitur Unggulan
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
@@ -199,9 +199,9 @@ const LandingPage = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 bg-gradient-to-br from-white to-gray-50/50">
+              <Card key={index} className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 bg-white/70 backdrop-blur-sm">
                 <CardHeader className="pb-4">
-                  <div className="bg-gradient-to-r from-indigo-100 to-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-md">
+                  <div className="bg-gradient-to-r from-indigo-100/80 to-blue-100/80 backdrop-blur-sm w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-md border border-white/30">
                     <feature.icon className="h-8 w-8 text-indigo-600" />
                   </div>
                   <CardTitle className="text-xl font-bold text-gray-900">{feature.title}</CardTitle>
@@ -218,11 +218,11 @@ const LandingPage = () => {
       </section>
 
       {/* Advantages Section */}
-      <section className="py-24 bg-gradient-to-br from-indigo-50 to-blue-50 relative overflow-hidden">
+      <section className="py-24 bg-gradient-to-br from-indigo-50/80 to-blue-50/80 backdrop-blur-sm relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/5 to-blue-600/5 -z-10"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <Badge className="mb-4 bg-white text-indigo-700 px-4 py-2 shadow-md">
+            <Badge className="mb-4 bg-white/80 backdrop-blur-sm text-indigo-700 px-4 py-2 shadow-md border border-white/30">
               Keunggulan Kompetitif
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
@@ -236,8 +236,8 @@ const LandingPage = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {advantages.map((advantage, index) => (
-              <div key={index} className="flex items-center space-x-4 bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300">
-                <div className="bg-gradient-to-r from-green-100 to-emerald-100 p-2 rounded-lg flex-shrink-0">
+              <div key={index} className="flex items-center space-x-4 bg-white/60 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-white/30 hover:shadow-xl transition-all duration-300">
+                <div className="bg-gradient-to-r from-green-100/80 to-emerald-100/80 backdrop-blur-sm p-2 rounded-lg flex-shrink-0 border border-white/30">
                   <CheckCircle className="h-6 w-6 text-green-600" />
                 </div>
                 <span className="text-gray-700 font-medium text-lg">{advantage}</span>
@@ -248,10 +248,10 @@ const LandingPage = () => {
       </section>
 
       {/* User Roles Section */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <Badge className="mb-4 bg-indigo-100 text-indigo-700 px-4 py-2">
+            <Badge className="mb-4 bg-indigo-100/80 backdrop-blur-sm text-indigo-700 px-4 py-2 border border-white/30">
               Akses Multi-Level
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
@@ -265,9 +265,9 @@ const LandingPage = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             {userRoles.map((user, index) => (
-              <Card key={index} className="border-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50/50">
+              <Card key={index} className="border-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white/70 backdrop-blur-sm border-white/30">
                 <CardHeader className="text-center pb-4">
-                  <div className={`w-20 h-20 rounded-full ${user.color} mx-auto flex items-center justify-center mb-6 shadow-lg`}>
+                  <div className={`w-20 h-20 rounded-full ${user.color} mx-auto flex items-center justify-center mb-6 shadow-lg backdrop-blur-sm border border-white/30`}>
                     <user.icon className="h-10 w-10" />
                   </div>
                   <CardTitle className="text-xl font-bold">{user.role}</CardTitle>
@@ -298,7 +298,7 @@ const LandingPage = () => {
       <section className="py-24 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent -z-10"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className="bg-white/20 backdrop-blur-sm w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl">
+          <div className="bg-white/20 backdrop-blur-sm w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl border border-white/30">
             <Smartphone className="h-10 w-10 text-white" />
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
@@ -312,7 +312,7 @@ const LandingPage = () => {
             <Button 
               size="lg" 
               variant="secondary"
-              className="text-lg px-10 py-4 bg-white text-indigo-600 hover:bg-gray-100 shadow-xl transform hover:scale-105 transition-all duration-200"
+              className="text-lg px-10 py-4 bg-white/90 backdrop-blur-sm text-indigo-600 hover:bg-white shadow-xl transform hover:scale-105 transition-all duration-200 border border-white/30"
             >
               <Download className="mr-2 h-5 w-5" />
               Download APK Kurir
@@ -320,7 +320,7 @@ const LandingPage = () => {
             <Button 
               size="lg" 
               variant="outline"
-              className="text-lg px-10 py-4 border-2 border-white text-white hover:bg-white hover:text-indigo-600 shadow-xl transform hover:scale-105 transition-all duration-200"
+              className="text-lg px-10 py-4 border-2 border-white/80 text-white hover:bg-white/20 backdrop-blur-sm shadow-xl transform hover:scale-105 transition-all duration-200"
             >
               Panduan Instalasi
             </Button>
@@ -329,16 +329,16 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
+      <footer className="bg-gray-900/95 backdrop-blur-sm text-white py-16 border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-4 mb-6">
-                <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-3 rounded-xl shadow-lg">
+                <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-white/20">
                   <img 
                     src="/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png" 
                     alt="PARA Logo" 
-                    className="h-8 w-8 object-contain"
+                    className="h-8 w-8 object-contain opacity-90"
                   />
                 </div>
                 <div>
