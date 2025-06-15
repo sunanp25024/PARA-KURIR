@@ -37,6 +37,9 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import CourierSidebar from '@/components/CourierSidebar';
 import CourierWorkflowMain from '@/components/CourierWorkflowMain';
 import ExcelImportManager from '@/components/ExcelImportManager';
+import CourierAttendanceActivity from '@/components/CourierAttendanceActivity';
+import CourierWorkSummary from '@/components/CourierWorkSummary';
+import CourierPerformanceCharts from '@/components/CourierPerformanceCharts';
 import { toast } from '@/hooks/use-toast';
 
 // Komponen khusus untuk courier dashboard dengan workflow context
@@ -258,6 +261,15 @@ const Dashboard = () => {
             </Card>
           ))}
         </div>
+
+        {/* Courier Activity Section - Only for admin and master-admin */}
+        {(user.role === 'admin' || user.role === 'master-admin') && (
+          <>
+            <CourierAttendanceActivity />
+            <CourierWorkSummary />
+            <CourierPerformanceCharts />
+          </>
+        )}
 
         {/* Download Reports Section */}
         <Card>
