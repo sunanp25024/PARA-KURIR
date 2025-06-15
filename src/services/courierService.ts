@@ -58,7 +58,7 @@ class CourierService {
   async getCourierProfile(courierId: string): Promise<CourierProfile | null> {
     try {
       const { data, error } = await supabase
-        .from('profiles' as any)
+        .from('profiles')
         .select('*')
         .eq('id', courierId)
         .single();
@@ -68,7 +68,7 @@ class CourierService {
         return null;
       }
 
-      return data as CourierProfile;
+      return data as unknown as CourierProfile;
     } catch (error) {
       console.error('Error fetching courier profile:', error);
       return null;
@@ -78,7 +78,7 @@ class CourierService {
   async updateCourierProfile(courierId: string, updates: Partial<CourierProfile>): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('profiles' as any)
+        .from('profiles')
         .update(updates)
         .eq('id', courierId);
 
@@ -98,7 +98,7 @@ class CourierService {
   async createDailyPackages(packages: Omit<DailyPackage, 'id' | 'created_at' | 'updated_at'>[]): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('daily_packages' as any)
+        .from('daily_packages')
         .insert(packages);
 
       if (error) {
@@ -116,7 +116,7 @@ class CourierService {
   async getDailyPackages(courierId: string, date?: string): Promise<DailyPackage[]> {
     try {
       let query = supabase
-        .from('daily_packages' as any)
+        .from('daily_packages')
         .select('*')
         .eq('courier_id', courierId)
         .order('created_at', { ascending: true });
@@ -149,7 +149,7 @@ class CourierService {
         return [];
       }
 
-      return (data || []) as DailyPackage[];
+      return (data || []) as unknown as DailyPackage[];
     } catch (error) {
       console.error('Error fetching daily packages:', error);
       return [];
@@ -180,7 +180,7 @@ class CourierService {
       }
 
       const { error } = await supabase
-        .from('daily_packages' as any)
+        .from('daily_packages')
         .update(updateData)
         .eq('id', packageId);
 
@@ -199,7 +199,7 @@ class CourierService {
   async deletePackage(packageId: string): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('daily_packages' as any)
+        .from('daily_packages')
         .delete()
         .eq('id', packageId);
 
@@ -219,7 +219,7 @@ class CourierService {
   async getDailySummary(courierId: string, date: string): Promise<DailySummary | null> {
     try {
       const { data, error } = await supabase
-        .from('daily_summaries' as any)
+        .from('daily_summaries')
         .select('*')
         .eq('courier_id', courierId)
         .eq('date', date)
@@ -230,7 +230,7 @@ class CourierService {
         return null;
       }
 
-      return data as DailySummary;
+      return data as unknown as DailySummary;
     } catch (error) {
       console.error('Error fetching daily summary:', error);
       return null;
@@ -276,7 +276,7 @@ class CourierService {
       }
 
       const { error } = await supabase
-        .from('daily_packages' as any)
+        .from('daily_packages')
         .update(updateData)
         .in('id', packageIds);
 
