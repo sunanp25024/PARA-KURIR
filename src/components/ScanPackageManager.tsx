@@ -8,7 +8,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Camera, Package, Trash2, CheckCircle, AlertTriangle } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
+import { useWorkflow } from '@/contexts/WorkflowContext';
+
+interface ScanPackageManagerProps {
+  onStepComplete?: () => void;
+}
 
 interface ScannedPackage {
   id: string;
@@ -17,24 +22,14 @@ interface ScannedPackage {
   scanTime: Date;
 }
 
-const ScanPackageManager = () => {
+const ScanPackageManager: React.FC<ScanPackageManagerProps> = ({ onStepComplete }) => {
+  const { dailyPackages, setDeliveryPackages } = useWorkflow();
   const [scannedPackages, setScannedPackages] = useState<ScannedPackage[]>([]);
   const [manualInput, setManualInput] = useState('');
   const [isCODManual, setIsCODManual] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [dailyPackageData, setDailyPackageData] = useState({
-    totalPackages: 0,
-    codPackages: 0,
-    nonCodPackages: 0
-  });
 
   useEffect(() => {
-    // Load daily package data
-    const savedData = localStorage.getItem('dailyPackageData');
-    if (savedData) {
-      setDailyPackageData(JSON.parse(savedData));
-    }
-
     // Load scanned packages
     const savedScanned = localStorage.getItem('scannedPackages');
     if (savedScanned) {
@@ -55,9 +50,15 @@ const ScanPackageManager = () => {
   const codScanned = scannedPackages.filter(pkg => pkg.isCOD).length;
   const nonCodScanned = scannedPackages.filter(pkg => !pkg.isCOD).length;
   
-  const isCompleted = totalScanned === dailyPackageData.totalPackages && 
-                     codScanned === dailyPackageData.codPackages && 
-                     nonCodScanned === dailyPackageData.nonCodPackages;
+  const dailyData = dailyPackages.length > 0 ? {
+    totalPackages: dailyPackages.length,
+    codPackages: dailyPackages.filter(pkg => pkg.isCOD).length,
+    nonCodPackages: dailyPackages.filter(pkg => !pkg.isCOD).length
+  } : { totalPackages: 0, codPackages: 0, nonCodPackages: 0 };
+  
+  const isCompleted = totalScanned === dailyData.totalPackages && 
+                     codScanned === dailyData.codPackages && 
+                     nonCodScanned === dailyData.nonCodPackages;
 
   const handleScanCamera = () => {
     setIsScanning(true);
@@ -121,17 +122,23 @@ const ScanPackageManager = () => {
   const handleStartDelivery = () => {
     if (isCompleted) {
       // Set packages to delivery status
+      setDeliveryPackages(scannedPackages);
       localStorage.setItem('deliveryPackages', JSON.stringify(scannedPackages));
       
       toast({
         title: "Pengiriman Dimulai",
         description: `${totalScanned} paket siap untuk dikirim`,
       });
+
+      // Auto progress to next step
+      setTimeout(() => {
+        onStepComplete?.();
+      }, 1000);
     }
   };
 
   const canStartDelivery = () => {
-    if (dailyPackageData.totalPackages === 0) return false;
+    if (dailyData.totalPackages === 0) return false;
     return isCompleted;
   };
 
@@ -145,7 +152,7 @@ const ScanPackageManager = () => {
         <CardDescription>Scan atau input manual paket yang akan dikirim</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {dailyPackageData.totalPackages === 0 && (
+        {dailyData.totalPackages === 0 && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
@@ -154,7 +161,7 @@ const ScanPackageManager = () => {
           </Alert>
         )}
 
-        {dailyPackageData.totalPackages > 0 && (
+        {dailyData.totalPackages > 0 && (
           <>
             {/* Scanning Options */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -202,7 +209,7 @@ const ScanPackageManager = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
               <div className="text-center">
                 <p className="text-sm text-gray-600">Target Total</p>
-                <p className="text-xl font-bold">{dailyPackageData.totalPackages}</p>
+                <p className="text-xl font-bold">{dailyData.totalPackages}</p>
               </div>
               <div className="text-center">
                 <p className="text-sm text-gray-600">Terscan</p>
@@ -210,11 +217,11 @@ const ScanPackageManager = () => {
               </div>
               <div className="text-center">
                 <p className="text-sm text-gray-600">COD</p>
-                <p className="text-xl font-bold text-green-600">{codScanned}/{dailyPackageData.codPackages}</p>
+                <p className="text-xl font-bold text-green-600">{codScanned}/{dailyData.codPackages}</p>
               </div>
               <div className="text-center">
                 <p className="text-sm text-gray-600">Non COD</p>
-                <p className="text-xl font-bold text-blue-600">{nonCodScanned}/{dailyPackageData.nonCodPackages}</p>
+                <p className="text-xl font-bold text-blue-600">{nonCodScanned}/{dailyData.nonCodPackages}</p>
               </div>
             </div>
 
@@ -223,9 +230,9 @@ const ScanPackageManager = () => {
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  Scan belum selesai. Total scan: {totalScanned}, Target: {dailyPackageData.totalPackages}
-                  {codScanned !== dailyPackageData.codPackages && ` | COD: ${codScanned}/${dailyPackageData.codPackages}`}
-                  {nonCodScanned !== dailyPackageData.nonCodPackages && ` | Non COD: ${nonCodScanned}/${dailyPackageData.nonCodPackages}`}
+                  Scan belum selesai. Total scan: {totalScanned}, Target: {dailyData.totalPackages}
+                  {codScanned !== dailyData.codPackages && ` | COD: ${codScanned}/${dailyData.codPackages}`}
+                  {nonCodScanned !== dailyData.nonCodPackages && ` | Non COD: ${nonCodScanned}/${dailyData.nonCodPackages}`}
                 </AlertDescription>
               </Alert>
             )}
@@ -278,7 +285,7 @@ const ScanPackageManager = () => {
               className="w-full"
               size="lg"
             >
-              {canStartDelivery() ? 'Mulai Proses Pengiriman' : `Scan ${dailyPackageData.totalPackages - totalScanned} Paket Lagi`}
+              {canStartDelivery() ? 'Mulai Proses Pengiriman' : `Scan ${dailyData.totalPackages - totalScanned} Paket Lagi`}
             </Button>
           </>
         )}

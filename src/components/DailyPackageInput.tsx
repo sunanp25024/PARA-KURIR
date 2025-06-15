@@ -6,9 +6,15 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Package, AlertTriangle, CheckCircle } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
+import { useWorkflow } from '@/contexts/WorkflowContext';
 
-const DailyPackageInput = () => {
+interface DailyPackageInputProps {
+  onStepComplete?: () => void;
+}
+
+const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete }) => {
+  const { setDailyPackages } = useWorkflow();
   const [totalPackages, setTotalPackages] = useState('');
   const [codPackages, setCodPackages] = useState('');
   const [nonCodPackages, setNonCodPackages] = useState('');
@@ -58,6 +64,15 @@ const DailyPackageInput = () => {
 
     localStorage.setItem('dailyPackageData', JSON.stringify(packageData));
     
+    // Generate daily packages for workflow context
+    const dailyPackages = Array.from({ length: total }, (_, i) => ({
+      id: `daily_${Date.now()}_${i}`,
+      trackingNumber: `PKG${String(i + 1).padStart(3, '0')}`,
+      isCOD: i < cod
+    }));
+    
+    setDailyPackages(dailyPackages);
+    
     // Clear any existing scanned packages when new data is input
     localStorage.removeItem('scannedPackages');
     
@@ -67,6 +82,11 @@ const DailyPackageInput = () => {
       title: "Data Tersimpan",
       description: `Total paket hari ini: ${total} (COD: ${cod}, Non COD: ${nonCod})`,
     });
+
+    // Auto progress to next step
+    setTimeout(() => {
+      onStepComplete?.();
+    }, 1000);
   };
 
   const handleReset = () => {
@@ -74,6 +94,7 @@ const DailyPackageInput = () => {
     setCodPackages('');
     setNonCodPackages('');
     setIsDataSaved(false);
+    setDailyPackages([]);
     localStorage.removeItem('dailyPackageData');
     localStorage.removeItem('scannedPackages');
     
