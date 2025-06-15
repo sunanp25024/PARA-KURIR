@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Plus, Search, Edit, Trash2, User, Upload, Download, Eye, MoreHorizontal, MapPin } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, User, Upload, Download, Eye, MoreHorizontal, MapPin, ToggleLeft, ToggleRight } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +35,7 @@ import { toast } from '@/hooks/use-toast';
 import ExcelImportManager from '@/components/ExcelImportManager';
 import { downloadFile } from '@/utils/downloadUtils';
 import AddKurirForm from '@/components/forms/AddKurirForm';
+import EditKurirForm from '@/components/forms/EditKurirForm';
 
 const ManageKurir = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -105,24 +106,36 @@ const ManageKurir = () => {
   const handleAddKurir = (newKurir: any) => {
     setKurirs([...kurirs, newKurir]);
     setShowAddDialog(false);
-  };
-
-  const handleDownloadTemplate = () => {
-    const templateData = `ID Kurir,Nama,Email,Telepon,Area,Lokasi Kerja,Status,Tanggal Bergabung
-KURIR004,Nama Kurir,email@example.com,081234567890,Jakarta Selatan,Kantor Pusat - Jl. Sudirman,Aktif,2024-12-15
-KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakung - Jl. Raya Cakung,Aktif,2024-12-15`;
-    
-    downloadFile(templateData, 'template_kurir.csv', 'text/csv;charset=utf-8;');
-    
     toast({
-      title: "Template Downloaded",
-      description: "Template Excel untuk kurir berhasil didownload sebagai template_kurir.csv",
+      title: "Kurir Ditambahkan",
+      description: `Kurir ${newKurir.name} berhasil ditambahkan`,
     });
   };
 
   const handleEditKurir = (kurir: any) => {
     setSelectedKurir(kurir);
     setShowEditDialog(true);
+  };
+
+  const handleUpdateKurir = (updatedKurir: any) => {
+    setKurirs(kurirs.map(k => k.id === updatedKurir.id ? updatedKurir : k));
+    setShowEditDialog(false);
+    setSelectedKurir(null);
+    toast({
+      title: "Kurir Diperbarui",
+      description: `Data kurir ${updatedKurir.name} berhasil diperbarui`,
+    });
+  };
+
+  const handleToggleStatus = (kurir: any) => {
+    const newStatus = kurir.status === 'Aktif' ? 'Tidak Aktif' : 'Aktif';
+    const updatedKurir = { ...kurir, status: newStatus };
+    setKurirs(kurirs.map(k => k.id === kurir.id ? updatedKurir : k));
+    
+    toast({
+      title: "Status Kurir Diubah",
+      description: `Status kurir ${kurir.name} berhasil diubah menjadi ${newStatus}`,
+    });
   };
 
   const handleDeleteKurir = (kurir: any) => {
@@ -144,6 +157,19 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
   const handleViewDetails = (kurir: any) => {
     setSelectedKurir(kurir);
     setShowDetailDialog(true);
+  };
+
+  const handleDownloadTemplate = () => {
+    const templateData = `ID Kurir,Nama,Email,Telepon,Area,Lokasi Kerja,Status,Tanggal Bergabung
+KURIR004,Nama Kurir,email@example.com,081234567890,Jakarta Selatan,Kantor Pusat - Jl. Sudirman,Aktif,2024-12-15
+KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakung - Jl. Raya Cakung,Aktif,2024-12-15`;
+    
+    downloadFile(templateData, 'template_kurir.csv', 'text/csv;charset=utf-8;');
+    
+    toast({
+      title: "Template Downloaded",
+      description: "Template Excel untuk kurir berhasil didownload sebagai template_kurir.csv",
+    });
   };
 
   const filteredKurirs = kurirs.filter(kurir =>
@@ -276,7 +302,7 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end" className="bg-white border shadow-lg">
                             <DropdownMenuItem onClick={() => handleViewDetails(kurir)}>
                               <Eye className="mr-2 h-4 w-4" />
                               Lihat Detail
@@ -284,6 +310,19 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
                             <DropdownMenuItem onClick={() => handleEditKurir(kurir)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleToggleStatus(kurir)}>
+                              {kurir.status === 'Aktif' ? (
+                                <>
+                                  <ToggleLeft className="mr-2 h-4 w-4" />
+                                  Nonaktifkan
+                                </>
+                              ) : (
+                                <>
+                                  <ToggleRight className="mr-2 h-4 w-4" />
+                                  Aktifkan
+                                </>
+                              )}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDeleteKurir(kurir)} className="text-red-600">
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -320,6 +359,25 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
               onSubmit={handleAddKurir}
               onCancel={() => setShowAddDialog(false)}
             />
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Kurir Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Edit Kurir</DialogTitle>
+              <DialogDescription>
+                Ubah data kurir di bawah ini
+              </DialogDescription>
+            </DialogHeader>
+            {selectedKurir && (
+              <EditKurirForm
+                kurir={selectedKurir}
+                onSubmit={handleUpdateKurir}
+                onCancel={() => setShowEditDialog(false)}
+              />
+            )}
           </DialogContent>
         </Dialog>
 
