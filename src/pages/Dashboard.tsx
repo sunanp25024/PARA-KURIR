@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -34,7 +33,6 @@ const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [isOnline, setIsOnline] = useState(false);
   const [currentLocation, setCurrentLocation] = useState('Menunggu lokasi...');
-  const [activeView, setActiveView] = useState<'dashboard' | 'workflow'>('dashboard');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,168 +59,115 @@ const Dashboard = () => {
     });
   };
 
-  const handleScanPackage = () => {
-    toast({
-      title: "Kamera Aktif",
-      description: "Arahkan kamera ke QR Code paket",
-    });
-  };
-
   if (!user) {
     return <div>Loading...</div>;
   }
 
-  // Dashboard khusus untuk kurir dengan layout mobile (TANPA tombol mode mobile)
+  // Dashboard khusus untuk kurir dengan layout mobile-friendly untuk Android
   if (user.role === 'kurir') {
     return (
       <Layout>
         <WorkflowProvider>
-          <div className="space-y-6">
-            {/* Header - Tanpa tombol Mode Mobile */}
+          <div className="space-y-4 p-4">
+            {/* Header dengan status online/offline */}
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Dashboard Kurir</h1>
-                <p className="text-muted-foreground">
-                  Selamat datang di sistem kurir INSAN Mobile
+                <h1 className="text-2xl font-bold tracking-tight">Dashboard Kurir</h1>
+                <p className="text-sm text-muted-foreground">
+                  INSAN Mobile Express Flow
                 </p>
               </div>
               <Button
                 onClick={handleToggleOnline}
                 variant={isOnline ? "destructive" : "default"}
                 className="flex items-center gap-2"
+                size="sm"
               >
                 <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-white' : 'bg-green-500'}`} />
                 {isOnline ? 'OFFLINE' : 'ONLINE'}
               </Button>
             </div>
 
-            {/* Main Navigation */}
-            <Tabs value={activeView} onValueChange={(value) => setActiveView(value as any)} className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-                <TabsTrigger value="workflow">
-                  <Workflow className="h-4 w-4 mr-2" />
-                  Workflow Harian
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="dashboard" className="space-y-4">
-                {/* Status & Location */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5 text-blue-600" />
-                      Status & Lokasi
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="text-sm font-medium mb-2">Lokasi Saat Ini:</p>
-                      <p className="text-sm text-gray-600 mb-4">{currentLocation}</p>
-                      
-                      <div className="flex gap-2">
-                        <Badge variant={isOnline ? "default" : "secondary"}>
-                          {isOnline ? 'Siap Terima' : 'Tidak Aktif'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Stats Overview */}
-                <div className="grid gap-4 grid-cols-2">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Paket Hari Ini</CardTitle>
-                      <Package className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">15</div>
-                      <p className="text-xs text-muted-foreground">+2 dari kemarin</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Terkirim</CardTitle>
-                      <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">12</div>
-                      <p className="text-xs text-muted-foreground">80% success rate</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Pending</CardTitle>
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">3</div>
-                      <p className="text-xs text-muted-foreground">Perlu tindak lanjut</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Rating</CardTitle>
-                      <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">4.8</div>
-                      <p className="text-xs text-muted-foreground">Performa bulan ini</p>
-                    </CardContent>
-                  </Card>
+            {/* Status & Location Card - Lebih compact untuk mobile */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <MapPin className="h-4 w-4 text-blue-600" />
+                  Status & Lokasi
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <p className="text-xs font-medium mb-1">Lokasi Saat Ini:</p>
+                  <p className="text-sm text-gray-600 mb-3">{currentLocation}</p>
+                  
+                  <Badge variant={isOnline ? "default" : "secondary"} className="text-xs">
+                    {isOnline ? 'Siap Terima' : 'Tidak Aktif'}
+                  </Badge>
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Quick Actions */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Aksi Cepat</CardTitle>
-                    <CardDescription>Fitur yang sering digunakan</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
-                      <Button 
-                        onClick={handleScanPackage} 
-                        className="flex flex-col gap-2 h-20"
-                      >
-                        <Camera className="h-5 w-5" />
-                        <span>Scan Paket</span>
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => navigate('/attendance')}
-                        className="flex flex-col gap-2 h-20"
-                      >
-                        <Clock className="h-5 w-5" />
-                        <span>Absen</span>
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => navigate('/performance')}
-                        className="flex flex-col gap-2 h-20"
-                      >
-                        <Truck className="h-5 w-5" />
-                        <span>Performa</span>
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="flex flex-col gap-2 h-20"
-                      >
-                        <MessageSquare className="h-5 w-5" />
-                        <span>Pesan</span>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+            {/* Stats Overview - Grid 2x2 untuk mobile */}
+            <div className="grid gap-3 grid-cols-2">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-xs font-medium">Paket Hari Ini</CardTitle>
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xl font-bold">15</div>
+                  <p className="text-xs text-muted-foreground">+2 dari kemarin</p>
+                </CardContent>
+              </Card>
 
-              <TabsContent value="workflow" className="space-y-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-xs font-medium">Terkirim</CardTitle>
+                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xl font-bold">12</div>
+                  <p className="text-xs text-muted-foreground">80% sukses</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-xs font-medium">Pending</CardTitle>
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xl font-bold">3</div>
+                  <p className="text-xs text-muted-foreground">Perlu tindak lanjut</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-xs font-medium">Rating</CardTitle>
+                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xl font-bold">4.8</div>
+                  <p className="text-xs text-muted-foreground">Performa bulan ini</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Workflow Section - Menggantikan Aksi Cepat */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Workflow className="h-5 w-5" />
+                  Workflow Harian
+                </CardTitle>
+                <CardDescription>Kelola tugas harian Anda</CardDescription>
+              </CardHeader>
+              <CardContent>
                 <KurirWorkflow />
-              </TabsContent>
-            </Tabs>
+              </CardContent>
+            </Card>
           </div>
         </WorkflowProvider>
       </Layout>
