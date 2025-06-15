@@ -21,7 +21,10 @@ import {
   Camera,
   MessageSquare,
   Navigation,
-  Workflow
+  Workflow,
+  Scan,
+  AlertTriangle,
+  TrendingUp
 } from 'lucide-react';
 import { WorkflowProvider } from '@/contexts/WorkflowContext';
 import DailyPackageInput from '@/components/DailyPackageInput';
@@ -63,111 +66,194 @@ const Dashboard = () => {
     return <div>Loading...</div>;
   }
 
-  // Dashboard khusus untuk kurir dengan layout mobile-friendly untuk Android
+  // Dashboard khusus untuk kurir dengan bottom tab navigation
   if (user.role === 'kurir') {
     return (
       <Layout>
         <WorkflowProvider>
-          <div className="space-y-4 p-4">
-            {/* Header dengan status online/offline */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">Dashboard Kurir</h1>
-                <p className="text-sm text-muted-foreground">
-                  INSAN Mobile Express Flow
-                </p>
+          <div className="flex flex-col h-screen bg-gray-50">
+            {/* Header - Fixed at top */}
+            <div className="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm">
+              <div className="flex-1">
+                <h1 className="text-lg font-bold text-gray-900">Dashboard Kurir</h1>
+                <p className="text-xs text-gray-500">INSAN Mobile Express</p>
               </div>
               <Button
                 onClick={handleToggleOnline}
                 variant={isOnline ? "destructive" : "default"}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 h-8 px-3"
                 size="sm"
               >
                 <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-white' : 'bg-green-500'}`} />
-                {isOnline ? 'OFFLINE' : 'ONLINE'}
+                <span className="text-xs">{isOnline ? 'OFFLINE' : 'ONLINE'}</span>
               </Button>
             </div>
 
-            {/* Status & Location Card - Lebih compact untuk mobile */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg">
+            {/* Status Card - Compact */}
+            <div className="px-4 py-3 bg-white border-b">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-blue-600" />
-                  Status & Lokasi
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <p className="text-xs font-medium mb-1">Lokasi Saat Ini:</p>
-                  <p className="text-sm text-gray-600 mb-3">{currentLocation}</p>
-                  
-                  <Badge variant={isOnline ? "default" : "secondary"} className="text-xs">
-                    {isOnline ? 'Siap Terima' : 'Tidak Aktif'}
-                  </Badge>
+                  <div>
+                    <p className="text-xs font-medium text-gray-700">Lokasi Saat Ini</p>
+                    <p className="text-xs text-gray-500 truncate max-w-48">{currentLocation}</p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Stats Overview - Grid 2x2 untuk mobile */}
-            <div className="grid gap-3 grid-cols-2">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs font-medium">Paket Hari Ini</CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xl font-bold">15</div>
-                  <p className="text-xs text-muted-foreground">+2 dari kemarin</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs font-medium">Terkirim</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xl font-bold">12</div>
-                  <p className="text-xs text-muted-foreground">80% sukses</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs font-medium">Pending</CardTitle>
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xl font-bold">3</div>
-                  <p className="text-xs text-muted-foreground">Perlu tindak lanjut</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs font-medium">Rating</CardTitle>
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xl font-bold">4.8</div>
-                  <p className="text-xs text-muted-foreground">Performa bulan ini</p>
-                </CardContent>
-              </Card>
+                <Badge variant={isOnline ? "default" : "secondary"} className="text-xs">
+                  {isOnline ? 'Aktif' : 'Offline'}
+                </Badge>
+              </div>
             </div>
 
-            {/* Workflow Section - Menggantikan Aksi Cepat */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Workflow className="h-5 w-5" />
-                  Workflow Harian
-                </CardTitle>
-                <CardDescription>Kelola tugas harian Anda</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <KurirWorkflow />
-              </CardContent>
-            </Card>
+            {/* Stats Overview - Horizontal scroll */}
+            <div className="px-4 py-3 bg-white border-b">
+              <div className="flex gap-3 overflow-x-auto">
+                <div className="flex-shrink-0 bg-blue-50 p-3 rounded-lg min-w-24">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Package className="h-4 w-4 text-blue-600" />
+                    <span className="text-xs font-medium text-blue-800">Paket</span>
+                  </div>
+                  <div className="text-lg font-bold text-blue-900">15</div>
+                </div>
+
+                <div className="flex-shrink-0 bg-green-50 p-3 rounded-lg min-w-24">
+                  <div className="flex items-center gap-2 mb-1">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-xs font-medium text-green-800">Selesai</span>
+                  </div>
+                  <div className="text-lg font-bold text-green-900">12</div>
+                </div>
+
+                <div className="flex-shrink-0 bg-orange-50 p-3 rounded-lg min-w-24">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="h-4 w-4 text-orange-600" />
+                    <span className="text-xs font-medium text-orange-800">Pending</span>
+                  </div>
+                  <div className="text-lg font-bold text-orange-900">3</div>
+                </div>
+
+                <div className="flex-shrink-0 bg-purple-50 p-3 rounded-lg min-w-24">
+                  <div className="flex items-center gap-2 mb-1">
+                    <BarChart3 className="h-4 w-4 text-purple-600" />
+                    <span className="text-xs font-medium text-purple-800">Rating</span>
+                  </div>
+                  <div className="text-lg font-bold text-purple-900">4.8</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Area - Scrollable */}
+            <div className="flex-1 overflow-hidden">
+              <Tabs defaultValue="input" className="h-full flex flex-col">
+                {/* Tab Content - Scrollable */}
+                <div className="flex-1 overflow-y-auto">
+                  <TabsContent value="input" className="mt-0 p-4">
+                    <DailyPackageInput onStepComplete={() => {}} />
+                  </TabsContent>
+
+                  <TabsContent value="scan" className="mt-0 p-4">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Scan className="h-5 w-5" />
+                          Scan & Kelola Paket
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600">Fitur scan akan tersedia setelah input paket selesai.</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="delivery" className="mt-0 p-4">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Truck className="h-5 w-5" />
+                          Pengantaran
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600">Fitur pengantaran akan tersedia setelah scan selesai.</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="pending" className="mt-0 p-4">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <AlertTriangle className="h-5 w-5" />
+                          Pending/Return
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600">Kelola paket yang pending atau perlu di-return.</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="performance" className="mt-0 p-4">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <TrendingUp className="h-5 w-5" />
+                          Performa Harian
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600">Lihat ringkasan performa hari ini.</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </div>
+
+                {/* Bottom Tab Navigation - Fixed at bottom */}
+                <div className="bg-white border-t shadow-lg">
+                  <TabsList className="w-full h-16 grid grid-cols-5 bg-white rounded-none border-0">
+                    <TabsTrigger 
+                      value="input" 
+                      className="flex flex-col gap-1 h-full data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600"
+                    >
+                      <Package className="h-5 w-5" />
+                      <span className="text-xs">Input</span>
+                    </TabsTrigger>
+                    
+                    <TabsTrigger 
+                      value="scan" 
+                      className="flex flex-col gap-1 h-full data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600"
+                    >
+                      <Scan className="h-5 w-5" />
+                      <span className="text-xs">Scan</span>
+                    </TabsTrigger>
+                    
+                    <TabsTrigger 
+                      value="delivery" 
+                      className="flex flex-col gap-1 h-full data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600"
+                    >
+                      <Truck className="h-5 w-5" />
+                      <span className="text-xs">Kirim</span>
+                    </TabsTrigger>
+                    
+                    <TabsTrigger 
+                      value="pending" 
+                      className="flex flex-col gap-1 h-full data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600"
+                    >
+                      <AlertTriangle className="h-5 w-5" />
+                      <span className="text-xs">Pending</span>
+                    </TabsTrigger>
+                    
+                    <TabsTrigger 
+                      value="performance" 
+                      className="flex flex-col gap-1 h-full data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600"
+                    >
+                      <TrendingUp className="h-5 w-5" />
+                      <span className="text-xs">Performa</span>
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+              </Tabs>
+            </div>
           </div>
         </WorkflowProvider>
       </Layout>
