@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
 import { 
   Package, 
   Scan, 
@@ -13,12 +13,8 @@ import {
   TrendingUp,
   CheckCircle,
   RotateCcw,
-  Clock,
-  Bell,
-  MapPin,
-  BarChart3,
-  Camera,
-  FileText
+  ArrowRight,
+  Clock
 } from 'lucide-react';
 import { useWorkflow } from '@/contexts/WorkflowContext';
 import DailyPackageInput from '@/components/DailyPackageInput';
@@ -46,6 +42,7 @@ const CourierWorkflowMain = () => {
   } = useWorkflow();
 
   const handleStartNewDay = () => {
+    // Clear all data
     setDailyPackages([]);
     setScannedPackages([]);
     setDeliveryPackages([]);
@@ -68,256 +65,227 @@ const CourierWorkflowMain = () => {
     });
   };
 
-  const getCurrentStepCard = () => {
+  const getStepProgress = () => {
+    const steps = ['input', 'scan', 'delivery', 'pending', 'performance'];
+    const currentIndex = steps.indexOf(currentStep);
+    return ((currentIndex + 1) / steps.length) * 100;
+  };
+
+  const getStepStatus = (step: string) => {
+    switch (step) {
+      case 'input':
+        return dailyPackages.length > 0 ? 'completed' : currentStep === 'input' ? 'active' : 'pending';
+      case 'scan':
+        return deliveryPackages.length > 0 ? 'completed' : currentStep === 'scan' ? 'active' : 'pending';
+      case 'delivery':
+        const totalDelivery = deliveryPackages.length;
+        const completedDelivery = deliveredPackages.length + pendingPackages.length;
+        return totalDelivery > 0 && totalDelivery === completedDelivery ? 'completed' : currentStep === 'delivery' ? 'active' : 'pending';
+      case 'pending':
+        const pendingToReturn = pendingPackages.filter(pkg => !pkg.returnedAt).length;
+        return pendingToReturn === 0 && pendingPackages.length > 0 ? 'completed' : currentStep === 'pending' ? 'active' : 'pending';
+      case 'performance':
+        return currentStep === 'performance' ? 'active' : 'pending';
+      default:
+        return 'pending';
+    }
+  };
+
+  const getStepIcon = (step: string, status: string) => {
+    const iconClass = "h-6 w-6";
+    if (status === 'completed') {
+      return <CheckCircle className={`${iconClass} text-green-600`} />;
+    }
+    if (status === 'active') {
+      switch (step) {
+        case 'input': return <Package className={`${iconClass} text-blue-600`} />;
+        case 'scan': return <Scan className={`${iconClass} text-blue-600`} />;
+        case 'delivery': return <Truck className={`${iconClass} text-blue-600`} />;
+        case 'pending': return <Clock className={`${iconClass} text-blue-600`} />;
+        case 'performance': return <TrendingUp className={`${iconClass} text-blue-600`} />;
+      }
+    }
+    switch (step) {
+      case 'input': return <Package className={`${iconClass} text-gray-400`} />;
+      case 'scan': return <Scan className={`${iconClass} text-gray-400`} />;
+      case 'delivery': return <Truck className={`${iconClass} text-gray-400`} />;
+      case 'pending': return <Clock className={`${iconClass} text-gray-400`} />;
+      case 'performance': return <TrendingUp className={`${iconClass} text-gray-400`} />;
+      default: return null;
+    }
+  };
+
+  const getStepComponent = () => {
     switch (currentStep) {
       case 'input':
-        return {
-          title: 'Input Data Paket Harian',
-          subtitle: 'Masukkan data paket yang akan diantarkan hari ini',
-          icon: Package,
-          buttonText: 'Input Data Paket',
-          buttonIcon: FileText,
-          color: 'from-blue-500 to-blue-600'
-        };
+        return <DailyPackageInput onStepComplete={autoProgressToNextStep} />;
       case 'scan':
-        return {
-          title: 'Scan & Kelola Paket',
-          subtitle: `Scan barcode paket untuk memulai pengantaran (${deliveryPackages.length}/${dailyPackages.length} paket terscan)`,
-          icon: Scan,
-          buttonText: 'Mulai Scan Barcode',
-          buttonIcon: Camera,
-          color: 'from-green-500 to-green-600'
-        };
+        if (dailyPackages.length === 0) {
+          return (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Silakan input data paket harian terlebih dahulu.
+              </AlertDescription>
+            </Alert>
+          );
+        }
+        return <ScanPackageManager onStepComplete={autoProgressToNextStep} />;
       case 'delivery':
-        return {
-          title: 'Proses Pengantaran',
-          subtitle: `Antarkan paket ke alamat tujuan (${deliveredPackages.length}/${deliveryPackages.length} paket terkirim)`,
-          icon: Truck,
-          buttonText: 'Mulai Pengantaran',
-          buttonIcon: MapPin,
-          color: 'from-orange-500 to-orange-600'
-        };
+        if (deliveryPackages.length === 0) {
+          return (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Silakan selesaikan proses scan paket terlebih dahulu.
+              </AlertDescription>
+            </Alert>
+          );
+        }
+        return <DeliveryTracking onStepComplete={autoProgressToNextStep} />;
       case 'pending':
-        return {
-          title: 'Kelola Paket Pending',
-          subtitle: `Proses paket yang belum terkirim (${pendingPackages.length} paket pending)`,
-          icon: Clock,
-          buttonText: 'Kelola Pending',
-          buttonIcon: AlertTriangle,
-          color: 'from-yellow-500 to-yellow-600'
-        };
+        if (pendingPackages.length === 0) {
+          setTimeout(() => {
+            setCurrentStep('performance');
+          }, 500);
+          return (
+            <Alert>
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                Tidak ada paket pending. Melanjutkan ke ringkasan performa...
+              </AlertDescription>
+            </Alert>
+          );
+        }
+        return <PendingReturnPackages onStepComplete={autoProgressToNextStep} />;
       case 'performance':
-        return {
-          title: 'Ringkasan Performa Harian',
-          subtitle: 'Lihat laporan dan statistik pengantaran hari ini',
-          icon: TrendingUp,
-          buttonText: 'Lihat Performa',
-          buttonIcon: BarChart3,
-          color: 'from-purple-500 to-purple-600'
-        };
+        return (
+          <div className="space-y-6">
+            <Alert className="border-green-200 bg-green-50">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                🎉 Selamat! Semua paket hari ini telah selesai diproses.
+              </AlertDescription>
+            </Alert>
+            <DailyPerformanceSummary />
+            <Card className="border-blue-200 bg-blue-50">
+              <CardContent className="pt-6">
+                <Button 
+                  onClick={handleStartNewDay}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  size="lg"
+                >
+                  <RotateCcw className="h-5 w-5 mr-2" />
+                  Mulai Hari Baru
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        );
       default:
         return null;
     }
   };
 
-  const stepCard = getCurrentStepCard();
-  
-  // Calculate completion percentages
-  const totalPackages = dailyPackages.length;
-  const codPackages = dailyPackages.filter(pkg => pkg.isCOD).length;
-  const deliveredCount = deliveredPackages.length;
-  const pendingCount = pendingPackages.length;
+  const steps = [
+    { key: 'input', label: 'Input Paket', count: dailyPackages.length },
+    { key: 'scan', label: 'Scan & Kelola', count: deliveryPackages.length },
+    { key: 'delivery', label: 'Pengantaran', count: `${deliveredPackages.length}/${deliveryPackages.length}` },
+    { key: 'pending', label: 'Pending/Return', count: pendingPackages.length },
+    { key: 'performance', label: 'Performa', count: '' }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 w-full overflow-x-hidden">
-      <div className="w-full max-w-6xl mx-auto p-4 lg:p-6 space-y-6">
-        
-        {/* Profile Header Card */}
-        <Card className="bg-white/95 backdrop-blur-sm shadow-lg border-0 w-full">
-          <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center space-x-4 w-full sm:w-auto">
-                <Avatar className="h-14 w-14 border-4 border-blue-100 flex-shrink-0">
-                  <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback className="bg-blue-500 text-white text-lg font-bold">
-                    BS
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <h1 className="text-xl sm:text-2xl font-bold text-slate-800 truncate">Budi Santoso</h1>
-                  <p className="text-slate-600 text-sm sm:text-base truncate">ID: PISTEST2025 - Jakarta Pusat Hub</p>
-                  <Badge className="mt-1 bg-blue-100 text-blue-700 border-blue-200">
-                    KURIR
-                  </Badge>
-                </div>
-              </div>
-              <Button variant="outline" size="icon" className="h-10 w-10 flex-shrink-0">
-                <Bell className="h-5 w-5" />
-              </Button>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto p-6 space-y-8">
+        {/* Header */}
+        <div className="text-center py-8">
+          <h1 className="text-3xl font-bold text-blue-600 mb-2">
+            Workflow Harian Kurir
+          </h1>
+          <p className="text-gray-600">Kelola paket harian Anda dengan mudah dan efisien</p>
+        </div>
+
+        {/* Progress Section */}
+        <Card className="bg-white shadow-lg">
+          <CardContent className="p-8">
+            {/* Progress Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-800">Progress Harian</h2>
+              <span className="text-3xl font-bold text-blue-600">{Math.round(getStepProgress())}%</span>
+            </div>
+            
+            {/* Progress Bar */}
+            <Progress value={getStepProgress()} className="h-3 mb-8" />
+            
+            {/* Step Cards */}
+            <div className="grid grid-cols-5 gap-4">
+              {steps.map((step) => {
+                const status = getStepStatus(step.key);
+                return (
+                  <div 
+                    key={step.key}
+                    className={`relative p-6 rounded-2xl border-2 transition-all duration-300 ${
+                      status === 'active' 
+                        ? 'bg-blue-50 border-blue-200 shadow-lg scale-105' 
+                        : status === 'completed'
+                        ? 'bg-green-50 border-green-200 shadow-md'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}
+                  >
+                    {/* Icon */}
+                    <div className="flex justify-center mb-4">
+                      {getStepIcon(step.key, status)}
+                    </div>
+                    
+                    {/* Label */}
+                    <div className="text-sm font-semibold text-gray-700 text-center mb-3">
+                      {step.label}
+                    </div>
+                    
+                    {/* Count Badge */}
+                    {step.count !== '' && (
+                      <div className="flex justify-center">
+                        <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                          status === 'completed' ? 'bg-green-100 text-green-700' :
+                          status === 'active' ? 'bg-blue-100 text-blue-700' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          {step.count}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
 
-        {/* Alert Banner - Hanya saat step input */}
-        {currentStep === 'input' && (
-          <Alert className="bg-orange-50 border-orange-200 shadow-sm w-full">
-            <AlertTriangle className="h-5 w-5 text-orange-600" />
-            <AlertDescription className="text-orange-800 font-medium">
-              Jangan lupa untuk melakukan absensi sebelum memulai aktivitas pengantaran!
-              <Button variant="link" className="p-0 h-auto ml-2 text-orange-700 underline">
-                Absen Sekarang
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Current Step Card */}
-        {stepCard && (
-          <Card className="bg-white/95 backdrop-blur-sm shadow-lg border-0 overflow-hidden w-full">
-            <CardContent className="p-0">
-              <div className={`bg-gradient-to-r ${stepCard.color} p-6 text-white`}>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                  <div className="p-3 bg-white/20 rounded-xl flex-shrink-0">
-                    <stepCard.icon className="h-6 w-6" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-lg sm:text-xl font-bold mb-1">{stepCard.title}</h2>
-                    <p className="text-white/90 text-sm sm:text-base">{stepCard.subtitle}</p>
-                  </div>
-                </div>
+        {/* Current Step Section */}
+        <Card className="bg-white shadow-lg">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3 text-xl text-gray-800">
+              {getStepIcon(currentStep, 'active')}
+              <span>
+                {currentStep === 'input' && 'Input Data Paket'}
+                {currentStep === 'scan' && 'Scan & Kelola Paket'}
+                {currentStep === 'delivery' && 'Proses Pengantaran'}
+                {currentStep === 'pending' && 'Kelola Paket Pending'}
+                {currentStep === 'performance' && 'Ringkasan Performa'}
+              </span>
+              <div className="ml-auto">
+                <Badge variant="secondary" className="text-sm">
+                  Step {['input', 'scan', 'delivery', 'pending', 'performance'].indexOf(currentStep) + 1}/5
+                </Badge>
               </div>
-              <div className="p-6">
-                {currentStep !== 'performance' ? (
-                  <Button 
-                    size="lg" 
-                    className={`w-full h-12 bg-gradient-to-r ${stepCard.color} hover:opacity-90 shadow-lg`}
-                    onClick={() => {
-                      // This will trigger the component render which handles the step logic
-                    }}
-                  >
-                    <stepCard.buttonIcon className="h-5 w-5 mr-2" />
-                    {stepCard.buttonText}
-                  </Button>
-                ) : (
-                  <div className="space-y-4">
-                    <Alert className="border-green-200 bg-green-50">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <AlertDescription className="text-green-800">
-                        🎉 Selamat! Semua paket hari ini telah selesai diproses.
-                      </AlertDescription>
-                    </Alert>
-                    <Button 
-                      onClick={handleStartNewDay}
-                      size="lg"
-                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
-                    >
-                      <RotateCcw className="h-5 w-5 mr-2" />
-                      Mulai Hari Baru
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-          <Card className="bg-white/95 backdrop-blur-sm shadow-md border-0 w-full">
-            <CardContent className="p-4 text-center">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Package className="h-5 w-5 text-blue-600" />
-              </div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-800 mb-1">{totalPackages}</div>
-              <p className="text-xs sm:text-sm text-slate-600">Total Paket</p>
-              <Badge variant="secondary" className="mt-2 text-xs">100%</Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/95 backdrop-blur-sm shadow-md border-0 w-full">
-            <CardContent className="p-4 text-center">
-              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <span className="text-lg">💰</span>
-              </div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-800 mb-1">{codPackages}</div>
-              <p className="text-xs sm:text-sm text-slate-600">COD</p>
-              <Badge variant="secondary" className="mt-2 text-xs">
-                {totalPackages > 0 ? Math.round((codPackages / totalPackages) * 100) : 0}%
-              </Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/95 backdrop-blur-sm shadow-md border-0 w-full">
-            <CardContent className="p-4 text-center">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              </div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-800 mb-1">{deliveredCount}</div>
-              <p className="text-xs sm:text-sm text-slate-600">Terkirim</p>
-              <Badge variant="default" className="mt-2 text-xs bg-green-600">
-                {totalPackages > 0 ? Math.round((deliveredCount / totalPackages) * 100) : 0}%
-              </Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/95 backdrop-blur-sm shadow-md border-0 w-full">
-            <CardContent className="p-4 text-center">
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Clock className="h-5 w-5 text-orange-600" />
-              </div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-800 mb-1">{pendingCount}</div>
-              <p className="text-xs sm:text-sm text-slate-600">Pending</p>
-              <Badge variant="outline" className="mt-2 text-xs border-orange-300 text-orange-600">
-                {totalPackages > 0 ? Math.round((pendingCount / totalPackages) * 100) : 0}%
-              </Badge>
-            </CardContent>
-          </Card>
-        </div>
+            </CardTitle>
+          </CardHeader>
+        </Card>
 
         {/* Main Content */}
-        <div className="min-h-[400px] w-full">
-          {currentStep === 'input' && <DailyPackageInput onStepComplete={autoProgressToNextStep} />}
-          
-          {currentStep === 'scan' && (
-            dailyPackages.length === 0 ? (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  Silakan input data paket harian terlebih dahulu.
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <ScanPackageManager onStepComplete={autoProgressToNextStep} />
-            )
-          )}
-          
-          {currentStep === 'delivery' && (
-            deliveryPackages.length === 0 ? (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  Silakan selesaikan proses scan paket terlebih dahulu.
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <DeliveryTracking onStepComplete={autoProgressToNextStep} />
-            )
-          )}
-          
-          {currentStep === 'pending' && (
-            pendingPackages.length === 0 ? (
-              <Alert>
-                <CheckCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Tidak ada paket pending. Melanjutkan ke ringkasan performa...
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <PendingReturnPackages onStepComplete={autoProgressToNextStep} />
-            )
-          )}
-          
-          {currentStep === 'performance' && <DailyPerformanceSummary />}
+        <div className="min-h-[400px]">
+          {getStepComponent()}
         </div>
       </div>
     </div>
