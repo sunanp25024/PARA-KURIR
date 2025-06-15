@@ -9,33 +9,22 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Package, 
-  Truck, 
-  Clock, 
-  CheckCircle,
-  BarChart3,
-  MapPin,
-  Calendar,
+  Shield,
   Users,
-  Settings,
+  User,
   Bell,
   FileText,
-  Shield,
-  User,
-  Camera,
-  MessageSquare,
-  Navigation,
-  Workflow,
-  Scan,
-  AlertTriangle,
-  TrendingUp,
+  Settings,
   Filter,
   Search,
   Download,
   FolderDown,
-  Archive,
-  FileImage,
   ClipboardList,
-  RefreshCw
+  BarChart3,
+  RefreshCw,
+  FileImage,
+  MessageSquare,
+  RotateCcw
 } from 'lucide-react';
 import { WorkflowProvider } from '@/contexts/WorkflowContext';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -51,14 +40,16 @@ import { downloadFile, generateSampleData, generateComprehensiveReport, download
 // Komponen khusus untuk courier dashboard dengan workflow context
 const CourierDashboardContent = () => {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <CourierSidebar />
-        <main className="flex-1 p-6 overflow-auto">
-          <CourierWorkflowMain />
-        </main>
-      </div>
-    </SidebarProvider>
+    <WorkflowProvider>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50/30">
+          <CourierSidebar />
+          <main className="flex-1 overflow-auto">
+            <CourierWorkflowMain />
+          </main>
+        </div>
+      </SidebarProvider>
+    </WorkflowProvider>
   );
 };
 
@@ -80,25 +71,16 @@ const Dashboard = () => {
   }, []);
 
   if (!user) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-lg text-slate-600">Loading...</div>
+      </div>
+    );
   }
 
   // Dashboard khusus untuk kurir dengan workflow terintegrasi
   if (user.role === 'kurir') {
-    return (
-      <Layout>
-        <WorkflowProvider>
-          <SidebarProvider>
-            <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50/30">
-              <CourierSidebar />
-              <main className="flex-1 w-full overflow-auto">
-                <CourierWorkflowMain />
-              </main>
-            </div>
-          </SidebarProvider>
-        </WorkflowProvider>
-      </Layout>
-    );
+    return <CourierDashboardContent />;
   }
 
   const handleDownloadReport = (reportType: string) => {
@@ -176,7 +158,7 @@ const Dashboard = () => {
     navigate('/send-notification');
   };
 
-  // Dashboard untuk role lainnya (master-admin, admin, pic) dengan layout yang lebih rapi
+  // Dashboard untuk role lainnya (master-admin, admin, pic)
   const getDashboardCards = () => {
     switch (user.role) {
       case 'master-admin':
@@ -238,18 +220,18 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
-        <div className="max-w-7xl mx-auto p-4 lg:p-6 space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 w-full overflow-x-hidden">
+        <div className="w-full max-w-7xl mx-auto p-4 lg:p-6 space-y-6">
           
-          {/* Header Section - Lebih kompak */}
-          <Card className="bg-white/95 backdrop-blur-sm shadow-lg border-0">
+          {/* Header Section */}
+          <Card className="bg-white/95 backdrop-blur-sm shadow-lg border-0 w-full">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="w-full sm:w-auto">
+                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
                     Dashboard
                   </h1>
-                  <p className="text-slate-600 text-lg">
+                  <p className="text-slate-600 text-base sm:text-lg">
                     Selamat datang, <span className="font-semibold text-blue-600">{user.name}</span>
                   </p>
                   <Badge variant="outline" className="mt-2 px-3 py-1 text-sm font-medium capitalize border-blue-200 text-blue-700">
@@ -257,7 +239,7 @@ const Dashboard = () => {
                   </Badge>
                 </div>
                 {user.role === 'master-admin' && (
-                  <Button onClick={handleSendNotification} size="lg" className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md">
+                  <Button onClick={handleSendNotification} size="lg" className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md whitespace-nowrap">
                     <MessageSquare className="h-5 w-5" />
                     Kirim Notifikasi
                   </Button>
@@ -268,7 +250,7 @@ const Dashboard = () => {
 
           {/* Filter Section - Hanya untuk admin dan master-admin */}
           {(user.role === 'admin' || user.role === 'master-admin') && (
-            <Card className="shadow-md border-slate-200/60 bg-white/90 backdrop-blur-sm">
+            <Card className="shadow-md border-slate-200/60 bg-white/90 backdrop-blur-sm w-full">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-3 text-lg text-slate-800">
                   <div className="p-2 bg-blue-50 rounded-lg">
@@ -278,19 +260,19 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full">
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                     <Input
                       placeholder="Cari ID/Password..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      className="pl-10 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 w-full"
                     />
                   </div>
                   
                   <Select value={wilayahFilter} onValueChange={setWilayahFilter}>
-                    <SelectTrigger className="border-slate-200 focus:border-blue-500">
+                    <SelectTrigger className="border-slate-200 focus:border-blue-500 w-full">
                       <SelectValue placeholder="Filter Wilayah" />
                     </SelectTrigger>
                     <SelectContent>
@@ -303,7 +285,7 @@ const Dashboard = () => {
                   </Select>
                   
                   <Select value={areaFilter} onValueChange={setAreaFilter}>
-                    <SelectTrigger className="border-slate-200 focus:border-blue-500">
+                    <SelectTrigger className="border-slate-200 focus:border-blue-500 w-full">
                       <SelectValue placeholder="Filter Area" />
                     </SelectTrigger>
                     <SelectContent>
@@ -317,7 +299,7 @@ const Dashboard = () => {
                   </Select>
                   
                   <Select value={lokasiKerjaFilter} onValueChange={setLokasiKerjaFilter}>
-                    <SelectTrigger className="border-slate-200 focus:border-blue-500">
+                    <SelectTrigger className="border-slate-200 focus:border-blue-500 w-full">
                       <SelectValue placeholder="Filter Lokasi Kerja" />
                     </SelectTrigger>
                     <SelectContent>
@@ -336,7 +318,7 @@ const Dashboard = () => {
                         description: `Filter: Wilayah=${wilayahFilter}, Area=${areaFilter}, Lokasi=${lokasiKerjaFilter}`,
                       });
                     }}
-                    className="gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                    className="gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 w-full"
                   >
                     <Filter className="h-4 w-4" />
                     Terapkan Filter
@@ -346,10 +328,10 @@ const Dashboard = () => {
             </Card>
           )}
 
-          {/* Stats Cards - Lebih rapi dengan spacing konsisten */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {/* Stats Cards */}
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4 w-full">
             {dashboardCards.map((card, index) => (
-              <Card key={index} className="shadow-md border-slate-200/60 bg-white/95 backdrop-blur-sm hover:shadow-lg transition-all duration-300 cursor-pointer group"
+              <Card key={index} className="shadow-md border-slate-200/60 bg-white/95 backdrop-blur-sm hover:shadow-lg transition-all duration-300 cursor-pointer group w-full"
                 onClick={() => {
                   toast({
                     title: card.title,
@@ -358,14 +340,14 @@ const Dashboard = () => {
                 }}
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                  <CardTitle className="text-sm font-medium text-slate-600">{card.title}</CardTitle>
-                  <div className={`p-3 rounded-xl ${card.color} group-hover:scale-110 transition-transform`}>
+                  <CardTitle className="text-sm font-medium text-slate-600 truncate">{card.title}</CardTitle>
+                  <div className={`p-3 rounded-xl ${card.color} group-hover:scale-110 transition-transform flex-shrink-0`}>
                     <card.icon className="h-5 w-5" />
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-slate-900 mb-1">{card.value}</div>
-                  <p className="text-sm text-slate-500">{card.description}</p>
+                  <p className="text-sm text-slate-500 truncate">{card.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -373,18 +355,18 @@ const Dashboard = () => {
 
           {/* Courier Activity Section - Untuk admin, master-admin, dan pic */}
           {(user.role === 'admin' || user.role === 'master-admin' || user.role === 'pic') && (
-            <div className="space-y-6">
+            <div className="space-y-6 w-full">
               <CourierAttendanceActivity />
               <CourierWorkSummary />
               <CourierPerformanceCharts />
             </div>
           )}
 
-          {/* Download & Action Section - Layout yang lebih rapi */}
+          {/* Download & Action Section */}
           {user.role !== 'pic' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Download Section - Lebih kompak */}
-              <Card className="lg:col-span-2 shadow-md border-slate-200/60 bg-white/95 backdrop-blur-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
+              {/* Download Section */}
+              <Card className="lg:col-span-2 shadow-md border-slate-200/60 bg-white/95 backdrop-blur-sm w-full">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3 text-lg text-slate-800">
                     <div className="p-2 bg-green-50 rounded-lg">
@@ -399,8 +381,8 @@ const Dashboard = () => {
                 <CardContent className="space-y-4">
                   {/* Main Download Button */}
                   <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200/50">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
+                      <div className="w-full sm:w-auto">
                         <h3 className="font-semibold text-slate-800 mb-1">Download Komprehensif</h3>
                         <p className="text-sm text-slate-600 mb-2">
                           Paket lengkap: Absensi, Kinerja, Pengiriman, Foto, Resi
@@ -431,7 +413,7 @@ const Dashboard = () => {
                     </Button>
                   </div>
 
-                  {/* Individual Downloads - Grid yang lebih rapi */}
+                  {/* Individual Downloads */}
                   <div className="grid grid-cols-2 gap-2">
                     <Button 
                       variant="outline" 
@@ -439,7 +421,7 @@ const Dashboard = () => {
                       className="gap-2 justify-start text-xs border-blue-200 text-blue-700 hover:bg-blue-50"
                     >
                       <ClipboardList className="h-3 w-3" />
-                      Absen
+                      <span className="truncate">Absen</span>
                     </Button>
                     <Button 
                       variant="outline" 
@@ -447,7 +429,7 @@ const Dashboard = () => {
                       className="gap-2 justify-start text-xs border-purple-200 text-purple-700 hover:bg-purple-50"
                     >
                       <BarChart3 className="h-3 w-3" />
-                      Kinerja
+                      <span className="truncate">Kinerja</span>
                     </Button>
                     <Button 
                       variant="outline" 
@@ -455,7 +437,7 @@ const Dashboard = () => {
                       className="gap-2 justify-start text-xs border-green-200 text-green-700 hover:bg-green-50"
                     >
                       <Package className="h-3 w-3" />
-                      Pengiriman
+                      <span className="truncate">Pengiriman</span>
                     </Button>
                     <Button 
                       variant="outline" 
@@ -463,16 +445,16 @@ const Dashboard = () => {
                       className="gap-2 justify-start text-xs border-orange-200 text-orange-700 hover:bg-orange-50"
                     >
                       <FileText className="h-3 w-3" />
-                      Ringkasan
+                      <span className="truncate">Ringkasan</span>
                     </Button>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Quick Actions & Templates - Layout vertikal */}
-              <div className="space-y-4">
+              {/* Quick Actions & Templates */}
+              <div className="space-y-4 w-full">
                 {/* Template Download */}
-                <Card className="shadow-md border-slate-200/60 bg-white/95 backdrop-blur-sm">
+                <Card className="shadow-md border-slate-200/60 bg-white/95 backdrop-blur-sm w-full">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base text-slate-800">
                       <div className="p-1 bg-yellow-50 rounded-lg">
@@ -495,7 +477,7 @@ const Dashboard = () => {
                 </Card>
 
                 {/* Quick Actions */}
-                <Card className="shadow-md border-slate-200/60 bg-white/95 backdrop-blur-sm">
+                <Card className="shadow-md border-slate-200/60 bg-white/95 backdrop-blur-sm w-full">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base text-slate-800">Aksi Cepat</CardTitle>
                   </CardHeader>
@@ -515,8 +497,8 @@ const Dashboard = () => {
                           }}
                           className={`flex flex-col gap-1 h-16 border text-xs ${action.color} transition-all duration-200 hover:shadow-md`}
                         >
-                          <action.icon className="h-4 w-4" />
-                          <span className="text-center font-medium leading-tight">{action.label}</span>
+                          <action.icon className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-center font-medium leading-tight truncate w-full">{action.label}</span>
                         </Button>
                       ))}
                     </div>
@@ -526,9 +508,9 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Excel Import Section untuk Master Admin - Lebih kompak */}
+          {/* Excel Import Section untuk Master Admin */}
           {user.role === 'master-admin' && (
-            <Card className="shadow-md border-slate-200/60 bg-white/95 backdrop-blur-sm">
+            <Card className="shadow-md border-slate-200/60 bg-white/95 backdrop-blur-sm w-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-lg text-slate-800">
                   <div className="p-2 bg-purple-50 rounded-lg">
@@ -554,7 +536,7 @@ const Dashboard = () => {
                   <Button 
                     onClick={() => setShowExcelImport(true)} 
                     size="lg"
-                    className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-md"
+                    className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-md w-full sm:w-auto"
                   >
                     <FileText className="h-5 w-5" />
                     Buka Import Manager
