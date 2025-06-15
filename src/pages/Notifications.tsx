@@ -1,53 +1,205 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Check, X, Clock, User, Package } from 'lucide-react';
+import { Bell, Check, X, Clock, User, Package, Shield, Users, AlertCircle } from 'lucide-react';
 import Layout from '@/components/Layout';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
+import { useApprovals } from '@/hooks/useApprovals';
 
 const Notifications = () => {
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'task',
-      title: 'Tugas Pengiriman Baru',
-      message: '5 paket baru telah ditambahkan ke daftar pengiriman Anda',
-      timestamp: '5 menit yang lalu',
-      read: false,
-      icon: Package
-    },
-    {
-      id: 2,
-      type: 'approval',
-      title: 'Permintaan Disetujui',
-      message: 'Permintaan perubahan area kerja telah disetujui',
-      timestamp: '1 jam yang lalu',
-      read: false,
-      icon: Check
-    },
-    {
-      id: 3,
-      type: 'system',
-      title: 'Update Sistem',
-      message: 'Aplikasi telah diperbarui ke versi 1.0.1',
-      timestamp: '2 jam yang lalu',
-      read: true,
-      icon: Bell
-    },
-    {
-      id: 4,
-      type: 'reminder',
-      title: 'Reminder Check-out',
-      message: 'Jangan lupa untuk check-out sebelum jam 17:00',
-      timestamp: '3 jam yang lalu',
-      read: true,
-      icon: Clock
+  const [user, setUser] = useState<any>(null);
+  const { allRequests, loading } = useApprovals();
+  
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
     }
-  ]);
+  }, []);
 
-  const handleMarkAsRead = (id: number) => {
+  const getNotificationsForRole = (userRole: string) => {
+    const baseNotifications = [
+      {
+        id: 'system-1',
+        type: 'system',
+        title: 'Update Sistem',
+        message: 'Aplikasi telah diperbarui ke versi 1.0.1',
+        timestamp: '2 jam yang lalu',
+        read: true,
+        icon: Bell
+      }
+    ];
+
+    switch (userRole) {
+      case 'master-admin':
+        return [
+          {
+            id: 'approval-1',
+            type: 'approval',
+            title: 'Permintaan Approval Baru',
+            message: '3 permintaan menunggu persetujuan Anda',
+            timestamp: '30 menit yang lalu',
+            read: false,
+            icon: AlertCircle
+          },
+          {
+            id: 'admin-1',
+            type: 'admin',
+            title: 'Admin Baru Ditambahkan',
+            message: 'Admin baru telah berhasil ditambahkan ke sistem',
+            timestamp: '1 jam yang lalu',
+            read: false,
+            icon: Shield
+          },
+          ...baseNotifications
+        ];
+
+      case 'admin':
+        return [
+          {
+            id: 'kurir-1',
+            type: 'task',
+            title: 'Request Kurir Baru',
+            message: 'Permintaan penambahan kurir telah dikirim untuk approval',
+            timestamp: '45 menit yang lalu',
+            read: false,
+            icon: User
+          },
+          {
+            id: 'approval-2',
+            type: 'approval',
+            title: 'Request Disetujui',
+            message: 'Permintaan edit data kurir telah disetujui',
+            timestamp: '1 jam yang lalu',
+            read: false,
+            icon: Check
+          },
+          ...baseNotifications
+        ];
+
+      case 'pic':
+        // Generate notifications from approval requests for PIC
+        const picNotifications = allRequests
+          .filter(request => 
+            request.request_type.includes('kurir') || 
+            request.request_type === 'create_admin' ||
+            request.request_type === 'edit_admin' ||
+            request.request_type === 'toggle_status' ||
+            request.request_type === 'delete_admin'
+          )
+          .slice(0, 5) // Limit to recent 5
+          .map(request => {
+            const isApproved = request.status === 'approved';
+            const isRejected = request.status === 'rejected';
+            const isPending = request.status === 'pending';
+            
+            let title = '';
+            let message = '';
+            let icon = Users;
+            
+            if (request.request_type.includes('kurir')) {
+              icon = User;
+              if (request.request_type === 'import_kurir_data') {
+                title = isPending ? 'Import Data Kurir Pending' : 
+                       isApproved ? 'Import Data Kurir Disetujui' : 'Import Data Kurir Ditolak';
+                message = `Admin ${request.requester_name} ${isPending ? 'mengajukan' : isApproved ? 'berhasil import' : 'gagal import'} ${request.request_data?.totalRecords || 0} data kurir`;
+              } else {
+                const actionMap: Record<string, string> = {
+                  'create_kurir': 'penambahan kurir baru',
+                  'edit_kurir': 'edit data kurir',
+                  'toggle_kurir_status': 'perubahan status kurir',
+                  'delete_kurir': 'penghapusan kurir'
+                };
+                const action = actionMap[request.request_type] || 'perubahan data kurir';
+                title = isPending ? 'Request Kurir Pending' : 
+                       isApproved ? 'Request Kurir Disetujui' : 'Request Kurir Ditolak';
+                message = `Admin ${request.requester_name} ${isPending ? 'mengajukan' : isApproved ? 'berhasil melakukan' : 'gagal melakukan'} ${action}`;
+              }
+            } else {
+              icon = Shield;
+              const actionMap: Record<string, string> = {
+                'create_admin': 'penambahan admin baru',
+                'edit_admin': 'edit data admin',
+                'toggle_status': 'perubahan status admin',
+                'delete_admin': 'penghapusan admin'
+              };
+              const action = actionMap[request.request_type] || 'perubahan data admin';
+              title = isPending ? 'Request Admin Pending' : 
+                     isApproved ? 'Request Admin Disetujui' : 'Request Admin Ditolak';
+              message = `Admin ${request.requester_name} ${isPending ? 'mengajukan' : isApproved ? 'berhasil melakukan' : 'gagal melakukan'} ${action}`;
+            }
+            
+            return {
+              id: request.id,
+              type: isPending ? 'pending' : isApproved ? 'approval' : 'rejected',
+              title,
+              message,
+              timestamp: new Date(request.created_at).toLocaleString('id-ID', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              }),
+              read: false,
+              icon
+            };
+          });
+
+        return [
+          ...picNotifications,
+          {
+            id: 'reminder-1',
+            type: 'reminder',
+            title: 'Reminder Monitoring Kurir',
+            message: 'Periksa aktivitas kurir di area Anda hari ini',
+            timestamp: '3 jam yang lalu',
+            read: true,
+            icon: Clock
+          },
+          ...baseNotifications
+        ];
+
+      case 'kurir':
+        return [
+          {
+            id: 'task-1',
+            type: 'task',
+            title: 'Tugas Pengiriman Baru',
+            message: '5 paket baru telah ditambahkan ke daftar pengiriman Anda',
+            timestamp: '5 menit yang lalu',
+            read: false,
+            icon: Package
+          },
+          {
+            id: 'reminder-2',
+            type: 'reminder',
+            title: 'Reminder Check-out',
+            message: 'Jangan lupa untuk check-out sebelum jam 17:00',
+            timestamp: '3 jam yang lalu',
+            read: true,
+            icon: Clock
+          },
+          ...baseNotifications
+        ];
+
+      default:
+        return baseNotifications;
+    }
+  };
+
+  const [notifications, setNotifications] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      const roleNotifications = getNotificationsForRole(user.role);
+      setNotifications(roleNotifications);
+    }
+  }, [user, allRequests]);
+
+  const handleMarkAsRead = (id: string) => {
     setNotifications(prev =>
       prev.map(notif =>
         notif.id === id ? { ...notif, read: true } : notif
@@ -69,7 +221,7 @@ const Notifications = () => {
     });
   };
 
-  const handleDeleteNotification = (id: number) => {
+  const handleDeleteNotification = (id: string) => {
     setNotifications(prev => prev.filter(notif => notif.id !== id));
     toast({
       title: "Notifikasi Dihapus",
@@ -85,9 +237,26 @@ const Notifications = () => {
       case 'approval': return 'bg-green-100 text-green-600';
       case 'system': return 'bg-purple-100 text-purple-600';
       case 'reminder': return 'bg-yellow-100 text-yellow-600';
+      case 'pending': return 'bg-orange-100 text-orange-600';
+      case 'rejected': return 'bg-red-100 text-red-600';
+      case 'admin': return 'bg-indigo-100 text-indigo-600';
       default: return 'bg-gray-100 text-gray-600';
     }
   };
+
+  const getNotificationStats = () => {
+    const taskCount = notifications.filter(n => n.type === 'task').length;
+    const systemCount = notifications.filter(n => n.type === 'system').length;
+    const approvalCount = notifications.filter(n => ['approval', 'pending', 'rejected'].includes(n.type)).length;
+    
+    return { taskCount, systemCount, approvalCount };
+  };
+
+  const { taskCount, systemCount, approvalCount } = getNotificationStats();
+
+  if (!user) {
+    return <Layout><div>Loading...</div></Layout>;
+  }
 
   return (
     <Layout>
@@ -98,6 +267,9 @@ const Notifications = () => {
             <p className="text-gray-600">
               {unreadCount > 0 ? `${unreadCount} notifikasi belum dibaca` : 'Semua notifikasi sudah dibaca'}
             </p>
+            <Badge variant="outline" className="mt-2 px-3 py-1 text-sm font-medium capitalize">
+              {user.role.replace('-', ' ').toUpperCase()}
+            </Badge>
           </div>
           
           {unreadCount > 0 && (
@@ -133,14 +305,23 @@ const Notifications = () => {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tugas</CardTitle>
-              <Package className="h-4 w-4 text-green-600" />
+              <CardTitle className="text-sm font-medium">
+                {user.role === 'pic' ? 'Approval' : user.role === 'kurir' ? 'Tugas' : 'Approval'}
+              </CardTitle>
+              {user.role === 'pic' ? 
+                <AlertCircle className="h-4 w-4 text-orange-600" /> :
+                user.role === 'kurir' ? 
+                <Package className="h-4 w-4 text-green-600" /> :
+                <Shield className="h-4 w-4 text-green-600" />
+              }
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {notifications.filter(n => n.type === 'task').length}
+                {user.role === 'pic' ? approvalCount : user.role === 'kurir' ? taskCount : approvalCount}
               </div>
-              <p className="text-xs text-muted-foreground">Notifikasi tugas</p>
+              <p className="text-xs text-muted-foreground">
+                {user.role === 'pic' ? 'Monitor approval' : user.role === 'kurir' ? 'Notifikasi tugas' : 'Persetujuan'}
+              </p>
             </CardContent>
           </Card>
           
@@ -150,9 +331,7 @@ const Notifications = () => {
               <Bell className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {notifications.filter(n => n.type === 'system').length}
-              </div>
+              <div className="text-2xl font-bold">{systemCount}</div>
               <p className="text-xs text-muted-foreground">Update sistem</p>
             </CardContent>
           </Card>
@@ -163,14 +342,26 @@ const Notifications = () => {
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
               Daftar Notifikasi
+              {user.role === 'pic' && (
+                <Badge variant="secondary" className="ml-2">Monitoring Mode</Badge>
+              )}
             </CardTitle>
             <CardDescription>
-              Semua notifikasi terbaru untuk Anda
+              {user.role === 'pic' 
+                ? 'Monitor aktivitas approval request terkait kurir dan admin'
+                : 'Semua notifikasi terbaru untuk Anda'
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {notifications.map((notification) => {
+              {loading && (
+                <div className="text-center py-4">
+                  <p className="text-gray-500">Memuat notifikasi...</p>
+                </div>
+              )}
+              
+              {!loading && notifications.map((notification) => {
                 const IconComponent = notification.icon;
                 return (
                   <div key={notification.id} className={`flex items-center justify-between p-4 border rounded-lg ${
@@ -187,6 +378,12 @@ const Notifications = () => {
                           <p className="font-medium">{notification.title}</p>
                           {!notification.read && (
                             <Badge variant="destructive" className="text-xs">Baru</Badge>
+                          )}
+                          {notification.type === 'pending' && (
+                            <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">Pending</Badge>
+                          )}
+                          {notification.type === 'rejected' && (
+                            <Badge variant="outline" className="text-xs text-red-600 border-red-200">Ditolak</Badge>
                           )}
                         </div>
                         <p className="text-sm text-gray-600">{notification.message}</p>
@@ -216,7 +413,7 @@ const Notifications = () => {
                 );
               })}
               
-              {notifications.length === 0 && (
+              {!loading && notifications.length === 0 && (
                 <div className="text-center py-8">
                   <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-500">Tidak ada notifikasi</p>
