@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -359,8 +358,8 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {/* Courier Activity Section - Only for admin and master-admin */}
-          {(user.role === 'admin' || user.role === 'master-admin') && (
+          {/* Courier Activity Section - Now includes PIC role */}
+          {(user.role === 'admin' || user.role === 'master-admin' || user.role === 'pic') && (
             <div className="space-y-6">
               <CourierAttendanceActivity />
               <CourierWorkSummary />
@@ -368,156 +367,158 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Enhanced Download & Action Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Comprehensive Download Section */}
-            <Card className="lg:col-span-2 shadow-md border-slate-200/60 bg-white/90 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-xl text-slate-800">
-                  <div className="p-2 bg-green-50 rounded-lg">
-                    <FolderDown className="h-6 w-6 text-green-600" />
-                  </div>
-                  Download Laporan Lengkap
-                </CardTitle>
-                <CardDescription className="text-slate-600">
-                  Download laporan komprehensif dengan semua data yang diperlukan
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Main Download Button */}
-                <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200/50">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold text-lg text-slate-800 mb-2">Download Semua Laporan</h3>
-                      <p className="text-sm text-slate-600 mb-3">
-                        Unduh paket lengkap berisi: Absensi, Kinerja, Pengiriman, Foto Bukti, Resi Terkirim & Pending
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="secondary" className="text-xs">Laporan Absensi</Badge>
-                        <Badge variant="secondary" className="text-xs">Laporan Kinerja</Badge>
-                        <Badge variant="secondary" className="text-xs">Laporan Pengiriman</Badge>
-                        <Badge variant="secondary" className="text-xs">Foto Bukti</Badge>
-                        <Badge variant="secondary" className="text-xs">Resi Terkirim</Badge>
-                        <Badge variant="secondary" className="text-xs">Resi Pending</Badge>
-                      </div>
-                    </div>
-                    <Archive className="h-12 w-12 text-green-600 opacity-20" />
-                  </div>
-                  <Button 
-                    onClick={handleDownloadComprehensive}
-                    disabled={isDownloading}
-                    size="lg"
-                    className="w-full gap-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-md"
-                  >
-                    {isDownloading ? (
-                      <>
-                        <RefreshCw className="h-5 w-5 animate-spin" />
-                        Mengunduh...
-                      </>
-                    ) : (
-                      <>
-                        <FolderDown className="h-5 w-5" />
-                        Download Semua (6 File)
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                {/* Individual Downloads */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleDownloadReport('Laporan Absen')} 
-                    className="gap-2 justify-start border-blue-200 text-blue-700 hover:bg-blue-50"
-                  >
-                    <ClipboardList className="h-4 w-4" />
-                    Laporan Absen
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleDownloadReport('Laporan Kinerja')} 
-                    className="gap-2 justify-start border-purple-200 text-purple-700 hover:bg-purple-50"
-                  >
-                    <BarChart3 className="h-4 w-4" />
-                    Laporan Kinerja
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleDownloadReport('Laporan Pengiriman')} 
-                    className="gap-2 justify-start border-green-200 text-green-700 hover:bg-green-50"
-                  >
-                    <Package className="h-4 w-4" />
-                    Laporan Pengiriman
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleDownloadReport('Semua Laporan')} 
-                    className="gap-2 justify-start border-orange-200 text-orange-700 hover:bg-orange-50"
-                  >
-                    <FileText className="h-4 w-4" />
-                    Ringkasan Umum
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Template & Quick Actions */}
-            <div className="space-y-6">
-              {/* Template Download */}
-              <Card className="shadow-md border-slate-200/60 bg-white/90 backdrop-blur-sm">
+          {/* Enhanced Download & Action Section - Exclude for PIC */}
+          {user.role !== 'pic' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Comprehensive Download Section */}
+              <Card className="lg:col-span-2 shadow-md border-slate-200/60 bg-white/90 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-lg text-slate-800">
-                    <div className="p-2 bg-yellow-50 rounded-lg">
-                      <FileImage className="h-5 w-5 text-yellow-600" />
+                  <CardTitle className="flex items-center gap-3 text-xl text-slate-800">
+                    <div className="p-2 bg-green-50 rounded-lg">
+                      <FolderDown className="h-6 w-6 text-green-600" />
                     </div>
-                    Template Import
+                    Download Laporan Lengkap
                   </CardTitle>
-                  <CardDescription>Template untuk input data</CardDescription>
+                  <CardDescription className="text-slate-600">
+                    Download laporan komprehensif dengan semua data yang diperlukan
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <Button 
-                    onClick={handleDownloadTemplates}
-                    variant="outline"
-                    className="w-full gap-2 border-yellow-200 text-yellow-700 hover:bg-yellow-50"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download Template (4 File)
-                  </Button>
-                </CardContent>
-              </Card>
+                <CardContent className="space-y-6">
+                  {/* Main Download Button */}
+                  <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200/50">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="font-semibold text-lg text-slate-800 mb-2">Download Semua Laporan</h3>
+                        <p className="text-sm text-slate-600 mb-3">
+                          Unduh paket lengkap berisi: Absensi, Kinerja, Pengiriman, Foto Bukti, Resi Terkirim & Pending
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="secondary" className="text-xs">Laporan Absensi</Badge>
+                          <Badge variant="secondary" className="text-xs">Laporan Kinerja</Badge>
+                          <Badge variant="secondary" className="text-xs">Laporan Pengiriman</Badge>
+                          <Badge variant="secondary" className="text-xs">Foto Bukti</Badge>
+                          <Badge variant="secondary" className="text-xs">Resi Terkirim</Badge>
+                          <Badge variant="secondary" className="text-xs">Resi Pending</Badge>
+                        </div>
+                      </div>
+                      <Archive className="h-12 w-12 text-green-600 opacity-20" />
+                    </div>
+                    <Button 
+                      onClick={handleDownloadComprehensive}
+                      disabled={isDownloading}
+                      size="lg"
+                      className="w-full gap-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-md"
+                    >
+                      {isDownloading ? (
+                        <>
+                          <RefreshCw className="h-5 w-5 animate-spin" />
+                          Mengunduh...
+                        </>
+                      ) : (
+                        <>
+                          <FolderDown className="h-5 w-5" />
+                          Download Semua (6 File)
+                        </>
+                      )}
+                    </Button>
+                  </div>
 
-              {/* Quick Actions */}
-              <Card className="shadow-md border-slate-200/60 bg-white/90 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg text-slate-800">Aksi Cepat</CardTitle>
-                  <CardDescription>Fitur yang sering digunakan</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
-                    {quickActions.map((action, index) => (
-                      <Button 
-                        key={index}
-                        variant="outline" 
-                        onClick={() => {
-                          navigate(action.path);
-                          toast({
-                            title: "Navigasi",
-                            description: `Menuju ke ${action.label}`,
-                          });
-                        }}
-                        className={`flex flex-col gap-2 h-20 border ${action.color} transition-all duration-200 hover:shadow-md`}
-                      >
-                        <action.icon className="h-5 w-5" />
-                        <span className="text-xs text-center font-medium">{action.label}</span>
-                      </Button>
-                    ))}
+                  {/* Individual Downloads */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleDownloadReport('Laporan Absen')} 
+                      className="gap-2 justify-start border-blue-200 text-blue-700 hover:bg-blue-50"
+                    >
+                      <ClipboardList className="h-4 w-4" />
+                      Laporan Absen
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleDownloadReport('Laporan Kinerja')} 
+                      className="gap-2 justify-start border-purple-200 text-purple-700 hover:bg-purple-50"
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      Laporan Kinerja
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleDownloadReport('Laporan Pengiriman')} 
+                      className="gap-2 justify-start border-green-200 text-green-700 hover:bg-green-50"
+                    >
+                      <Package className="h-4 w-4" />
+                      Laporan Pengiriman
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleDownloadReport('Semua Laporan')} 
+                      className="gap-2 justify-start border-orange-200 text-orange-700 hover:bg-orange-50"
+                    >
+                      <FileText className="h-4 w-4" />
+                      Ringkasan Umum
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </div>
 
-          {/* Excel Import Section for Master Admin */}
+              {/* Template & Quick Actions */}
+              <div className="space-y-6">
+                {/* Template Download */}
+                <Card className="shadow-md border-slate-200/60 bg-white/90 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3 text-lg text-slate-800">
+                      <div className="p-2 bg-yellow-50 rounded-lg">
+                        <FileImage className="h-5 w-5 text-yellow-600" />
+                      </div>
+                      Template Import
+                    </CardTitle>
+                    <CardDescription>Template untuk input data</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      onClick={handleDownloadTemplates}
+                      variant="outline"
+                      className="w-full gap-2 border-yellow-200 text-yellow-700 hover:bg-yellow-50"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download Template (4 File)
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Quick Actions */}
+                <Card className="shadow-md border-slate-200/60 bg-white/90 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-slate-800">Aksi Cepat</CardTitle>
+                    <CardDescription>Fitur yang sering digunakan</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-3">
+                      {quickActions.map((action, index) => (
+                        <Button 
+                          key={index}
+                          variant="outline" 
+                          onClick={() => {
+                            navigate(action.path);
+                            toast({
+                              title: "Navigasi",
+                              description: `Menuju ke ${action.label}`,
+                            });
+                          }}
+                          className={`flex flex-col gap-2 h-20 border ${action.color} transition-all duration-200 hover:shadow-md`}
+                        >
+                          <action.icon className="h-5 w-5" />
+                          <span className="text-xs text-center font-medium">{action.label}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {/* Excel Import Section for Master Admin only */}
           {user.role === 'master-admin' && (
             <Card className="shadow-md border-slate-200/60 bg-white/90 backdrop-blur-sm">
               <CardHeader>
