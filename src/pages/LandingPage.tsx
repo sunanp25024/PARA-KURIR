@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -95,6 +94,11 @@ const LandingPage = () => {
     { number: "50+", label: "Kota Terjangkau", icon: Globe }
   ];
 
+  const handleDownloadAPK = () => {
+    // Redirect ke halaman mobile kurir untuk demo
+    navigate('/kurir-mobile');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
@@ -172,9 +176,10 @@ const LandingPage = () => {
               size="lg" 
               variant="outline" 
               className="text-lg px-10 py-4 border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 shadow-lg transform hover:scale-105 transition-all duration-200"
+              onClick={handleDownloadAPK}
             >
               <Download className="mr-2 h-5 w-5" />
-              Download APK Kurir
+              Coba APK Kurir
             </Button>
           </div>
         </div>
@@ -313,9 +318,10 @@ const LandingPage = () => {
               size="lg" 
               variant="secondary"
               className="text-lg px-10 py-4 bg-white/90 backdrop-blur-sm text-indigo-600 hover:bg-white shadow-xl transform hover:scale-105 transition-all duration-200 border border-white/30"
+              onClick={handleDownloadAPK}
             >
               <Download className="mr-2 h-5 w-5" />
-              Download APK Kurir
+              Coba APK Kurir
             </Button>
             <Button 
               size="lg" 
