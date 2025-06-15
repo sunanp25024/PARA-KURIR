@@ -1,56 +1,42 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/hooks/useAuth';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
-import ManageAdmin from "./pages/ManageAdmin";
-import ManagePIC from "./pages/ManagePIC";
-import ManageKurir from "./pages/ManageKurir";
-import Attendance from "./pages/Attendance";
-import Performance from "./pages/Performance";
-import Settings from "./pages/Settings";
-import Approval from "./pages/Approval";
-import Notifications from "./pages/Notifications";
-import Reports from "./pages/Reports";
-import ApprovalStatus from "./pages/ApprovalStatus";
-import SendNotification from "./pages/SendNotification";
-import NotFound from "./pages/NotFound";
+// Pages
+import Auth from '@/pages/Auth';
+import KurirMobile from '@/pages/KurirMobile';
+import Index from '@/pages/Index';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/manage-admin" element={<ManageAdmin />} />
-          <Route path="/manage-pic" element={<ManagePIC />} />
-          <Route path="/manage-kurir" element={<ManageKurir />} />
-          <Route path="/attendance" element={<Attendance />} />
-          <Route path="/performance" element={<Performance />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/approval" element={<Approval />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/approval-status" element={<ApprovalStatus />} />
-          <Route path="/send-notification" element={<SendNotification />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-background">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/kurir-mobile" element={<KurirMobile />} />
+              
+              {/* Redirect unknown routes to home */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+          <Toaster />
+        </Router>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

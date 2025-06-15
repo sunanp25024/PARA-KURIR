@@ -7,32 +7,33 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Package, AlertTriangle, CheckCircle, ArrowRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useWorkflow } from '@/contexts/WorkflowContext';
+import { useCourierWorkflow } from '@/hooks/useCourierWorkflow';
 
 interface DailyPackageInputProps {
   onStepComplete?: () => void;
 }
 
 const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete }) => {
-  const { setDailyPackages } = useWorkflow();
+  const { dailyPackages, createDailyPackages, loading } = useCourierWorkflow();
   const [totalPackages, setTotalPackages] = useState('');
   const [codPackages, setCodPackages] = useState('');
   const [nonCodPackages, setNonCodPackages] = useState('');
-  const [isDataSaved, setIsDataSaved] = useState(false);
+
+  const isDataSaved = dailyPackages.length > 0;
 
   useEffect(() => {
-    // Load existing data
-    const savedData = localStorage.getItem('dailyPackageData');
-    if (savedData) {
-      const data = JSON.parse(savedData);
-      setTotalPackages(data.totalPackages.toString());
-      setCodPackages(data.codPackages.toString());
-      setNonCodPackages(data.nonCodPackages.toString());
-      setIsDataSaved(true);
+    // Load existing data if available
+    if (dailyPackages.length > 0) {
+      const codCount = dailyPackages.filter(pkg => pkg.is_cod).length;
+      const nonCodCount = dailyPackages.length - codCount;
+      
+      setTotalPackages(dailyPackages.length.toString());
+      setCodPackages(codCount.toString());
+      setNonCodPackages(nonCodCount.toString());
     }
-  }, []);
+  }, [dailyPackages]);
 
-  const handleSaveData = () => {
+  const handleSaveData = async () => {
     const total = parseInt(totalPackages) || 0;
     const cod = parseInt(codPackages) || 0;
     const nonCod = parseInt(nonCodPackages) || 0;
@@ -55,33 +56,20 @@ const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete })
       return;
     }
 
-    const packageData = {
-      totalPackages: total,
-      codPackages: cod,
-      nonCodPackages: nonCod,
-      savedAt: new Date().toISOString()
-    };
-
-    localStorage.setItem('dailyPackageData', JSON.stringify(packageData));
+    const success = await createDailyPackages(total, cod);
     
-    // Generate daily packages for workflow context
-    const dailyPackages = Array.from({ length: total }, (_, i) => ({
-      id: `daily_${Date.now()}_${i}`,
-      trackingNumber: `PKG${String(i + 1).padStart(3, '0')}`,
-      isCOD: i < cod
-    }));
-    
-    setDailyPackages(dailyPackages);
-    
-    // Clear any existing scanned packages when new data is input
-    localStorage.removeItem('scannedPackages');
-    
-    setIsDataSaved(true);
-    
-    toast({
-      title: "Data Tersimpan",
-      description: `Total paket hari ini: ${total} (COD: ${cod}, Non COD: ${nonCod})`,
-    });
+    if (success) {
+      toast({
+        title: "Data Tersimpan",
+        description: `Total paket hari ini: ${total} (COD: ${cod}, Non COD: ${nonCod})`,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Gagal menyimpan data paket",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleProceedToScan = () => {
@@ -90,25 +78,9 @@ const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete })
       description: "Beralih ke tahap scan dan kelola paket",
     });
     
-    // Auto progress to next step
     setTimeout(() => {
       onStepComplete?.();
     }, 500);
-  };
-
-  const handleReset = () => {
-    setTotalPackages('');
-    setCodPackages('');
-    setNonCodPackages('');
-    setIsDataSaved(false);
-    setDailyPackages([]);
-    localStorage.removeItem('dailyPackageData');
-    localStorage.removeItem('scannedPackages');
-    
-    toast({
-      title: "Data Direset",
-      description: "Semua data paket harian telah dihapus",
-    });
   };
 
   const total = parseInt(totalPackages) || 0;
@@ -135,7 +107,7 @@ const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete })
               value={totalPackages}
               onChange={(e) => setTotalPackages(e.target.value)}
               placeholder="0"
-              disabled={isDataSaved}
+              disabled={isDataSaved || loading}
             />
           </div>
           <div>
@@ -146,7 +118,7 @@ const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete })
               value={codPackages}
               onChange={(e) => setCodPackages(e.target.value)}
               placeholder="0"
-              disabled={isDataSaved}
+              disabled={isDataSaved || loading}
             />
           </div>
           <div>
@@ -157,7 +129,7 @@ const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete })
               value={nonCodPackages}
               onChange={(e) => setNonCodPackages(e.target.value)}
               placeholder="0"
-              disabled={isDataSaved}
+              disabled={isDataSaved || loading}
             />
           </div>
         </div>
@@ -186,7 +158,9 @@ const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete })
           <Alert>
             <CheckCircle className="h-4 w-4" />
             <AlertDescription>
-              Data paket harian sudah tersimpan. Total: {total}, COD: {cod}, Non COD: {nonCod}
+              Data paket harian sudah tersimpan. Total: {dailyPackages.length}, 
+              COD: {dailyPackages.filter(pkg => pkg.is_cod).length}, 
+              Non COD: {dailyPackages.filter(pkg => !pkg.is_cod).length}
             </AlertDescription>
           </Alert>
         )}
@@ -195,28 +169,20 @@ const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete })
           {!isDataSaved ? (
             <Button 
               onClick={handleSaveData} 
-              disabled={!isValid}
+              disabled={!isValid || loading}
               className="flex-1"
             >
-              Simpan Data Paket
+              {loading ? 'Menyimpan...' : 'Simpan Data Paket'}
             </Button>
           ) : (
-            <div className="flex gap-2 w-full">
-              <Button 
-                onClick={handleProceedToScan} 
-                className="flex-1"
-              >
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Lanjut ke Scan Paket
-              </Button>
-              <Button 
-                onClick={handleReset} 
-                variant="outline"
-                size="sm"
-              >
-                Reset
-              </Button>
-            </div>
+            <Button 
+              onClick={handleProceedToScan} 
+              className="flex-1"
+              disabled={loading}
+            >
+              <ArrowRight className="h-4 w-4 mr-2" />
+              Lanjut ke Scan Paket
+            </Button>
           )}
         </div>
       </CardContent>
