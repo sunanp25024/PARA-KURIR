@@ -36,6 +36,7 @@ import ExcelImportManager from '@/components/ExcelImportManager';
 import { downloadFile } from '@/utils/downloadUtils';
 import AddKurirForm from '@/components/forms/AddKurirForm';
 import EditKurirForm from '@/components/forms/EditKurirForm';
+import { useApprovals } from '@/hooks/useApprovals';
 
 const ManageKurir = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,6 +46,17 @@ const ManageKurir = () => {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedKurir, setSelectedKurir] = useState<any>(null);
+  const { createApprovalRequest } = useApprovals();
+  
+  // Get user role from localStorage
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userRole = user.role || '';
+  const isMasterAdmin = userRole === 'master_admin';
+  const isAdmin = userRole === 'admin';
+  const isPIC = userRole === 'pic';
+  const canManage = isMasterAdmin || isAdmin;
+  const canView = isMasterAdmin || isAdmin || isPIC;
+
   const [kurirs, setKurirs] = useState([
     {
       id: 'PISTEST2025',
@@ -103,55 +115,116 @@ const ManageKurir = () => {
     }
   ]);
 
-  const handleAddKurir = (newKurir: any) => {
-    setKurirs([...kurirs, newKurir]);
-    setShowAddDialog(false);
-    toast({
-      title: "Kurir Ditambahkan",
-      description: `Kurir ${newKurir.name} berhasil ditambahkan`,
-    });
+  const handleAddKurir = async (newKurir: any) => {
+    if (isMasterAdmin) {
+      // Master Admin can add directly
+      setKurirs([...kurirs, newKurir]);
+      setShowAddDialog(false);
+      toast({
+        title: "Kurir Ditambahkan",
+        description: `Kurir ${newKurir.name} berhasil ditambahkan`,
+      });
+    } else if (isAdmin) {
+      // Admin needs approval
+      await createApprovalRequest(
+        user.id,
+        user.name,
+        'create_admin', // Using existing enum, ideally should be 'create_kurir'
+        newKurir,
+        undefined,
+        undefined
+      );
+      setShowAddDialog(false);
+    }
   };
 
   const handleEditKurir = (kurir: any) => {
+    if (!canManage) return;
     setSelectedKurir(kurir);
     setShowEditDialog(true);
   };
 
-  const handleUpdateKurir = (updatedKurir: any) => {
-    setKurirs(kurirs.map(k => k.id === updatedKurir.id ? updatedKurir : k));
-    setShowEditDialog(false);
-    setSelectedKurir(null);
-    toast({
-      title: "Kurir Diperbarui",
-      description: `Data kurir ${updatedKurir.name} berhasil diperbarui`,
-    });
+  const handleUpdateKurir = async (updatedKurir: any) => {
+    if (isMasterAdmin) {
+      // Master Admin can update directly
+      setKurirs(kurirs.map(k => k.id === updatedKurir.id ? updatedKurir : k));
+      setShowEditDialog(false);
+      setSelectedKurir(null);
+      toast({
+        title: "Kurir Diperbarui",
+        description: `Data kurir ${updatedKurir.name} berhasil diperbarui`,
+      });
+    } else if (isAdmin) {
+      // Admin needs approval
+      await createApprovalRequest(
+        user.id,
+        user.name,
+        'edit_admin', // Using existing enum, ideally should be 'edit_kurir'
+        updatedKurir,
+        selectedKurir.id,
+        selectedKurir
+      );
+      setShowEditDialog(false);
+      setSelectedKurir(null);
+    }
   };
 
-  const handleToggleStatus = (kurir: any) => {
+  const handleToggleStatus = async (kurir: any) => {
+    if (!canManage) return;
+    
     const newStatus = kurir.status === 'Aktif' ? 'Tidak Aktif' : 'Aktif';
     const updatedKurir = { ...kurir, status: newStatus };
-    setKurirs(kurirs.map(k => k.id === kurir.id ? updatedKurir : k));
     
-    toast({
-      title: "Status Kurir Diubah",
-      description: `Status kurir ${kurir.name} berhasil diubah menjadi ${newStatus}`,
-    });
+    if (isMasterAdmin) {
+      // Master Admin can toggle directly
+      setKurirs(kurirs.map(k => k.id === kurir.id ? updatedKurir : k));
+      toast({
+        title: "Status Kurir Diubah",
+        description: `Status kurir ${kurir.name} berhasil diubah menjadi ${newStatus}`,
+      });
+    } else if (isAdmin) {
+      // Admin needs approval
+      await createApprovalRequest(
+        user.id,
+        user.name,
+        'toggle_status',
+        { id: kurir.id, status: newStatus },
+        kurir.id,
+        kurir
+      );
+    }
   };
 
   const handleDeleteKurir = (kurir: any) => {
+    if (!canManage) return;
     setSelectedKurir(kurir);
     setShowDeleteDialog(true);
   };
 
-  const confirmDeleteKurir = () => {
-    setKurirs(kurirs.filter(k => k.id !== selectedKurir.id));
-    setShowDeleteDialog(false);
-    setSelectedKurir(null);
-    toast({
-      title: "Kurir Dihapus",
-      description: `Kurir ${selectedKurir.name} telah dihapus dari sistem`,
-      variant: "destructive"
-    });
+  const confirmDeleteKurir = async () => {
+    if (isMasterAdmin) {
+      // Master Admin can delete directly
+      setKurirs(kurirs.filter(k => k.id !== selectedKurir.id));
+      setShowDeleteDialog(false);
+      setSelectedKurir(null);
+      toast({
+        title: "Kurir Dihapus",
+        description: `Kurir ${selectedKurir.name} telah dihapus dari sistem`,
+        variant: "destructive"
+      });
+    } else if (isAdmin) {
+      // Admin needs approval
+      await createApprovalRequest(
+        user.id,
+        user.name,
+        'delete_admin', // Using existing enum, ideally should be 'delete_kurir'
+        { id: selectedKurir.id },
+        selectedKurir.id,
+        selectedKurir
+      );
+      setShowDeleteDialog(false);
+      setSelectedKurir(null);
+    }
   };
 
   const handleViewDetails = (kurir: any) => {
@@ -160,6 +233,8 @@ const ManageKurir = () => {
   };
 
   const handleDownloadTemplate = () => {
+    if (!canManage) return;
+    
     const templateData = `ID Kurir,Nama,Email,Telepon,Area,Lokasi Kerja,Status,Tanggal Bergabung
 KURIR004,Nama Kurir,email@example.com,081234567890,Jakarta Selatan,Kantor Pusat - Jl. Sudirman,Aktif,2024-12-15
 KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakung - Jl. Raya Cakung,Aktif,2024-12-15`;
@@ -180,6 +255,19 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
     kurir.workLocation.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // If user doesn't have view access, show access denied
+  if (!canView) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center min-h-[400px]">
+          <User className="h-16 w-16 text-gray-400 mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Akses Ditolak</h2>
+          <p className="text-gray-600">Anda tidak memiliki akses untuk melihat halaman ini.</p>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -187,25 +275,33 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Kelola Kurir</h1>
             <p className="text-gray-600">Manajemen kurir dan performa</p>
+            {isPIC && (
+              <p className="text-sm text-blue-600 mt-1">Anda memiliki akses read-only untuk data kurir</p>
+            )}
+            {!canManage && !isPIC && (
+              <p className="text-sm text-red-600 mt-1">Anda tidak memiliki akses untuk mengelola kurir</p>
+            )}
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2">
-              <Download className="h-4 w-4" />
-              Template Excel
-            </Button>
-            <Button variant="outline" onClick={() => setShowExcelImport(true)} className="gap-2">
-              <Upload className="h-4 w-4" />
-              Import Excel
-            </Button>
-            <Button onClick={() => setShowAddDialog(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Kurir
-            </Button>
-          </div>
+          {canManage && (
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2">
+                <Download className="h-4 w-4" />
+                Template Excel
+              </Button>
+              <Button variant="outline" onClick={() => setShowExcelImport(true)} className="gap-2">
+                <Upload className="h-4 w-4" />
+                Import Excel
+              </Button>
+              <Button onClick={() => setShowAddDialog(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                {isAdmin ? 'Request Tambah Kurir' : 'Tambah Kurir'}
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Excel Import Section */}
-        {showExcelImport && (
+        {/* Excel Import Section - Only for those who can manage */}
+        {showExcelImport && canManage && (
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -307,27 +403,31 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
                               <Eye className="mr-2 h-4 w-4" />
                               Lihat Detail
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditKurir(kurir)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleToggleStatus(kurir)}>
-                              {kurir.status === 'Aktif' ? (
-                                <>
-                                  <ToggleLeft className="mr-2 h-4 w-4" />
-                                  Nonaktifkan
-                                </>
-                              ) : (
-                                <>
-                                  <ToggleRight className="mr-2 h-4 w-4" />
-                                  Aktifkan
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeleteKurir(kurir)} className="text-red-600">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Hapus
-                            </DropdownMenuItem>
+                            {canManage && (
+                              <>
+                                <DropdownMenuItem onClick={() => handleEditKurir(kurir)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  {isAdmin ? 'Request Edit' : 'Edit'}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleToggleStatus(kurir)}>
+                                  {kurir.status === 'Aktif' ? (
+                                    <>
+                                      <ToggleLeft className="mr-2 h-4 w-4" />
+                                      {isAdmin ? 'Request Nonaktifkan' : 'Nonaktifkan'}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ToggleRight className="mr-2 h-4 w-4" />
+                                      {isAdmin ? 'Request Aktifkan' : 'Aktifkan'}
+                                    </>
+                                  )}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteKurir(kurir)} className="text-red-600">
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  {isAdmin ? 'Request Hapus' : 'Hapus'}
+                                </DropdownMenuItem>
+                              </>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -346,42 +446,52 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
           </CardContent>
         </Card>
 
-        {/* Add Kurir Dialog */}
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Tambah Kurir Baru</DialogTitle>
-              <DialogDescription>
-                Isi form di bawah untuk menambahkan kurir baru ke sistem
-              </DialogDescription>
-            </DialogHeader>
-            <AddKurirForm
-              onSubmit={handleAddKurir}
-              onCancel={() => setShowAddDialog(false)}
-            />
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit Kurir Dialog */}
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Edit Kurir</DialogTitle>
-              <DialogDescription>
-                Ubah data kurir di bawah ini
-              </DialogDescription>
-            </DialogHeader>
-            {selectedKurir && (
-              <EditKurirForm
-                kurir={selectedKurir}
-                onSubmit={handleUpdateKurir}
-                onCancel={() => setShowEditDialog(false)}
+        {/* Add Kurir Dialog - Only for those who can manage */}
+        {canManage && (
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>{isAdmin ? 'Request Tambah Kurir Baru' : 'Tambah Kurir Baru'}</DialogTitle>
+                <DialogDescription>
+                  {isAdmin 
+                    ? 'Request ini akan dikirim ke Master Admin untuk persetujuan'
+                    : 'Isi form di bawah untuk menambahkan kurir baru ke sistem'
+                  }
+                </DialogDescription>
+              </DialogHeader>
+              <AddKurirForm
+                onSubmit={handleAddKurir}
+                onCancel={() => setShowAddDialog(false)}
               />
-            )}
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
 
-        {/* Detail Dialog */}
+        {/* Edit Kurir Dialog - Only for those who can manage */}
+        {canManage && (
+          <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>{isAdmin ? 'Request Edit Kurir' : 'Edit Kurir'}</DialogTitle>
+                <DialogDescription>
+                  {isAdmin 
+                    ? 'Request perubahan ini akan dikirim ke Master Admin untuk persetujuan'
+                    : 'Ubah data kurir di bawah ini'
+                  }
+                </DialogDescription>
+              </DialogHeader>
+              {selectedKurir && (
+                <EditKurirForm
+                  kurir={selectedKurir}
+                  onSubmit={handleUpdateKurir}
+                  onCancel={() => setShowEditDialog(false)}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Detail Dialog - Available for all roles who can view */}
         <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
@@ -440,24 +550,30 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
           </DialogContent>
         </Dialog>
 
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Konfirmasi Hapus Kurir</AlertDialogTitle>
-              <AlertDialogDescription>
-                Apakah Anda yakin ingin menghapus kurir "{selectedKurir?.name}"? 
-                Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Batal</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDeleteKurir} className="bg-red-600 hover:bg-red-700">
-                Hapus
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {/* Delete Confirmation Dialog - Only for those who can manage */}
+        {canManage && (
+          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {isAdmin ? 'Request Hapus Kurir' : 'Konfirmasi Hapus Kurir'}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {isAdmin 
+                    ? `Request penghapusan kurir "${selectedKurir?.name}" akan dikirim ke Master Admin untuk persetujuan.`
+                    : `Apakah Anda yakin ingin menghapus kurir "${selectedKurir?.name}"? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.`
+                  }
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Batal</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmDeleteKurir} className="bg-red-600 hover:bg-red-700">
+                  {isAdmin ? 'Kirim Request' : 'Hapus'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
     </Layout>
   );

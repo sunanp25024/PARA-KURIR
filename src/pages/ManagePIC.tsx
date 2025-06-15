@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ import ExcelImportManager from '@/components/ExcelImportManager';
 import { downloadFile } from '@/utils/downloadUtils';
 import AddPICForm from '@/components/forms/AddPICForm';
 import EditPICForm from '@/components/forms/EditPICForm';
+import { useApprovals } from '@/hooks/useApprovals';
 
 const ManagePIC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,6 +46,15 @@ const ManagePIC = () => {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedPIC, setSelectedPIC] = useState<any>(null);
+  const { createApprovalRequest } = useApprovals();
+  
+  // Get user role from localStorage
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userRole = user.role || '';
+  const isMasterAdmin = userRole === 'master_admin';
+  const isAdmin = userRole === 'admin';
+  const canManage = isMasterAdmin || isAdmin;
+
   const [pics, setPics] = useState([
     {
       id: 'PIC001',
@@ -77,55 +88,116 @@ const ManagePIC = () => {
     }
   ]);
 
-  const handleAddPIC = (newPIC: any) => {
-    setPics([...pics, newPIC]);
-    setShowAddDialog(false);
-    toast({
-      title: "PIC Ditambahkan",
-      description: `PIC ${newPIC.name} berhasil ditambahkan`,
-    });
+  const handleAddPIC = async (newPIC: any) => {
+    if (isMasterAdmin) {
+      // Master Admin can add directly
+      setPics([...pics, newPIC]);
+      setShowAddDialog(false);
+      toast({
+        title: "PIC Ditambahkan",
+        description: `PIC ${newPIC.name} berhasil ditambahkan`,
+      });
+    } else if (isAdmin) {
+      // Admin needs approval
+      await createApprovalRequest(
+        user.id,
+        user.name,
+        'create_admin', // Using existing enum, ideally should be 'create_pic'
+        newPIC,
+        undefined,
+        undefined
+      );
+      setShowAddDialog(false);
+    }
   };
 
   const handleEditPIC = (pic: any) => {
+    if (!canManage) return;
     setSelectedPIC(pic);
     setShowEditDialog(true);
   };
 
-  const handleUpdatePIC = (updatedPIC: any) => {
-    setPics(pics.map(p => p.id === updatedPIC.id ? updatedPIC : p));
-    setShowEditDialog(false);
-    setSelectedPIC(null);
-    toast({
-      title: "PIC Diperbarui",
-      description: `Data PIC ${updatedPIC.name} berhasil diperbarui`,
-    });
+  const handleUpdatePIC = async (updatedPIC: any) => {
+    if (isMasterAdmin) {
+      // Master Admin can update directly
+      setPics(pics.map(p => p.id === updatedPIC.id ? updatedPIC : p));
+      setShowEditDialog(false);
+      setSelectedPIC(null);
+      toast({
+        title: "PIC Diperbarui",
+        description: `Data PIC ${updatedPIC.name} berhasil diperbarui`,
+      });
+    } else if (isAdmin) {
+      // Admin needs approval
+      await createApprovalRequest(
+        user.id,
+        user.name,
+        'edit_admin', // Using existing enum, ideally should be 'edit_pic'
+        updatedPIC,
+        selectedPIC.id,
+        selectedPIC
+      );
+      setShowEditDialog(false);
+      setSelectedPIC(null);
+    }
   };
 
-  const handleToggleStatus = (pic: any) => {
+  const handleToggleStatus = async (pic: any) => {
+    if (!canManage) return;
+    
     const newStatus = pic.status === 'Aktif' ? 'Tidak Aktif' : 'Aktif';
     const updatedPIC = { ...pic, status: newStatus };
-    setPics(pics.map(p => p.id === pic.id ? updatedPIC : p));
     
-    toast({
-      title: "Status PIC Diubah",
-      description: `Status PIC ${pic.name} berhasil diubah menjadi ${newStatus}`,
-    });
+    if (isMasterAdmin) {
+      // Master Admin can toggle directly
+      setPics(pics.map(p => p.id === pic.id ? updatedPIC : p));
+      toast({
+        title: "Status PIC Diubah",
+        description: `Status PIC ${pic.name} berhasil diubah menjadi ${newStatus}`,
+      });
+    } else if (isAdmin) {
+      // Admin needs approval
+      await createApprovalRequest(
+        user.id,
+        user.name,
+        'toggle_status',
+        { id: pic.id, status: newStatus },
+        pic.id,
+        pic
+      );
+    }
   };
 
   const handleDeletePIC = (pic: any) => {
+    if (!canManage) return;
     setSelectedPIC(pic);
     setShowDeleteDialog(true);
   };
 
-  const confirmDeletePIC = () => {
-    setPics(pics.filter(p => p.id !== selectedPIC.id));
-    setShowDeleteDialog(false);
-    setSelectedPIC(null);
-    toast({
-      title: "PIC Dihapus",
-      description: `PIC ${selectedPIC.name} telah dihapus dari sistem`,
-      variant: "destructive"
-    });
+  const confirmDeletePIC = async () => {
+    if (isMasterAdmin) {
+      // Master Admin can delete directly
+      setPics(pics.filter(p => p.id !== selectedPIC.id));
+      setShowDeleteDialog(false);
+      setSelectedPIC(null);
+      toast({
+        title: "PIC Dihapus",
+        description: `PIC ${selectedPIC.name} telah dihapus dari sistem`,
+        variant: "destructive"
+      });
+    } else if (isAdmin) {
+      // Admin needs approval
+      await createApprovalRequest(
+        user.id,
+        user.name,
+        'delete_admin', // Using existing enum, ideally should be 'delete_pic'
+        { id: selectedPIC.id },
+        selectedPIC.id,
+        selectedPIC
+      );
+      setShowDeleteDialog(false);
+      setSelectedPIC(null);
+    }
   };
 
   const handleViewDetails = (pic: any) => {
@@ -134,6 +206,8 @@ const ManagePIC = () => {
   };
 
   const handleDownloadTemplate = () => {
+    if (!canManage) return;
+    
     const templateData = `ID PIC,Nama,Email,Telepon,Departemen,Lokasi Kerja,Status,Tanggal Bergabung
 PIC004,Nama PIC,email@example.com,081234567890,Customer Service,Kantor Pusat - Jl. Sudirman,Aktif,2024-12-15
 PIC005,Nama PIC 2,email2@example.com,081234567891,Operasional,Cabang Jakarta Timur,Aktif,2024-12-15`;
@@ -161,25 +235,30 @@ PIC005,Nama PIC 2,email2@example.com,081234567891,Operasional,Cabang Jakarta Tim
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Kelola PIC</h1>
             <p className="text-gray-600">Manajemen Person In Charge (PIC)</p>
+            {!canManage && (
+              <p className="text-sm text-red-600 mt-1">Anda hanya memiliki akses read-only</p>
+            )}
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2">
-              <Download className="h-4 w-4" />
-              Template Excel
-            </Button>
-            <Button variant="outline" onClick={() => setShowExcelImport(true)} className="gap-2">
-              <Upload className="h-4 w-4" />
-              Import Excel
-            </Button>
-            <Button onClick={() => setShowAddDialog(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah PIC
-            </Button>
-          </div>
+          {canManage && (
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2">
+                <Download className="h-4 w-4" />
+                Template Excel
+              </Button>
+              <Button variant="outline" onClick={() => setShowExcelImport(true)} className="gap-2">
+                <Upload className="h-4 w-4" />
+                Import Excel
+              </Button>
+              <Button onClick={() => setShowAddDialog(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                {isAdmin ? 'Request Tambah PIC' : 'Tambah PIC'}
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Excel Import Section */}
-        {showExcelImport && (
+        {/* Excel Import Section - Only for those who can manage */}
+        {showExcelImport && canManage && (
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -227,7 +306,7 @@ PIC005,Nama PIC 2,email2@example.com,081234567891,Operasional,Cabang Jakarta Tim
                     <TableHead>Lokasi Kerja</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Bergabung</TableHead>
-                    <TableHead className="w-[50px]">Aksi</TableHead>
+                    {canManage && <TableHead className="w-[50px]">Aksi</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -265,42 +344,44 @@ PIC005,Nama PIC 2,email2@example.com,081234567891,Operasional,Cabang Jakarta Tim
                       <TableCell>
                         <span className="text-sm text-gray-500">{pic.joinDate}</span>
                       </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-white border shadow-lg">
-                            <DropdownMenuItem onClick={() => handleViewDetails(pic)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Lihat Detail
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditPIC(pic)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleToggleStatus(pic)}>
-                              {pic.status === 'Aktif' ? (
-                                <>
-                                  <ToggleLeft className="mr-2 h-4 w-4" />
-                                  Nonaktifkan
-                                </>
-                              ) : (
-                                <>
-                                  <ToggleRight className="mr-2 h-4 w-4" />
-                                  Aktifkan
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeletePIC(pic)} className="text-red-600">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Hapus
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+                      {canManage && (
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-white border shadow-lg">
+                              <DropdownMenuItem onClick={() => handleViewDetails(pic)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Lihat Detail
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEditPIC(pic)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                {isAdmin ? 'Request Edit' : 'Edit'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleToggleStatus(pic)}>
+                                {pic.status === 'Aktif' ? (
+                                  <>
+                                    <ToggleLeft className="mr-2 h-4 w-4" />
+                                    {isAdmin ? 'Request Nonaktifkan' : 'Nonaktifkan'}
+                                  </>
+                                ) : (
+                                  <>
+                                    <ToggleRight className="mr-2 h-4 w-4" />
+                                    {isAdmin ? 'Request Aktifkan' : 'Aktifkan'}
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDeletePIC(pic)} className="text-red-600">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                {isAdmin ? 'Request Hapus' : 'Hapus'}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -316,42 +397,52 @@ PIC005,Nama PIC 2,email2@example.com,081234567891,Operasional,Cabang Jakarta Tim
           </CardContent>
         </Card>
 
-        {/* Add PIC Dialog */}
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Tambah PIC Baru</DialogTitle>
-              <DialogDescription>
-                Isi form di bawah untuk menambahkan PIC baru ke sistem
-              </DialogDescription>
-            </DialogHeader>
-            <AddPICForm
-              onSubmit={handleAddPIC}
-              onCancel={() => setShowAddDialog(false)}
-            />
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit PIC Dialog */}
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Edit PIC</DialogTitle>
-              <DialogDescription>
-                Ubah data PIC di bawah ini
-              </DialogDescription>
-            </DialogHeader>
-            {selectedPIC && (
-              <EditPICForm
-                pic={selectedPIC}
-                onSubmit={handleUpdatePIC}
-                onCancel={() => setShowEditDialog(false)}
+        {/* Add PIC Dialog - Only for those who can manage */}
+        {canManage && (
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>{isAdmin ? 'Request Tambah PIC Baru' : 'Tambah PIC Baru'}</DialogTitle>
+                <DialogDescription>
+                  {isAdmin 
+                    ? 'Request ini akan dikirim ke Master Admin untuk persetujuan'
+                    : 'Isi form di bawah untuk menambahkan PIC baru ke sistem'
+                  }
+                </DialogDescription>
+              </DialogHeader>
+              <AddPICForm
+                onSubmit={handleAddPIC}
+                onCancel={() => setShowAddDialog(false)}
               />
-            )}
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
 
-        {/* Detail Dialog */}
+        {/* Edit PIC Dialog - Only for those who can manage */}
+        {canManage && (
+          <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>{isAdmin ? 'Request Edit PIC' : 'Edit PIC'}</DialogTitle>
+                <DialogDescription>
+                  {isAdmin 
+                    ? 'Request perubahan ini akan dikirim ke Master Admin untuk persetujuan'
+                    : 'Ubah data PIC di bawah ini'
+                  }
+                </DialogDescription>
+              </DialogHeader>
+              {selectedPIC && (
+                <EditPICForm
+                  pic={selectedPIC}
+                  onSubmit={handleUpdatePIC}
+                  onCancel={() => setShowEditDialog(false)}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Detail Dialog - Available for all roles */}
         <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
@@ -406,24 +497,30 @@ PIC005,Nama PIC 2,email2@example.com,081234567891,Operasional,Cabang Jakarta Tim
           </DialogContent>
         </Dialog>
 
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Konfirmasi Hapus PIC</AlertDialogTitle>
-              <AlertDialogDescription>
-                Apakah Anda yakin ingin menghapus PIC "{selectedPIC?.name}"? 
-                Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Batal</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDeletePIC} className="bg-red-600 hover:bg-red-700">
-                Hapus
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {/* Delete Confirmation Dialog - Only for those who can manage */}
+        {canManage && (
+          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {isAdmin ? 'Request Hapus PIC' : 'Konfirmasi Hapus PIC'}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {isAdmin 
+                    ? `Request penghapusan PIC "${selectedPIC?.name}" akan dikirim ke Master Admin untuk persetujuan.`
+                    : `Apakah Anda yakin ingin menghapus PIC "${selectedPIC?.name}"? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.`
+                  }
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Batal</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmDeletePIC} className="bg-red-600 hover:bg-red-700">
+                  {isAdmin ? 'Kirim Request' : 'Hapus'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
     </Layout>
   );
