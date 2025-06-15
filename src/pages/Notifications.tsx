@@ -80,7 +80,7 @@ const Notifications = () => {
         ];
 
       case 'pic':
-        // Generate notifications from approval requests for PIC
+        // Generate notifications from approval requests for PIC - MONITORING ONLY
         const picNotifications = allRequests
           .filter(request => 
             request.request_type.includes('kurir') || 
@@ -102,8 +102,8 @@ const Notifications = () => {
             if (request.request_type.includes('kurir')) {
               icon = User;
               if (request.request_type === 'import_kurir_data') {
-                title = isPending ? 'Import Data Kurir Pending' : 
-                       isApproved ? 'Import Data Kurir Disetujui' : 'Import Data Kurir Ditolak';
+                title = isPending ? 'Monitoring: Import Data Kurir Pending' : 
+                       isApproved ? 'Monitoring: Import Data Kurir Disetujui' : 'Monitoring: Import Data Kurir Ditolak';
                 message = `Admin ${request.requester_name} ${isPending ? 'mengajukan' : isApproved ? 'berhasil import' : 'gagal import'} ${request.request_data?.totalRecords || 0} data kurir`;
               } else {
                 const actionMap: Record<string, string> = {
@@ -113,8 +113,8 @@ const Notifications = () => {
                   'delete_kurir': 'penghapusan kurir'
                 };
                 const action = actionMap[request.request_type] || 'perubahan data kurir';
-                title = isPending ? 'Request Kurir Pending' : 
-                       isApproved ? 'Request Kurir Disetujui' : 'Request Kurir Ditolak';
+                title = isPending ? 'Monitoring: Request Kurir Pending' : 
+                       isApproved ? 'Monitoring: Request Kurir Disetujui' : 'Monitoring: Request Kurir Ditolak';
                 message = `Admin ${request.requester_name} ${isPending ? 'mengajukan' : isApproved ? 'berhasil melakukan' : 'gagal melakukan'} ${action}`;
               }
             } else {
@@ -126,14 +126,14 @@ const Notifications = () => {
                 'delete_admin': 'penghapusan admin'
               };
               const action = actionMap[request.request_type] || 'perubahan data admin';
-              title = isPending ? 'Request Admin Pending' : 
-                     isApproved ? 'Request Admin Disetujui' : 'Request Admin Ditolak';
+              title = isPending ? 'Monitoring: Request Admin Pending' : 
+                     isApproved ? 'Monitoring: Request Admin Disetujui' : 'Monitoring: Request Admin Ditolak';
               message = `Admin ${request.requester_name} ${isPending ? 'mengajukan' : isApproved ? 'berhasil melakukan' : 'gagal melakukan'} ${action}`;
             }
             
             return {
               id: request.id,
-              type: isPending ? 'pending' : isApproved ? 'approval' : 'rejected',
+              type: isPending ? 'monitoring-pending' : isApproved ? 'monitoring-approved' : 'monitoring-rejected',
               title,
               message,
               timestamp: new Date(request.created_at).toLocaleString('id-ID', {
@@ -144,7 +144,8 @@ const Notifications = () => {
                 minute: '2-digit'
               }),
               read: false,
-              icon
+              icon,
+              isMonitoringOnly: true // Flag to indicate this is monitoring only
             };
           });
 
@@ -240,6 +241,9 @@ const Notifications = () => {
       case 'pending': return 'bg-orange-100 text-orange-600';
       case 'rejected': return 'bg-red-100 text-red-600';
       case 'admin': return 'bg-indigo-100 text-indigo-600';
+      case 'monitoring-pending': return 'bg-orange-100 text-orange-600';
+      case 'monitoring-approved': return 'bg-green-100 text-green-600';
+      case 'monitoring-rejected': return 'bg-red-100 text-red-600';
       default: return 'bg-gray-100 text-gray-600';
     }
   };
@@ -247,7 +251,7 @@ const Notifications = () => {
   const getNotificationStats = () => {
     const taskCount = notifications.filter(n => n.type === 'task').length;
     const systemCount = notifications.filter(n => n.type === 'system').length;
-    const approvalCount = notifications.filter(n => ['approval', 'pending', 'rejected'].includes(n.type)).length;
+    const approvalCount = notifications.filter(n => ['approval', 'pending', 'rejected', 'monitoring-pending', 'monitoring-approved', 'monitoring-rejected'].includes(n.type)).length;
     
     return { taskCount, systemCount, approvalCount };
   };
@@ -348,7 +352,7 @@ const Notifications = () => {
             </CardTitle>
             <CardDescription>
               {user.role === 'pic' 
-                ? 'Monitor aktivitas approval request terkait kurir dan admin'
+                ? 'Monitor aktivitas approval request terkait kurir dan admin (hanya melihat, tidak bisa approve/reject)'
                 : 'Semua notifikasi terbaru untuk Anda'
               }
             </CardDescription>
@@ -363,6 +367,8 @@ const Notifications = () => {
               
               {!loading && notifications.map((notification) => {
                 const IconComponent = notification.icon;
+                const isPicMonitoringOnly = user.role === 'pic' && notification.isMonitoringOnly;
+                
                 return (
                   <div key={notification.id} className={`flex items-center justify-between p-4 border rounded-lg ${
                     !notification.read ? 'bg-blue-50 border-blue-200' : 'bg-white'
@@ -376,14 +382,20 @@ const Notifications = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{notification.title}</p>
-                          {!notification.read && (
+                          {!notification.read && !isPicMonitoringOnly && (
                             <Badge variant="destructive" className="text-xs">Baru</Badge>
                           )}
-                          {notification.type === 'pending' && (
+                          {notification.type === 'monitoring-pending' && (
                             <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">Pending</Badge>
                           )}
-                          {notification.type === 'rejected' && (
+                          {notification.type === 'monitoring-rejected' && (
                             <Badge variant="outline" className="text-xs text-red-600 border-red-200">Ditolak</Badge>
+                          )}
+                          {notification.type === 'monitoring-approved' && (
+                            <Badge variant="outline" className="text-xs text-green-600 border-green-200">Disetujui</Badge>
+                          )}
+                          {isPicMonitoringOnly && (
+                            <Badge variant="secondary" className="text-xs">Monitor</Badge>
                           )}
                         </div>
                         <p className="text-sm text-gray-600">{notification.message}</p>
@@ -392,22 +404,38 @@ const Notifications = () => {
                     </div>
                     
                     <div className="flex gap-2">
-                      {!notification.read && (
+                      {/* Only show action buttons for non-PIC monitoring notifications */}
+                      {!isPicMonitoringOnly && (
+                        <>
+                          {!notification.read && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleMarkAsRead(notification.id)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleDeleteNotification(notification.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                      
+                      {/* For PIC monitoring, only show delete button */}
+                      {isPicMonitoringOnly && (
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => handleMarkAsRead(notification.id)}
+                          onClick={() => handleDeleteNotification(notification.id)}
                         >
-                          <Check className="h-4 w-4" />
+                          <X className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleDeleteNotification(notification.id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
                     </div>
                   </div>
                 );
