@@ -13,15 +13,38 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import Layout from '@/components/Layout';
 import { toast } from '@/hooks/use-toast';
 import ExcelImportManager from '@/components/ExcelImportManager';
 import { downloadFile } from '@/utils/downloadUtils';
+import AddPICForm from '@/components/forms/AddPICForm';
 
 const ManagePIC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showExcelImport, setShowExcelImport] = useState(false);
-  const [pics] = useState([
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedPIC, setSelectedPIC] = useState<any>(null);
+  const [pics, setPics] = useState([
     {
       id: 'PIC2025',
       name: 'PIC User',
@@ -68,12 +91,9 @@ const ManagePIC = () => {
     }
   ]);
 
-  const handleAddPIC = () => {
-    toast({
-      title: "Form Tambah PIC",
-      description: "Membuka form untuk menambahkan PIC baru",
-    });
-    console.log("Opening add PIC form");
+  const handleAddPIC = (newPIC: any) => {
+    setPics([...pics, newPIC]);
+    setShowAddDialog(false);
   };
 
   const handleDownloadTemplate = () => {
@@ -87,32 +107,32 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
       title: "Template Downloaded",
       description: "Template Excel untuk PIC berhasil didownload sebagai template_pic.csv",
     });
-    console.log("Downloaded PIC template");
   };
 
   const handleEditPIC = (pic: any) => {
-    toast({
-      title: "Edit PIC",
-      description: `Membuka form edit untuk ${pic.name}`,
-    });
-    console.log("Editing PIC:", pic);
+    setSelectedPIC(pic);
+    setShowEditDialog(true);
   };
 
   const handleDeletePIC = (pic: any) => {
+    setSelectedPIC(pic);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeletePIC = () => {
+    setPics(pics.filter(p => p.id !== selectedPIC.id));
+    setShowDeleteDialog(false);
+    setSelectedPIC(null);
     toast({
-      title: "Konfirmasi Hapus",
-      description: `Menghapus PIC ${pic.name}? Aksi ini tidak dapat dibatalkan.`,
+      title: "PIC Dihapus",
+      description: `PIC ${selectedPIC.name} telah dihapus dari sistem`,
       variant: "destructive"
     });
-    console.log("Deleting PIC:", pic);
   };
 
   const handleViewDetails = (pic: any) => {
-    toast({
-      title: "Detail PIC",
-      description: `Menampilkan detail lengkap untuk ${pic.name}`,
-    });
-    console.log("Viewing PIC details:", pic);
+    setSelectedPIC(pic);
+    setShowDetailDialog(true);
   };
 
   const filteredPICs = pics.filter(pic =>
@@ -139,7 +159,7 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
               <Upload className="h-4 w-4" />
               Import Excel
             </Button>
-            <Button onClick={handleAddPIC}>
+            <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Tambah PIC
             </Button>
@@ -271,6 +291,97 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
             </div>
           </CardContent>
         </Card>
+
+        {/* Add PIC Dialog */}
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Tambah PIC Baru</DialogTitle>
+              <DialogDescription>
+                Isi form di bawah untuk menambahkan PIC baru ke sistem
+              </DialogDescription>
+            </DialogHeader>
+            <AddPICForm
+              onSubmit={handleAddPIC}
+              onCancel={() => setShowAddDialog(false)}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* Detail Dialog */}
+        <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Detail PIC</DialogTitle>
+            </DialogHeader>
+            {selectedPIC && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarFallback className="bg-green-100 text-green-600 text-lg">
+                      {selectedPIC.name.split(' ').map((n: string) => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold text-lg">{selectedPIC.name}</h3>
+                    <p className="text-gray-500">{selectedPIC.id}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Email</label>
+                    <p className="text-sm">{selectedPIC.email}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Telepon</label>
+                    <p className="text-sm">{selectedPIC.phone}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Area</label>
+                    <p className="text-sm">{selectedPIC.area}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Status</label>
+                    <Badge variant={selectedPIC.status === 'Aktif' ? 'default' : 'secondary'}>
+                      {selectedPIC.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Jumlah Kurir</label>
+                    <p className="text-sm">{selectedPIC.kurirCount} kurir</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Bergabung</label>
+                    <p className="text-sm">{selectedPIC.joinDate}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-sm font-medium text-gray-500">Login Terakhir</label>
+                    <p className="text-sm">{selectedPIC.lastLogin}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Konfirmasi Hapus PIC</AlertDialogTitle>
+              <AlertDialogDescription>
+                Apakah Anda yakin ingin menghapus PIC "{selectedPIC?.name}"? 
+                Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeletePIC} className="bg-red-600 hover:bg-red-700">
+                Hapus
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );

@@ -13,15 +13,38 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import Layout from '@/components/Layout';
 import { toast } from '@/hooks/use-toast';
 import ExcelImportManager from '@/components/ExcelImportManager';
 import { downloadFile } from '@/utils/downloadUtils';
+import AddKurirForm from '@/components/forms/AddKurirForm';
 
 const ManageKurir = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showExcelImport, setShowExcelImport] = useState(false);
-  const [kurirs] = useState([
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedKurir, setSelectedKurir] = useState<any>(null);
+  const [kurirs, setKurirs] = useState([
     {
       id: 'PISTEST2025',
       name: 'Kurir Test',
@@ -79,12 +102,9 @@ const ManageKurir = () => {
     }
   ]);
 
-  const handleAddKurir = () => {
-    toast({
-      title: "Form Tambah Kurir",
-      description: "Membuka form untuk menambahkan kurir baru",
-    });
-    console.log("Opening add courier form");
+  const handleAddKurir = (newKurir: any) => {
+    setKurirs([...kurirs, newKurir]);
+    setShowAddDialog(false);
   };
 
   const handleDownloadTemplate = () => {
@@ -98,32 +118,32 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
       title: "Template Downloaded",
       description: "Template Excel untuk kurir berhasil didownload sebagai template_kurir.csv",
     });
-    console.log("Downloaded kurir template");
   };
 
   const handleEditKurir = (kurir: any) => {
-    toast({
-      title: "Edit Kurir",
-      description: `Membuka form edit untuk ${kurir.name}`,
-    });
-    console.log("Editing courier:", kurir);
+    setSelectedKurir(kurir);
+    setShowEditDialog(true);
   };
 
   const handleDeleteKurir = (kurir: any) => {
+    setSelectedKurir(kurir);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteKurir = () => {
+    setKurirs(kurirs.filter(k => k.id !== selectedKurir.id));
+    setShowDeleteDialog(false);
+    setSelectedKurir(null);
     toast({
-      title: "Konfirmasi Hapus",
-      description: `Menghapus kurir ${kurir.name}? Aksi ini tidak dapat dibatalkan.`,
+      title: "Kurir Dihapus",
+      description: `Kurir ${selectedKurir.name} telah dihapus dari sistem`,
       variant: "destructive"
     });
-    console.log("Deleting courier:", kurir);
   };
 
   const handleViewDetails = (kurir: any) => {
-    toast({
-      title: "Detail Kurir",
-      description: `Menampilkan detail lengkap untuk ${kurir.name}`,
-    });
-    console.log("Viewing courier details:", kurir);
+    setSelectedKurir(kurir);
+    setShowDetailDialog(true);
   };
 
   const filteredKurirs = kurirs.filter(kurir =>
@@ -151,7 +171,7 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
               <Upload className="h-4 w-4" />
               Import Excel
             </Button>
-            <Button onClick={handleAddKurir}>
+            <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Tambah Kurir
             </Button>
@@ -286,6 +306,100 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
             </div>
           </CardContent>
         </Card>
+
+        {/* Add Kurir Dialog */}
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Tambah Kurir Baru</DialogTitle>
+              <DialogDescription>
+                Isi form di bawah untuk menambahkan kurir baru ke sistem
+              </DialogDescription>
+            </DialogHeader>
+            <AddKurirForm
+              onSubmit={handleAddKurir}
+              onCancel={() => setShowAddDialog(false)}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* Detail Dialog */}
+        <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Detail Kurir</DialogTitle>
+            </DialogHeader>
+            {selectedKurir && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarFallback className="bg-purple-100 text-purple-600 text-lg">
+                      {selectedKurir.name.split(' ').map((n: string) => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold text-lg">{selectedKurir.name}</h3>
+                    <p className="text-gray-500">{selectedKurir.id}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Email</label>
+                    <p className="text-sm">{selectedKurir.email}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Telepon</label>
+                    <p className="text-sm">{selectedKurir.phone}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Area</label>
+                    <p className="text-sm">{selectedKurir.area}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Status</label>
+                    <Badge variant={selectedKurir.status === 'Aktif' ? 'default' : 'secondary'}>
+                      {selectedKurir.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Performance</label>
+                    <p className="text-sm text-green-600 font-medium">{selectedKurir.performance}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Bergabung</label>
+                    <p className="text-sm">{selectedKurir.joinDate}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-sm font-medium text-gray-500">Lokasi Kerja</label>
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4 text-gray-500" />
+                      <p className="text-sm">{selectedKurir.workLocation}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Konfirmasi Hapus Kurir</AlertDialogTitle>
+              <AlertDialogDescription>
+                Apakah Anda yakin ingin menghapus kurir "{selectedKurir?.name}"? 
+                Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeleteKurir} className="bg-red-600 hover:bg-red-700">
+                Hapus
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );
