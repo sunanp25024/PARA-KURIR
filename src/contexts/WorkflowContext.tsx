@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface Package {
@@ -9,6 +8,7 @@ interface Package {
 
 interface ScannedPackage extends Package {
   scanTime: Date;
+  status: 'scanned';
 }
 
 interface DeliveredPackage extends Package {
@@ -56,7 +56,7 @@ interface WorkflowContextType {
   canProceedToPerformance: () => boolean;
   
   // Action helpers
-  addScannedPackage: (trackingNumber: string, isCOD: boolean) => void;
+  addScannedPackage: (trackingNumber: string, isCOD: boolean) => boolean;
   removeScannedPackage: (id: string) => void;
   startDelivery: () => void;
   markAsDelivered: (packageId: string, recipientName: string, proofPhoto: string) => void;
@@ -134,21 +134,23 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return totalDelivery > 0 && totalDelivery === completedDelivery;
   };
 
-  const addScannedPackage = (trackingNumber: string, isCOD: boolean) => {
-    // Check for duplicates
-    if (scannedPackages.some(pkg => pkg.trackingNumber === trackingNumber)) {
-      return false; // Duplicate
+  const addScannedPackage = (trackingNumber: string, isCOD: boolean): boolean => {
+    // Check if package already exists
+    const exists = scannedPackages.some(pkg => pkg.trackingNumber === trackingNumber);
+    if (exists) {
+      return false; // Package already scanned
     }
 
     const newPackage: ScannedPackage = {
-      id: `scan_${Date.now()}_${Math.random()}`,
+      id: `scanned_${Date.now()}_${Math.random()}`,
       trackingNumber,
       isCOD,
-      scanTime: new Date()
+      scanTime: new Date(),
+      status: 'scanned'
     };
 
     setScannedPackages(prev => [...prev, newPackage]);
-    return true;
+    return true; // Successfully added
   };
 
   const removeScannedPackage = (id: string) => {
