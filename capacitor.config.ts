@@ -15,7 +15,16 @@ const config: CapacitorConfig = {
     },
     Geolocation: {
       permissions: ['location']
+    },
+    PushNotifications: {
+      presentationOptions: ['badge', 'sound', 'alert']
     }
+  },
+  ios: {
+    scheme: 'INSAN MOBILE'
+  },
+  android: {
+    allowMixedContent: true
   }
 };
 

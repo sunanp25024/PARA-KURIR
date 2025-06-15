@@ -1,0 +1,62 @@
+
+{
+  "name": "INSAN MOBILE - Kurir Professional System",
+  "short_name": "INSAN MOBILE",
+  "description": "Sistem manajemen kurir profesional dengan tracking real-time",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "id",
+  "categories": ["business", "productivity", "logistics"],
+  "screenshots": [
+    {
+      "src": "/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Akses dashboard utama",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Kurir Mobile",
+      "short_name": "Kurir",
+      "description": "Aplikasi kurir mobile",
+      "url": "/kurir-mobile",
+      "icons": [
+        {
+          "src": "/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

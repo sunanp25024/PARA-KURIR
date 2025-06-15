@@ -20,6 +20,7 @@ import {
   Zap,
   Globe
 } from 'lucide-react';
+import PWAInstallButton from '@/components/PWAInstallButton';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -120,13 +121,16 @@ const LandingPage = () => {
                 <p className="text-sm text-indigo-600 font-medium">Kurir Professional System</p>
               </div>
             </div>
-            <Button 
-              onClick={() => navigate('/login')}
-              className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-lg transform hover:scale-105 transition-all duration-200"
-            >
-              <Monitor className="mr-2 h-4 w-4" />
-              Login Dashboard
-            </Button>
+            <div className="flex gap-3">
+              <PWAInstallButton />
+              <Button 
+                onClick={() => navigate('/login')}
+                className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-lg transform hover:scale-105 transition-all duration-200"
+              >
+                <Monitor className="mr-2 h-4 w-4" />
+                Login Dashboard
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -172,6 +176,7 @@ const LandingPage = () => {
               <Monitor className="mr-2 h-5 w-5" />
               Akses Dashboard Web
             </Button>
+            <PWAInstallButton />
             <Button 
               size="lg" 
               variant="outline" 
@@ -179,7 +184,7 @@ const LandingPage = () => {
               onClick={handleDownloadAPK}
             >
               <Download className="mr-2 h-5 w-5" />
-              Coba APK Kurir
+              Coba Mobile Demo
             </Button>
           </div>
         </div>
@@ -307,28 +312,22 @@ const LandingPage = () => {
             <Smartphone className="h-10 w-10 text-white" />
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Aplikasi Mobile Khusus Kurir
+            Progressive Web App (PWA)
           </h2>
           <p className="text-xl mb-12 text-blue-100 max-w-3xl mx-auto leading-relaxed">
-            Download aplikasi mobile yang dirancang khusus untuk kurir dengan fitur scanning QR code, 
-            foto bukti pengiriman, tracking real-time, dan notifikasi push untuk efisiensi maksimal
+            Nikmati pengalaman aplikasi native dengan PWA yang dapat diinstall langsung dari browser, 
+            bekerja offline, dan memberikan performa optimal di semua perangkat
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Button 
-              size="lg" 
-              variant="secondary"
-              className="text-lg px-10 py-4 bg-white/90 backdrop-blur-sm text-indigo-600 hover:bg-white shadow-xl transform hover:scale-105 transition-all duration-200 border border-white/30"
-              onClick={handleDownloadAPK}
-            >
-              <Download className="mr-2 h-5 w-5" />
-              Coba APK Kurir
-            </Button>
+            <PWAInstallButton />
             <Button 
               size="lg" 
               variant="outline"
               className="text-lg px-10 py-4 border-2 border-white/80 text-white hover:bg-white/20 backdrop-blur-sm shadow-xl transform hover:scale-105 transition-all duration-200"
+              onClick={handleDownloadAPK}
             >
-              Panduan Instalasi
+              <Smartphone className="mr-2 h-5 w-5" />
+              Coba Mobile Demo
             </Button>
           </div>
         </div>
