@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Package, 
@@ -13,8 +15,18 @@ import {
   Bell,
   AlertCircle,
   Camera,
-  Scan
+  Scan,
+  Search,
+  Filter,
+  UserCheck,
+  MapPin,
+  Calendar,
+  BarChart3,
+  PieChart,
+  Activity
 } from 'lucide-react';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Bar, BarChart, Line, LineChart, Pie, PieChart as RechartsePie, Cell, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import Layout from '@/components/Layout';
 import DailyPackageInput from '@/components/DailyPackageInput';
 import ScanPackageManager from '@/components/ScanPackageManager';
@@ -62,6 +74,102 @@ const Dashboard = () => {
     </Layout>
   );
 };
+
+// Chart configuration
+const chartConfig = {
+  terkirim: { label: "Terkirim", color: "#10b981" },
+  pending: { label: "Pending", color: "#f59e0b" },
+  return: { label: "Return", color: "#ef4444" },
+  total: { label: "Total", color: "#3b82f6" },
+};
+
+// Sample data for charts
+const dailyData = [
+  { date: "Sen", terkirim: 120, pending: 15, return: 8 },
+  { date: "Sel", terkirim: 135, pending: 12, return: 6 },
+  { date: "Rab", terkirim: 142, pending: 18, return: 10 },
+  { date: "Kam", terkirim: 128, pending: 20, return: 12 },
+  { date: "Jum", terkirim: 155, pending: 8, return: 5 },
+  { date: "Sab", terkirim: 98, pending: 25, return: 15 },
+  { date: "Min", terkirim: 85, pending: 30, return: 18 },
+];
+
+const monthlyData = [
+  { month: "Jan", total: 3500, terkirim: 3150, return: 350 },
+  { month: "Feb", total: 3800, terkirim: 3420, return: 380 },
+  { month: "Mar", total: 4200, terkirim: 3780, return: 420 },
+  { month: "Apr", total: 3900, terkirim: 3510, return: 390 },
+];
+
+const performanceData = [
+  { name: "Terkirim", value: 85, color: "#10b981" },
+  { name: "Return", value: 10, color: "#ef4444" },
+  { name: "Pending", value: 5, color: "#f59e0b" },
+];
+
+const FilterSection = ({ role }: { role: string }) => (
+  <Card className="mb-6">
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2">
+        <Filter className="h-5 w-5" />
+        Filter & Pencarian
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <Select>
+          <SelectTrigger>
+            <SelectValue placeholder="Pilih Wilayah" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="jakarta">Jakarta</SelectItem>
+            <SelectItem value="bandung">Bandung</SelectItem>
+            <SelectItem value="surabaya">Surabaya</SelectItem>
+            <SelectItem value="medan">Medan</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Select>
+          <SelectTrigger>
+            <SelectValue placeholder="Pilih Area" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="jaksel">Jakarta Selatan</SelectItem>
+            <SelectItem value="jakut">Jakarta Utara</SelectItem>
+            <SelectItem value="jaktim">Jakarta Timur</SelectItem>
+            <SelectItem value="jakbar">Jakarta Barat</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Select>
+          <SelectTrigger>
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="aktif">Aktif</SelectItem>
+            <SelectItem value="tidak-aktif">Tidak Aktif</SelectItem>
+            <SelectItem value="cuti">Cuti</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <Input placeholder="Cari ID Kurir..." className="pl-10" />
+        </div>
+        
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <Input placeholder="Cari Nama..." className="pl-10" />
+        </div>
+        
+        <Button className="w-full">
+          <Search className="h-4 w-4 mr-2" />
+          Cari
+        </Button>
+      </div>
+    </CardContent>
+  </Card>
+);
 
 const KurirDashboard = () => {
   const [todayStats] = useState({
@@ -222,31 +330,47 @@ const PICDashboard = () => {
     activeKurir: 5,
     deliveredToday: 45,
     totalCOD: 2850000,
-    successRate: 88
+    successRate: 88,
+    attendanceToday: 4,
+    totalPackagesNational: 1250
   });
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Kurir Aktif</CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{areaStats.activeKurir}</div>
-            <p className="text-xs text-muted-foreground">Kurir dalam area</p>
-          </CardContent>
-        </Card>
-        
+      <FilterSection role="pic" />
+      
+      {/* Enhanced Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Paket Terkirim</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{areaStats.deliveredToday}</div>
-            <p className="text-xs text-muted-foreground">Hari ini</p>
+            <div className="text-2xl font-bold">{areaStats.totalPackagesNational}</div>
+            <p className="text-xs text-muted-foreground">Nasional hari ini</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Kurir Aktif</CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{areaStats.activeKurir}</div>
+            <p className="text-xs text-muted-foreground">Dalam area</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Absensi Hari Ini</CardTitle>
+            <UserCheck className="h-4 w-4 text-purple-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{areaStats.attendanceToday}/{areaStats.activeKurir}</div>
+            <p className="text-xs text-muted-foreground">Kurir hadir</p>
           </CardContent>
         </Card>
         
@@ -273,28 +397,145 @@ const PICDashboard = () => {
         </Card>
       </div>
 
+      {/* Charts and Analytics */}
+      <Tabs defaultValue="daily" className="w-full">
+        <TabsList>
+          <TabsTrigger value="daily">Harian</TabsTrigger>
+          <TabsTrigger value="weekly">Mingguan</TabsTrigger>
+          <TabsTrigger value="monthly">Bulanan</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="daily" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Performa Harian</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={dailyData}>
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="terkirim" fill="#10b981" />
+                      <Bar dataKey="pending" fill="#f59e0b" />
+                      <Bar dataKey="return" fill="#ef4444" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Distribusi Status Paket</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RechartsePie>
+                      <Pie
+                        data={performanceData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        dataKey="value"
+                        label={({ name, value }) => `${name}: ${value}%`}
+                      >
+                        {performanceData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip />
+                    </RechartsePie>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="weekly" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Trend Mingguan</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={dailyData}>
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Line type="monotone" dataKey="terkirim" stroke="#10b981" strokeWidth={2} />
+                    <Line type="monotone" dataKey="return" stroke="#ef4444" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="monthly" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performa Bulanan</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyData}>
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="total" fill="#3b82f6" />
+                    <Bar dataKey="terkirim" fill="#10b981" />
+                    <Bar dataKey="return" fill="#ef4444" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Real-time Kurir Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Performa Kurir Hari Ini</CardTitle>
+            <CardTitle>Real-time Absensi Kurir</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {[
-                { name: 'Ahmad Kurniawan', delivered: 12, target: 15, rate: 80 },
-                { name: 'Budi Santoso', delivered: 10, target: 12, rate: 83 },
-                { name: 'Siti Nurhaliza', delivered: 8, target: 10, rate: 80 },
-                { name: 'Dedi Mulyadi', delivered: 9, target: 15, rate: 60 },
-                { name: 'Rina Sari', delivered: 6, target: 8, rate: 75 }
+                { name: 'Ahmad Kurniawan', status: 'Hadir', time: '07:30', location: 'Jakarta Selatan' },
+                { name: 'Budi Santoso', status: 'Hadir', time: '07:45', location: 'Jakarta Timur' },
+                { name: 'Siti Nurhaliza', status: 'Hadir', time: '08:00', location: 'Jakarta Pusat' },
+                { name: 'Dedi Mulyadi', status: 'Terlambat', time: '08:30', location: 'Jakarta Barat' },
+                { name: 'Rina Sari', status: 'Tidak Hadir', time: '-', location: 'Jakarta Utara' }
               ].map((kurir, index) => (
                 <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{kurir.name}</p>
-                    <p className="text-sm text-gray-600">{kurir.delivered}/{kurir.target} paket</p>
+                  <div className="flex items-center gap-3">
+                    <div className={`h-3 w-3 rounded-full ${
+                      kurir.status === 'Hadir' ? 'bg-green-500' : 
+                      kurir.status === 'Terlambat' ? 'bg-yellow-500' : 'bg-red-500'
+                    }`} />
+                    <div>
+                      <p className="font-medium">{kurir.name}</p>
+                      <p className="text-sm text-gray-600">{kurir.location}</p>
+                    </div>
                   </div>
-                  <Badge variant={kurir.rate >= 80 ? 'default' : kurir.rate >= 70 ? 'secondary' : 'destructive'}>
-                    {kurir.rate}%
-                  </Badge>
+                  <div className="text-right">
+                    <Badge variant={
+                      kurir.status === 'Hadir' ? 'default' : 
+                      kurir.status === 'Terlambat' ? 'secondary' : 'destructive'
+                    }>
+                      {kurir.status}
+                    </Badge>
+                    <p className="text-sm text-gray-500 mt-1">{kurir.time}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -303,24 +544,32 @@ const PICDashboard = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Notifikasi Area</CardTitle>
+            <CardTitle>Ringkasan Kinerja Kurir</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-red-600" />
-                <div>
-                  <p className="text-sm font-medium">Kurir Dedi performa menurun</p>
-                  <p className="text-xs text-gray-600">Rate sukses 60% hari ini</p>
+            <div className="space-y-4">
+              {[
+                { name: 'Ahmad Kurniawan', delivered: 12, target: 15, rate: 80, trend: '+5%' },
+                { name: 'Budi Santoso', delivered: 10, target: 12, rate: 83, trend: '+2%' },
+                { name: 'Siti Nurhaliza', delivered: 8, target: 10, rate: 80, trend: '-3%' },
+                { name: 'Dedi Mulyadi', delivered: 9, target: 15, rate: 60, trend: '-10%' },
+                { name: 'Rina Sari', delivered: 6, target: 8, rate: 75, trend: '+8%' }
+              ].map((kurir, index) => (
+                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{kurir.name}</p>
+                    <p className="text-sm text-gray-600">{kurir.delivered}/{kurir.target} paket</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm ${kurir.trend.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                      {kurir.trend}
+                    </span>
+                    <Badge variant={kurir.rate >= 80 ? 'default' : kurir.rate >= 70 ? 'secondary' : 'destructive'}>
+                      {kurir.rate}%
+                    </Badge>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <div>
-                  <p className="text-sm font-medium">Target area tercapai</p>
-                  <p className="text-xs text-gray-600">45 paket dari target 40</p>
-                </div>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -330,28 +579,52 @@ const PICDashboard = () => {
 };
 
 const AdminDashboard = () => {
+  const [adminStats] = useState({
+    totalKurir: 25,
+    totalPIC: 8,
+    deliveredToday: 850,
+    pendingApproval: 3,
+    successRate: 87,
+    attendanceToday: 22,
+    totalPackagesNational: 2150
+  });
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Kurir</CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">15</div>
-            <p className="text-xs text-muted-foreground">Kurir terdaftar</p>
-          </CardContent>
-        </Card>
-        
+      <FilterSection role="admin" />
+      
+      {/* Enhanced Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Paket Terkirim</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">Hari ini</p>
+            <div className="text-2xl font-bold">{adminStats.totalPackagesNational}</div>
+            <p className="text-xs text-muted-foreground">Nasional hari ini</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Kurir</CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{adminStats.totalKurir}</div>
+            <p className="text-xs text-muted-foreground">Kurir terdaftar</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Absensi Hari Ini</CardTitle>
+            <UserCheck className="h-4 w-4 text-purple-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{adminStats.attendanceToday}/{adminStats.totalKurir}</div>
+            <p className="text-xs text-muted-foreground">Kurir hadir</p>
           </CardContent>
         </Card>
         
@@ -361,7 +634,7 @@ const AdminDashboard = () => {
             <Clock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">{adminStats.pendingApproval}</div>
             <p className="text-xs text-muted-foreground">Menunggu persetujuan</p>
           </CardContent>
         </Card>
@@ -372,57 +645,148 @@ const AdminDashboard = () => {
             <TrendingUp className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0%</div>
+            <div className="text-2xl font-bold">{adminStats.successRate}%</div>
             <p className="text-xs text-muted-foreground">Keseluruhan</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Status Persetujuan</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                <div>
-                  <p className="font-medium">Tambah Kurir Baru</p>
-                  <p className="text-sm text-gray-600">2 jam yang lalu</p>
-                </div>
-                <Badge variant="secondary">Pending</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Charts similar to PIC but with broader scope */}
+      <Tabs defaultValue="daily" className="w-full">
+        <TabsList>
+          <TabsTrigger value="daily">Harian</TabsTrigger>
+          <TabsTrigger value="weekly">Mingguan</TabsTrigger>
+          <TabsTrigger value="monthly">Bulanan</TabsTrigger>
+          <TabsTrigger value="area">Per Area</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="daily" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Performa Regional Harian</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={dailyData}>
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="terkirim" fill="#10b981" />
+                      <Bar dataKey="pending" fill="#f59e0b" />
+                      <Bar dataKey="return" fill="#ef4444" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Aktivitas Terbaru</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8">
-              <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">Belum ada aktivitas</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Distribusi Status Regional</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RechartsePie>
+                      <Pie
+                        data={performanceData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        dataKey="value"
+                        label={({ name, value }) => `${name}: ${value}%`}
+                      >
+                        {performanceData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip />
+                    </RechartsePie>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="area" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performa Per Area</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[
+                  { area: 'Jakarta Selatan', kurir: 8, delivered: 320, rate: 92 },
+                  { area: 'Jakarta Timur', kurir: 6, delivered: 245, rate: 85 },
+                  { area: 'Jakarta Pusat', kurir: 4, delivered: 180, rate: 88 },
+                  { area: 'Jakarta Barat', kurir: 4, delivered: 165, rate: 82 },
+                  { area: 'Jakarta Utara', kurir: 3, delivered: 125, rate: 78 }
+                ].map((area, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <MapPin className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="font-medium">{area.area}</p>
+                        <p className="text-sm text-gray-600">{area.kurir} kurir aktif</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold">{area.delivered} paket</p>
+                      <Badge variant={area.rate >= 85 ? 'default' : 'secondary'}>
+                        {area.rate}%
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
 
 const MasterAdminDashboard = () => {
+  const [masterStats] = useState({
+    totalAdmin: 3,
+    totalPIC: 8,
+    totalKurir: 45,
+    deliveredToday: 2850,
+    pendingApproval: 5,
+    attendanceToday: 42,
+    totalPackagesNational: 5200,
+    successRateNational: 89
+  });
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <FilterSection role="master-admin" />
+      
+      {/* National Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Paket Nasional</CardTitle>
+            <Package className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{masterStats.totalPackagesNational}</div>
+            <p className="text-xs text-muted-foreground">Terkirim hari ini</p>
+          </CardContent>
+        </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Admin</CardTitle>
             <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">{masterStats.totalAdmin}</div>
             <p className="text-xs text-muted-foreground">Admin aktif</p>
           </CardContent>
         </Card>
@@ -433,7 +797,7 @@ const MasterAdminDashboard = () => {
             <Users className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
+            <div className="text-2xl font-bold">{masterStats.totalPIC}</div>
             <p className="text-xs text-muted-foreground">PIC aktif</p>
           </CardContent>
         </Card>
@@ -444,19 +808,19 @@ const MasterAdminDashboard = () => {
             <Users className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">45</div>
+            <div className="text-2xl font-bold">{masterStats.totalKurir}</div>
             <p className="text-xs text-muted-foreground">Kurir aktif</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Paket Terkirim</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CardTitle className="text-sm font-medium">Absensi Nasional</CardTitle>
+            <UserCheck className="h-4 w-4 text-indigo-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">Hari ini</p>
+            <div className="text-2xl font-bold">{masterStats.attendanceToday}/{masterStats.totalKurir}</div>
+            <p className="text-xs text-muted-foreground">Kurir hadir</p>
           </CardContent>
         </Card>
         
@@ -466,43 +830,169 @@ const MasterAdminDashboard = () => {
             <Bell className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5</div>
+            <div className="text-2xl font-bold">{masterStats.pendingApproval}</div>
             <p className="text-xs text-muted-foreground">Menunggu</p>
           </CardContent>
         </Card>
       </div>
 
+      {/* National Performance Charts */}
+      <Tabs defaultValue="national" className="w-full">
+        <TabsList>
+          <TabsTrigger value="national">Nasional</TabsTrigger>
+          <TabsTrigger value="regional">Regional</TabsTrigger>
+          <TabsTrigger value="monthly">Bulanan</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="national" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Performa Nasional Harian</CardTitle>
+                <CardDescription>Data pengiriman seluruh Indonesia</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[350px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={dailyData}>
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Line type="monotone" dataKey="terkirim" stroke="#10b981" strokeWidth={3} />
+                      <Line type="monotone" dataKey="pending" stroke="#f59e0b" strokeWidth={2} />
+                      <Line type="monotone" dataKey="return" stroke="#ef4444" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Distribusi Status Nasional</CardTitle>
+                <CardDescription>Persentase status pengiriman</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[350px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RechartsePie>
+                      <Pie
+                        data={performanceData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={80}
+                        outerRadius={120}
+                        dataKey="value"
+                        label={({ name, value }) => `${name}: ${value}%`}
+                      >
+                        {performanceData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip />
+                    </RechartsePie>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="regional" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performa Per Wilayah</CardTitle>
+              <CardDescription>Monitoring kinerja seluruh wilayah</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[
+                  { region: 'Jakarta', admin: 1, pic: 3, kurir: 25, delivered: 1250, rate: 89 },
+                  { region: 'Bandung', admin: 1, pic: 2, kurir: 8, delivered: 420, rate: 85 },
+                  { region: 'Surabaya', admin: 1, pic: 2, kurir: 8, delivered: 380, rate: 87 },
+                  { region: 'Medan', admin: 0, pic: 1, kurir: 4, delivered: 180, rate: 82 }
+                ].map((region, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <MapPin className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-lg">{region.region}</p>
+                        <p className="text-sm text-gray-600">
+                          {region.admin} Admin • {region.pic} PIC • {region.kurir} Kurir
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-xl">{region.delivered}</p>
+                      <p className="text-sm text-gray-600">paket hari ini</p>
+                      <Badge variant={region.rate >= 85 ? 'default' : 'secondary'} className="mt-1">
+                        {region.rate}%
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Real-time Monitoring & Approvals */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Persetujuan Terbaru</CardTitle>
+            <CardTitle>Persetujuan Menunggu</CardTitle>
+            <CardDescription>Requires immediate attention</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                <div>
-                  <p className="font-medium">Admin ingin tambah Kurir</p>
-                  <p className="text-sm text-gray-600">ID: KURIR001</p>
+              {[
+                { type: 'Admin', action: 'Tambah Kurir Baru', requester: 'ADMIN001', priority: 'High' },
+                { type: 'Admin', action: 'Update Area PIC', requester: 'ADMIN002', priority: 'Medium' },
+                { type: 'PIC', action: 'Request Tambah Kurir', requester: 'PIC005', priority: 'Low' }
+              ].map((approval, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
+                  <div>
+                    <p className="font-medium">{approval.type} - {approval.action}</p>
+                    <p className="text-sm text-gray-600">Dari: {approval.requester}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant={approval.priority === 'High' ? 'destructive' : approval.priority === 'Medium' ? 'secondary' : 'outline'}>
+                      {approval.priority}
+                    </Badge>
+                    <Button size="sm" variant="outline">Tolak</Button>
+                    <Button size="sm">Setuju</Button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline">Tolak</Button>
-                  <Button size="sm">Setuju</Button>
-                </div>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Notifikasi Sistem</CardTitle>
+            <CardTitle>Real-time System Activity</CardTitle>
+            <CardDescription>Live monitoring seluruh sistem</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="font-medium">Admin ADMIN2025 menambahkan PIC baru</p>
-                <p className="text-sm text-gray-600">5 menit yang lalu</p>
-              </div>
+              {[
+                { activity: 'ADMIN002 menambahkan PIC baru', time: '2 menit lalu', type: 'admin' },
+                { activity: '15 kurir check-in untuk shift pagi', time: '5 menit lalu', type: 'attendance' },
+                { activity: 'PIC Jakarta Selatan update target harian', time: '8 menit lalu', type: 'update' },
+                { activity: 'System backup completed successfully', time: '15 menit lalu', type: 'system' }
+              ].map((activity, index) => (
+                <div key={index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                  <Activity className="h-5 w-5 text-blue-600" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{activity.activity}</p>
+                    <p className="text-xs text-gray-600">{activity.time}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
