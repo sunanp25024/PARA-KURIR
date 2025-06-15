@@ -1,14 +1,12 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Package, Scan, Truck, AlertTriangle, TrendingUp, CheckCircle, RotateCcw, ArrowRight, Clock, Plus } from 'lucide-react';
 import { useWorkflow } from '@/contexts/WorkflowContext';
 import { toast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import DailyPackageInput from './DailyPackageInput';
+import ScanPackageManager from './ScanPackageManager';
 
 const CourierWorkflowMain = () => {
   const {
@@ -50,6 +48,14 @@ const CourierWorkflowMain = () => {
     });
   };
 
+  const handleStepComplete = () => {
+    if (currentStep === 'input') {
+      setCurrentStep('scan');
+    } else if (currentStep === 'scan') {
+      setCurrentStep('delivery');
+    }
+  };
+
   // Get user data from localStorage
   const userData = localStorage.getItem('user');
   const user = userData ? JSON.parse(userData) : null;
@@ -78,8 +84,14 @@ const CourierWorkflowMain = () => {
         </CardContent>
       </Card>
 
-      {/* Daily Package Input Section */}
-      <DailyPackageInput />
+      {/* Dynamic Content Based on Current Step */}
+      {currentStep === 'input' && (
+        <DailyPackageInput onStepComplete={handleStepComplete} />
+      )}
+
+      {currentStep === 'scan' && (
+        <ScanPackageManager onStepComplete={handleStepComplete} />
+      )}
     </div>
   );
 };
