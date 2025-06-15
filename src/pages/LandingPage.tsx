@@ -102,11 +102,11 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="bg-white/20 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/30">
+              <div className="bg-white/90 backdrop-blur-md p-3 rounded-xl shadow-lg border border-gray-200/50">
                 <img 
                   src="/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png" 
                   alt="PARA Logo" 
-                  className="h-10 w-10 object-contain opacity-90"
+                  className="h-10 w-10 object-contain"
                 />
               </div>
               <div>
@@ -334,11 +334,11 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-4 mb-6">
-                <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-white/20">
+                <div className="bg-white/90 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-gray-600/30">
                   <img 
                     src="/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png" 
                     alt="PARA Logo" 
-                    className="h-8 w-8 object-contain opacity-90"
+                    className="h-8 w-8 object-contain"
                   />
                 </div>
                 <div>
