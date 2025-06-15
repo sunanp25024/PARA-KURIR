@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   Package, 
@@ -14,10 +13,8 @@ import {
   TrendingUp,
   CheckCircle,
   RotateCcw,
-  ArrowRight,
   Clock,
   Bell,
-  User,
   MapPin,
   BarChart3,
   Camera,
@@ -69,32 +66,6 @@ const CourierWorkflowMain = () => {
       title: "Hari Baru Dimulai",
       description: "Semua data telah direset. Silakan input data paket untuk hari ini.",
     });
-  };
-
-  const getStepProgress = () => {
-    const steps = ['input', 'scan', 'delivery', 'pending', 'performance'];
-    const currentIndex = steps.indexOf(currentStep);
-    return ((currentIndex + 1) / steps.length) * 100;
-  };
-
-  const getStepStatus = (step: string) => {
-    switch (step) {
-      case 'input':
-        return dailyPackages.length > 0 ? 'completed' : currentStep === 'input' ? 'active' : 'pending';
-      case 'scan':
-        return deliveryPackages.length > 0 ? 'completed' : currentStep === 'scan' ? 'active' : 'pending';
-      case 'delivery':
-        const totalDelivery = deliveryPackages.length;
-        const completedDelivery = deliveredPackages.length + pendingPackages.length;
-        return totalDelivery > 0 && totalDelivery === completedDelivery ? 'completed' : currentStep === 'delivery' ? 'active' : 'pending';
-      case 'pending':
-        const pendingToReturn = pendingPackages.filter(pkg => !pkg.returnedAt).length;
-        return pendingToReturn === 0 && pendingPackages.length > 0 ? 'completed' : currentStep === 'pending' ? 'active' : 'pending';
-      case 'performance':
-        return currentStep === 'performance' ? 'active' : 'pending';
-      default:
-        return 'pending';
-    }
   };
 
   const getCurrentStepCard = () => {
@@ -153,7 +124,7 @@ const CourierWorkflowMain = () => {
   
   // Calculate completion percentages
   const totalPackages = dailyPackages.length;
-  const codPackages = dailyPackages.filter(pkg => pkg.paymentType === 'COD').length;
+  const codPackages = dailyPackages.filter(pkg => pkg.isCOD).length;
   const deliveredCount = deliveredPackages.length;
   const pendingCount = pendingPackages.length;
 
@@ -199,56 +170,6 @@ const CourierWorkflowMain = () => {
             </AlertDescription>
           </Alert>
         )}
-
-        {/* Progress Overview Card */}
-        <Card className="bg-white/95 backdrop-blur-sm shadow-lg border-0">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl text-slate-800">Progress Harian</CardTitle>
-              <div className="text-right">
-                <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  {Math.round(getStepProgress())}%
-                </div>
-                <p className="text-sm text-slate-500">Step {['input', 'scan', 'delivery', 'pending', 'performance'].indexOf(currentStep) + 1}/5</p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Progress value={getStepProgress()} className="h-3 mb-6" />
-            <div className="grid grid-cols-5 gap-4">
-              {[
-                { key: 'input', label: 'Input', icon: Package, count: dailyPackages.length },
-                { key: 'scan', label: 'Scan', icon: Scan, count: deliveryPackages.length },
-                { key: 'delivery', label: 'Kirim', icon: Truck, count: deliveredPackages.length },
-                { key: 'pending', label: 'Pending', icon: Clock, count: pendingPackages.length },
-                { key: 'performance', label: 'Selesai', icon: TrendingUp, count: '' }
-              ].map((step, index) => {
-                const status = getStepStatus(step.key);
-                return (
-                  <div key={step.key} className="text-center">
-                    <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-3 transition-all ${
-                      status === 'completed' ? 'bg-green-100 text-green-600' :
-                      status === 'active' ? 'bg-blue-100 text-blue-600' :
-                      'bg-slate-100 text-slate-400'
-                    }`}>
-                      {status === 'completed' ? (
-                        <CheckCircle className="h-8 w-8" />
-                      ) : (
-                        <step.icon className="h-8 w-8" />
-                      )}
-                    </div>
-                    <p className="text-sm font-semibold text-slate-700 mb-1">{step.label}</p>
-                    {step.count !== '' && (
-                      <Badge variant={status === 'completed' ? 'default' : 'secondary'} className="text-xs">
-                        {step.count}
-                      </Badge>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Current Action Card */}
         {stepCard && (
