@@ -211,7 +211,7 @@ const CourierDashboardContent = () => {
                 className="flex flex-col gap-1 h-full data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600"
                 disabled={pendingPackages.length === 0}
               >
-                <AlertTriangle className="h-5 w-5" />
+                <Clock className="h-5 w-5" />
                 <span className="text-xs">Pending</span>
               </TabsTrigger>
               

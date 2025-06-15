@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Camera, Package, CheckCircle, AlertTriangle, RotateCcw } from 'lucide-react';
+import { Camera, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useWorkflow } from '@/contexts/WorkflowContext';
 
@@ -16,9 +16,9 @@ interface PendingReturnPackagesProps {
 
 const PendingReturnPackages: React.FC<PendingReturnPackagesProps> = ({ onStepComplete }) => {
   const { pendingPackages, returnToWarehouse } = useWorkflow();
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [leaderName, setLeaderName] = useState('');
   const [photoTaken, setPhotoTaken] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const pendingItems = pendingPackages.filter(pkg => !pkg.returnedAt);
   const returnedItems = pendingPackages.filter(pkg => pkg.returnedAt);
@@ -31,8 +31,17 @@ const PendingReturnPackages: React.FC<PendingReturnPackagesProps> = ({ onStepCom
     });
   };
 
-  const handleReturnToWarehouse = () => {
-    if (!selectedPackage || !leaderName.trim() || !photoTaken) {
+  const handleReturnAllToWarehouse = async () => {
+    if (pendingItems.length === 0) {
+      toast({
+        title: "Tidak Ada Paket",
+        description: "Tidak ada paket pending untuk dikembalikan",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!leaderName.trim() || !photoTaken) {
       toast({
         title: "Data Tidak Lengkap",
         description: "Pastikan foto bukti dan nama leader sudah diisi",
@@ -41,23 +50,29 @@ const PendingReturnPackages: React.FC<PendingReturnPackagesProps> = ({ onStepCom
       return;
     }
 
-    returnToWarehouse(selectedPackage, leaderName.trim(), 'photo_taken');
+    setIsProcessing(true);
+
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Return all pending packages to warehouse
+    pendingItems.forEach(pkg => {
+      returnToWarehouse(pkg.id, leaderName.trim(), 'photo_taken');
+    });
     
     // Reset form
-    setSelectedPackage(null);
     setLeaderName('');
     setPhotoTaken(false);
+    setIsProcessing(false);
 
     toast({
-      title: "Paket Berhasil Dikembalikan",
-      description: "Paket telah diserahkan ke leader dan dikembalikan ke gudang",
+      title: "Semua Paket Berhasil Dikembalikan",
+      description: `${pendingItems.length} paket telah diserahkan ke leader dan dikembalikan ke gudang`,
     });
 
-    // Check if all pending packages are returned and trigger auto progress
+    // Trigger auto progress after all packages are returned
     setTimeout(() => {
-      if (pendingPackages.every(pkg => pkg.returnedAt)) {
-        onStepComplete?.();
-      }
+      onStepComplete?.();
     }, 500);
   };
 
@@ -66,11 +81,11 @@ const PendingReturnPackages: React.FC<PendingReturnPackagesProps> = ({ onStepCom
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <RotateCcw className="h-5 w-5" />
-            Paket Pending/Return ({pendingItems.length})
+            <Clock className="h-5 w-5" />
+            Paket Pending ({pendingItems.length})
           </CardTitle>
           <CardDescription>
-            Kelola paket yang pending atau perlu dikembalikan ke gudang
+            Kelola paket yang pending dan perlu dikembalikan ke gudang
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -78,7 +93,7 @@ const PendingReturnPackages: React.FC<PendingReturnPackagesProps> = ({ onStepCom
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                Tidak ada paket pending/return. Jika ada paket yang tidak dapat terkirim, 
+                Tidak ada paket pending. Jika ada paket yang tidak dapat terkirim, 
                 tandai sebagai pending di tab 'Pengantaran'
               </AlertDescription>
             </Alert>
@@ -91,93 +106,73 @@ const PendingReturnPackages: React.FC<PendingReturnPackagesProps> = ({ onStepCom
             </div>
           )}
 
+          {/* List of Pending Packages */}
           {pendingItems.length > 0 && (
-            <div className="space-y-3">
-              {pendingItems.map((item) => (
-                <div 
-                  key={item.id} 
-                  className={`p-4 border rounded-lg transition-colors ${
-                    selectedPackage === item.id ? 'border-orange-500 bg-orange-50' : 'border-gray-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="font-medium">{item.trackingNumber}</p>
-                      <p className="text-sm text-gray-600">Alasan: {item.reason}</p>
+            <>
+              <div className="space-y-3">
+                <h4 className="font-medium text-gray-700">Daftar Paket Pending:</h4>
+                {pendingItems.map((item) => (
+                  <div key={item.id} className="p-3 border rounded-lg bg-orange-50 border-orange-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{item.trackingNumber}</p>
+                        <p className="text-sm text-gray-600">Alasan: {item.reason}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <Badge variant={item.isCOD ? "default" : "secondary"}>
+                          {item.isCOD ? 'COD' : 'Non COD'}
+                        </Badge>
+                        <Badge variant="outline" className="text-orange-600 border-orange-600">
+                          Pending
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <Badge variant={item.isCOD ? "default" : "secondary"}>
-                        {item.isCOD ? 'COD' : 'Non COD'}
-                      </Badge>
-                      <Badge variant="outline" className="text-orange-600 border-orange-600">
-                        Pending
-                      </Badge>
-                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Single Return Form for All Packages */}
+              <div className="mt-6 p-4 border border-orange-200 rounded-lg bg-orange-50">
+                <h4 className="font-medium mb-4">
+                  Kembalikan Semua Paket ke Gudang ({pendingItems.length} paket)
+                </h4>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="leader">Nama Leader Penerima</Label>
+                    <Input
+                      id="leader"
+                      value={leaderName}
+                      onChange={(e) => setLeaderName(e.target.value)}
+                      placeholder="Masukkan nama leader yang menerima paket"
+                      disabled={isProcessing}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Foto Bukti Pengembalian</Label>
+                    <Button 
+                      onClick={handleTakePhoto}
+                      variant={photoTaken ? "outline" : "default"}
+                      className="w-full"
+                      disabled={isProcessing}
+                    >
+                      <Camera className="h-4 w-4 mr-2" />
+                      {photoTaken ? 'Foto Sudah Diambil ✓' : 'Ambil Foto Bukti'}
+                    </Button>
                   </div>
 
                   <Button 
-                    size="sm" 
-                    onClick={() => setSelectedPackage(item.id)}
-                    variant={selectedPackage === item.id ? "default" : "outline"}
+                    onClick={handleReturnAllToWarehouse}
+                    disabled={!leaderName.trim() || !photoTaken || isProcessing}
                     className="w-full"
-                  >
-                    <RotateCcw className="h-3 w-3 mr-1" />
-                    {selectedPackage === item.id ? 'Sedang Diproses' : 'Kembalikan ke Gudang'}
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Return Form - Only show when package is selected */}
-          {selectedPackage && (
-            <div className="mt-6 p-4 border border-orange-200 rounded-lg bg-orange-50">
-              <h4 className="font-medium mb-4">
-                Proses Pengembalian - {pendingPackages.find(p => p.id === selectedPackage)?.trackingNumber}
-              </h4>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="leader">Nama Leader Penerima</Label>
-                  <Input
-                    id="leader"
-                    value={leaderName}
-                    onChange={(e) => setLeaderName(e.target.value)}
-                    placeholder="Masukkan nama leader yang menerima paket"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Foto Bukti Pengembalian</Label>
-                  <Button 
-                    onClick={handleTakePhoto}
-                    variant={photoTaken ? "outline" : "default"}
-                    className="w-full"
-                  >
-                    <Camera className="h-4 w-4 mr-2" />
-                    {photoTaken ? 'Foto Sudah Diambil ✓' : 'Ambil Foto Bukti'}
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2">
-                  <Button 
-                    onClick={handleReturnToWarehouse}
-                    disabled={!leaderName.trim() || !photoTaken}
-                    className="w-full"
+                    size="lg"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    Serahkan ke Leader
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setSelectedPackage(null)}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    Batal
+                    {isProcessing ? 'Sedang Memproses...' : `Serahkan ${pendingItems.length} Paket ke Leader`}
                   </Button>
                 </div>
               </div>
-            </div>
+            </>
           )}
         </CardContent>
       </Card>

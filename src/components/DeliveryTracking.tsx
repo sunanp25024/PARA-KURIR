@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Camera, CheckCircle, Package, AlertTriangle, Clock, RotateCcw } from 'lucide-react';
+import { Camera, CheckCircle, Package, AlertTriangle, Clock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useWorkflow } from '@/contexts/WorkflowContext';
 
@@ -26,7 +26,7 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [recipientName, setRecipientName] = useState('');
   const [photoTaken, setPhotoTaken] = useState(false);
-  const [pendingReason, setPendingReason] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleTakePhoto = () => {
     setPhotoTaken(true);
@@ -36,7 +36,7 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
     });
   };
 
-  const handleCompleteDelivery = () => {
+  const handleCompleteDelivery = async () => {
     if (!selectedItem || !recipientName.trim() || !photoTaken) {
       toast({
         title: "Data Tidak Lengkap",
@@ -46,12 +46,18 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
       return;
     }
 
+    setIsProcessing(true);
+
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     markAsDelivered(selectedItem, recipientName.trim(), 'photo_taken');
     
     // Reset form
     setSelectedItem(null);
     setRecipientName('');
     setPhotoTaken(false);
+    setIsProcessing(false);
 
     toast({
       title: "Pengiriman Selesai",
@@ -64,11 +70,16 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
     }, 500);
   };
 
-  const handleMarkAsPending = (packageId?: string) => {
+  const handleMarkAsPending = async (packageId?: string) => {
     const targetPackageId = packageId || selectedItem;
     if (!targetPackageId) return;
 
-    const reason = pendingReason.trim() || 'Tidak dapat terkirim';
+    setIsProcessing(true);
+
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const reason = 'Tidak dapat terkirim';
     markAsPending(targetPackageId, reason);
     
     // Reset form if it was the selected item
@@ -76,38 +87,13 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
       setSelectedItem(null);
       setRecipientName('');
       setPhotoTaken(false);
-      setPendingReason('');
     }
 
-    toast({
-      title: "Paket Pending/Return",
-      description: "Paket telah ditandai sebagai pending/return",
-    });
-
-    // Check if all packages are processed and trigger auto progress
-    setTimeout(() => {
-      onStepComplete?.();
-    }, 500);
-  };
-
-  const handleMarkAsReturn = (packageId?: string) => {
-    const targetPackageId = packageId || selectedItem;
-    if (!targetPackageId) return;
-
-    const reason = 'Return ke gudang';
-    markAsPending(targetPackageId, reason);
-    
-    // Reset form if it was the selected item
-    if (targetPackageId === selectedItem) {
-      setSelectedItem(null);
-      setRecipientName('');
-      setPhotoTaken(false);
-      setPendingReason('');
-    }
+    setIsProcessing(false);
 
     toast({
-      title: "Paket Return",
-      description: "Paket telah ditandai untuk dikembalikan ke gudang",
+      title: "Paket Pending",
+      description: "Paket telah ditandai sebagai pending",
     });
 
     // Check if all packages are processed and trigger auto progress
@@ -134,7 +120,7 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
             Pengantaran Aktif ({inDeliveryItems.length})
           </CardTitle>
           <CardDescription>
-            Kelola proses pengantaran paket. Setiap paket dapat ditandai sebagai: Terkirim, Pending, atau Return.
+            Kelola proses pengantaran paket. Setiap paket dapat ditandai sebagai: Terkirim atau Pending.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -174,11 +160,12 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
                   </div>
 
                   {/* Quick Action Buttons for each package */}
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <Button 
                       size="sm" 
                       onClick={() => setSelectedItem(item.id)}
                       variant={selectedItem === item.id ? "default" : "outline"}
+                      disabled={isProcessing}
                     >
                       <CheckCircle className="h-3 w-3 mr-1" />
                       Terkirim
@@ -187,17 +174,10 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
                       size="sm" 
                       variant="outline"
                       onClick={() => handleMarkAsPending(item.id)}
+                      disabled={isProcessing}
                     >
                       <Clock className="h-3 w-3 mr-1" />
                       Pending
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleMarkAsReturn(item.id)}
-                    >
-                      <RotateCcw className="h-3 w-3 mr-1" />
-                      Return
                     </Button>
                   </div>
                 </div>
@@ -217,6 +197,7 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
                     value={recipientName}
                     onChange={(e) => setRecipientName(e.target.value)}
                     placeholder="Masukkan nama penerima"
+                    disabled={isProcessing}
                   />
                 </div>
 
@@ -226,6 +207,7 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
                     onClick={handleTakePhoto}
                     variant={photoTaken ? "outline" : "default"}
                     className="w-full"
+                    disabled={isProcessing}
                   >
                     <Camera className="h-4 w-4 mr-2" />
                     {photoTaken ? 'Foto Sudah Diambil ✓' : 'Ambil Foto Bukti'}
@@ -235,17 +217,18 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
                 <div className="grid grid-cols-1 gap-2">
                   <Button 
                     onClick={handleCompleteDelivery}
-                    disabled={!recipientName.trim() || !photoTaken}
+                    disabled={!recipientName.trim() || !photoTaken || isProcessing}
                     className="w-full"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    Selesaikan Pengiriman
+                    {isProcessing ? 'Memproses...' : 'Selesaikan Pengiriman'}
                   </Button>
                   
                   <Button 
                     onClick={() => setSelectedItem(null)}
                     variant="outline"
                     className="w-full"
+                    disabled={isProcessing}
                   >
                     Batal
                   </Button>
