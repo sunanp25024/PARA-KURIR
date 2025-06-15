@@ -32,7 +32,8 @@ const KurirWorkflow = () => {
     dailyPackages,
     deliveryPackages,
     deliveredPackages,
-    pendingPackages
+    pendingPackages,
+    autoProgressToNextStep
   } = useWorkflow();
 
   const getStepStatus = (step: string) => {
@@ -65,6 +66,7 @@ const KurirWorkflow = () => {
   };
 
   const handleNextStep = () => {
+    console.log('Manual next step clicked - current step:', currentStep);
     switch (currentStep) {
       case 'input':
         if (canProceedToScan()) setCurrentStep('scan');
@@ -103,6 +105,13 @@ const KurirWorkflow = () => {
     }
   };
 
+  // Handle "Selesaikan Pengantaran" button in pending step
+  const handleFinishDelivery = () => {
+    if (canProceedToPerformance()) {
+      setCurrentStep('performance');
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Progress Header */}
@@ -134,10 +143,17 @@ const KurirWorkflow = () => {
             </Badge>
           </div>
 
-          {canProceedToNext() && (
+          {canProceedToNext() && currentStep !== 'pending' && (
             <Button onClick={handleNextStep} className="w-full">
               <ArrowRight className="h-4 w-4 mr-2" />
               {getNextStepText()}
+            </Button>
+          )}
+
+          {currentStep === 'pending' && canProceedToPerformance() && (
+            <Button onClick={handleFinishDelivery} className="w-full bg-green-600 hover:bg-green-700">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Selesaikan Pengantaran
             </Button>
           )}
         </CardContent>
@@ -164,7 +180,7 @@ const KurirWorkflow = () => {
         </TabsList>
 
         <TabsContent value="input">
-          <DailyPackageInput />
+          <DailyPackageInput onStepComplete={autoProgressToNextStep} />
         </TabsContent>
 
         <TabsContent value="scan">
@@ -176,7 +192,7 @@ const KurirWorkflow = () => {
               </AlertDescription>
             </Alert>
           ) : (
-            <ScanPackageManager />
+            <ScanPackageManager onStepComplete={autoProgressToNextStep} />
           )}
         </TabsContent>
 
@@ -189,7 +205,7 @@ const KurirWorkflow = () => {
               </AlertDescription>
             </Alert>
           ) : (
-            <DeliveryTracking />
+            <DeliveryTracking onStepComplete={autoProgressToNextStep} />
           )}
         </TabsContent>
 
@@ -203,7 +219,7 @@ const KurirWorkflow = () => {
               </AlertDescription>
             </Alert>
           ) : (
-            <PendingReturnPackages />
+            <PendingReturnPackages onStepComplete={autoProgressToNextStep} />
           )}
         </TabsContent>
 

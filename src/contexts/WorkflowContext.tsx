@@ -51,6 +51,9 @@ interface WorkflowContextType {
   markAsDelivered: (packageId: string, recipientName: string, proofPhoto: string) => void;
   markAsPending: (packageId: string, reason: string) => void;
   returnToWarehouse: (packageId: string, leaderName: string, returnPhoto: string) => void;
+  
+  // Auto progression
+  autoProgressToNextStep: () => void;
 }
 
 const WorkflowContext = createContext<WorkflowContextType | undefined>(undefined);
@@ -139,6 +142,48 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     ));
   };
 
+  const autoProgressToNextStep = () => {
+    console.log('Auto progress check - current step:', currentStep);
+    console.log('Daily packages:', dailyPackages.length);
+    console.log('Delivery packages:', deliveryPackages.length);
+    console.log('Delivered packages:', deliveredPackages.length);
+    console.log('Pending packages:', pendingPackages.length);
+    
+    switch (currentStep) {
+      case 'input':
+        if (canProceedToScan()) {
+          console.log('Auto progressing from input to scan');
+          setCurrentStep('scan');
+        }
+        break;
+      case 'scan':
+        if (canProceedToDelivery()) {
+          console.log('Auto progressing from scan to delivery');
+          setCurrentStep('delivery');
+        }
+        break;
+      case 'delivery':
+        const totalDelivery = deliveryPackages.length;
+        const processedDelivery = deliveredPackages.length + pendingPackages.length;
+        if (totalDelivery > 0 && totalDelivery === processedDelivery) {
+          if (canProceedToPending()) {
+            console.log('Auto progressing from delivery to pending');
+            setCurrentStep('pending');
+          } else if (canProceedToPerformance()) {
+            console.log('Auto progressing from delivery to performance');
+            setCurrentStep('performance');
+          }
+        }
+        break;
+      case 'pending':
+        if (canProceedToPerformance()) {
+          console.log('Auto progressing from pending to performance');
+          setCurrentStep('performance');
+        }
+        break;
+    }
+  };
+
   return (
     <WorkflowContext.Provider value={{
       currentStep,
@@ -157,7 +202,8 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       canProceedToPerformance,
       markAsDelivered,
       markAsPending,
-      returnToWarehouse
+      returnToWarehouse,
+      autoProgressToNextStep
     }}>
       {children}
     </WorkflowContext.Provider>

@@ -6,11 +6,15 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Camera, CheckCircle, Package, AlertTriangle, Clock } from 'lucide-react';
+import { Camera, CheckCircle, Package, AlertTriangle, Clock, RotateCcw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useWorkflow } from '@/contexts/WorkflowContext';
 
-const DeliveryTracking = () => {
+interface DeliveryTrackingProps {
+  onStepComplete?: () => void;
+}
+
+const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) => {
   const {
     deliveryPackages,
     deliveredPackages,
@@ -53,37 +57,63 @@ const DeliveryTracking = () => {
       title: "Pengiriman Selesai",
       description: "Paket berhasil ditandai sebagai terkirim",
     });
+
+    // Check if all packages are processed and trigger auto progress
+    setTimeout(() => {
+      onStepComplete?.();
+    }, 500);
   };
 
-  const handleMarkAsPending = () => {
-    if (!selectedItem) return;
+  const handleMarkAsPending = (packageId?: string) => {
+    const targetPackageId = packageId || selectedItem;
+    if (!targetPackageId) return;
 
     const reason = pendingReason.trim() || 'Tidak dapat terkirim';
-    markAsPending(selectedItem, reason);
+    markAsPending(targetPackageId, reason);
     
-    // Reset form
-    setSelectedItem(null);
-    setRecipientName('');
-    setPhotoTaken(false);
-    setPendingReason('');
+    // Reset form if it was the selected item
+    if (targetPackageId === selectedItem) {
+      setSelectedItem(null);
+      setRecipientName('');
+      setPhotoTaken(false);
+      setPendingReason('');
+    }
 
     toast({
-      title: "Paket Pending",
+      title: "Paket Pending/Return",
       description: "Paket telah ditandai sebagai pending/return",
     });
+
+    // Check if all packages are processed and trigger auto progress
+    setTimeout(() => {
+      onStepComplete?.();
+    }, 500);
   };
 
-  // Auto-mark packages as pending if they don't have complete delivery info
-  const handleAutoMarkPending = (packageId: string) => {
-    if (!recipientName.trim() || !photoTaken) {
-      const reason = 'Tidak ada bukti foto dan nama penerima';
-      markAsPending(packageId, reason);
-      
-      toast({
-        title: "Auto Pending",
-        description: "Paket otomatis ditandai pending karena data tidak lengkap",
-      });
+  const handleMarkAsReturn = (packageId?: string) => {
+    const targetPackageId = packageId || selectedItem;
+    if (!targetPackageId) return;
+
+    const reason = 'Return ke gudang';
+    markAsPending(targetPackageId, reason);
+    
+    // Reset form if it was the selected item
+    if (targetPackageId === selectedItem) {
+      setSelectedItem(null);
+      setRecipientName('');
+      setPhotoTaken(false);
+      setPendingReason('');
     }
+
+    toast({
+      title: "Paket Return",
+      description: "Paket telah ditandai untuk dikembalikan ke gudang",
+    });
+
+    // Check if all packages are processed and trigger auto progress
+    setTimeout(() => {
+      onStepComplete?.();
+    }, 500);
   };
 
   const inDeliveryItems = deliveryPackages.filter(pkg => 
@@ -104,7 +134,7 @@ const DeliveryTracking = () => {
             Pengantaran Aktif ({inDeliveryItems.length})
           </CardTitle>
           <CardDescription>
-            Kelola proses pengantaran paket. Paket tanpa foto dan nama penerima akan otomatis menjadi pending.
+            Kelola proses pengantaran paket. Setiap paket dapat ditandai sebagai: Terkirim, Pending, atau Return.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -119,7 +149,8 @@ const DeliveryTracking = () => {
 
           {inDeliveryItems.length === 0 && deliveryPackages.length > 0 && (
             <div className="text-center py-8 text-gray-500">
-              Semua paket sudah selesai diproses
+              <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
+              <p>Semua paket sudah selesai diproses</p>
             </div>
           )}
 
@@ -128,12 +159,11 @@ const DeliveryTracking = () => {
               {inDeliveryItems.map((item) => (
                 <div 
                   key={item.id} 
-                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                  className={`p-4 border rounded-lg transition-colors ${
                     selectedItem === item.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
                   }`}
-                  onClick={() => setSelectedItem(item.id)}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-3">
                     <div>
                       <p className="font-medium">{item.trackingNumber}</p>
                       <Badge variant={item.isCOD ? "default" : "secondary"}>
@@ -142,15 +172,43 @@ const DeliveryTracking = () => {
                     </div>
                     <Badge variant="outline">Dalam Pengantaran</Badge>
                   </div>
+
+                  {/* Quick Action Buttons for each package */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button 
+                      size="sm" 
+                      onClick={() => setSelectedItem(item.id)}
+                      variant={selectedItem === item.id ? "default" : "outline"}
+                    >
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Terkirim
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleMarkAsPending(item.id)}
+                    >
+                      <Clock className="h-3 w-3 mr-1" />
+                      Pending
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleMarkAsReturn(item.id)}
+                    >
+                      <RotateCcw className="h-3 w-3 mr-1" />
+                      Return
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Delivery Form */}
+          {/* Delivery Form - Only show when item is selected for "Terkirim" */}
           {selectedItem && (
             <div className="mt-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
-              <h4 className="font-medium mb-4">Proses Pengantaran</h4>
+              <h4 className="font-medium mb-4">Proses Pengantaran - {deliveryPackages.find(p => p.id === selectedItem)?.trackingNumber}</h4>
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="recipient">Nama Penerima</Label>
@@ -174,16 +232,6 @@ const DeliveryTracking = () => {
                   </Button>
                 </div>
 
-                <div>
-                  <Label htmlFor="pendingReason">Alasan Pending (Opsional)</Label>
-                  <Input
-                    id="pendingReason"
-                    value={pendingReason}
-                    onChange={(e) => setPendingReason(e.target.value)}
-                    placeholder="Contoh: Alamat tidak ditemukan, penerima tidak ada"
-                  />
-                </div>
-
                 <div className="grid grid-cols-1 gap-2">
                   <Button 
                     onClick={handleCompleteDelivery}
@@ -195,12 +243,11 @@ const DeliveryTracking = () => {
                   </Button>
                   
                   <Button 
-                    onClick={handleMarkAsPending}
+                    onClick={() => setSelectedItem(null)}
                     variant="outline"
                     className="w-full"
                   >
-                    <Clock className="h-4 w-4 mr-2" />
-                    Tandai Sebagai Pending/Return
+                    Batal
                   </Button>
                 </div>
               </div>
@@ -227,7 +274,7 @@ const DeliveryTracking = () => {
                       <p className="font-medium">{item.trackingNumber}</p>
                       <p className="text-sm text-gray-600">Penerima: {item.recipientName}</p>
                       <p className="text-sm text-gray-600">
-                        Terkirim: {item.deliveredAt?.toLocaleString('id-ID')}
+                        Terkirim: {new Date(item.deliveredAt).toLocaleString('id-ID')}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-1">
