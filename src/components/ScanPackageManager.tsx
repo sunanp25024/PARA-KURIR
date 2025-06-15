@@ -128,128 +128,148 @@ const ScanPackageManager: React.FC<ScanPackageManagerProps> = ({ onStepComplete 
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Camera className="h-5 w-5" />
-          Scan & Kelola Paket
-        </CardTitle>
-        <CardDescription>Scan atau input manual paket yang akan dikirim</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {dailyData.totalPackages === 0 && (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Silakan input data paket harian terlebih dahulu di tab "Input Paket"
-            </AlertDescription>
-          </Alert>
-        )}
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center">
+        <h2 className="text-2xl font-bold">Scan & Kelola Paket</h2>
+        <p className="text-muted-foreground mt-1">Scan atau input manual paket yang akan dikirim</p>
+      </div>
 
-        {dailyData.totalPackages > 0 && (
-          <>
-            {/* Scanning Options */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <h4 className="font-medium">Scan dengan Kamera</h4>
+      {dailyData.totalPackages === 0 && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Silakan input data paket harian terlebih dahulu
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {dailyData.totalPackages > 0 && (
+        <>
+          {/* Progress Summary */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-4 gap-4 text-center">
+                <div className="space-y-1">
+                  <p className="text-2xl font-bold">{dailyData.totalPackages}</p>
+                  <p className="text-sm text-muted-foreground">Target Total</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-2xl font-bold text-blue-600">{totalScanned}</p>
+                  <p className="text-sm text-muted-foreground">Terscan</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-2xl font-bold text-green-600">{codScanned}/{dailyData.codPackages}</p>
+                  <p className="text-sm text-muted-foreground">COD</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-2xl font-bold text-purple-600">{nonCodScanned}/{dailyData.nonCodPackages}</p>
+                  <p className="text-sm text-muted-foreground">Non COD</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Scanning Methods */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Camera Scan */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Camera className="h-5 w-5" />
+                  Scan dengan Kamera
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                 <Button 
                   onClick={handleScanCamera} 
                   disabled={isScanning || isCompleted || isStartingDelivery}
-                  className="w-full"
+                  className="w-full h-12"
+                  size="lg"
                 >
-                  <Camera className="h-4 w-4 mr-2" />
                   {isScanning ? 'Scanning...' : 'Scan Paket'}
                 </Button>
-              </div>
+              </CardContent>
+            </Card>
 
-              <div className="space-y-3">
-                <h4 className="font-medium">Input Manual</h4>
+            {/* Manual Input */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  Input Manual
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="tracking">Nomor Resi</Label>
                   <Input
+                    id="tracking"
                     value={manualInput}
                     onChange={(e) => setManualInput(e.target.value)}
                     placeholder="Masukkan nomor resi"
                     disabled={isCompleted || isStartingDelivery}
                   />
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="codManual"
-                      checked={isCODManual}
-                      onCheckedChange={(checked) => setIsCODManual(checked as boolean)}
-                      disabled={isCompleted || isStartingDelivery}
-                    />
-                    <Label htmlFor="codManual">Paket COD</Label>
-                  </div>
-                  <Button 
-                    onClick={handleManualInput} 
-                    disabled={!manualInput.trim() || isCompleted || isStartingDelivery}
-                    className="w-full"
-                  >
-                    Tambah Paket
-                  </Button>
                 </div>
-              </div>
-            </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="codManual"
+                    checked={isCODManual}
+                    onCheckedChange={(checked) => setIsCODManual(checked as boolean)}
+                    disabled={isCompleted || isStartingDelivery}
+                  />
+                  <Label htmlFor="codManual">Paket COD</Label>
+                </div>
+                <Button 
+                  onClick={handleManualInput} 
+                  disabled={!manualInput.trim() || isCompleted || isStartingDelivery}
+                  className="w-full"
+                >
+                  Tambah Paket
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* Progress Status */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
-              <div className="text-center">
-                <p className="text-sm text-gray-600">Target Total</p>
-                <p className="text-xl font-bold">{dailyData.totalPackages}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-gray-600">Terscan</p>
-                <p className="text-xl font-bold">{totalScanned}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-gray-600">COD</p>
-                <p className="text-xl font-bold text-green-600">{codScanned}/{dailyData.codPackages}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-gray-600">Non COD</p>
-                <p className="text-xl font-bold text-blue-600">{nonCodScanned}/{dailyData.nonCodPackages}</p>
-              </div>
-            </div>
+          {/* Status Messages */}
+          {!isCompleted && totalScanned > 0 && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Scan belum selesai. Terscan: {totalScanned}/{dailyData.totalPackages}
+                {codScanned !== dailyData.codPackages && ` | COD: ${codScanned}/${dailyData.codPackages}`}
+                {nonCodScanned !== dailyData.nonCodPackages && ` | Non COD: ${nonCodScanned}/${dailyData.nonCodPackages}`}
+              </AlertDescription>
+            </Alert>
+          )}
 
-            {/* Status Alert */}
-            {!isCompleted && totalScanned > 0 && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  Scan belum selesai. Total scan: {totalScanned}, Target: {dailyData.totalPackages}
-                  {codScanned !== dailyData.codPackages && ` | COD: ${codScanned}/${dailyData.codPackages}`}
-                  {nonCodScanned !== dailyData.nonCodPackages && ` | Non COD: ${nonCodScanned}/${dailyData.nonCodPackages}`}
-                </AlertDescription>
-              </Alert>
-            )}
+          {isCompleted && !isStartingDelivery && (
+            <Alert>
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                Semua paket sudah terscan dengan benar. Anda dapat memulai pengantaran.
+              </AlertDescription>
+            </Alert>
+          )}
 
-            {isCompleted && !isStartingDelivery && (
-              <Alert>
-                <CheckCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Semua paket sudah terscan dengan benar. Anda dapat memulai pengantaran.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Scanned Packages List - "Paket Diproses" */}
-            {scannedPackages.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium">Paket Diproses ({scannedPackages.length})</h4>
-                <div className="max-h-60 overflow-y-auto space-y-2">
+          {/* Scanned Packages List */}
+          {scannedPackages.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Paket Terscan ({scannedPackages.length})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="max-h-60 overflow-y-auto space-y-3">
                   {scannedPackages.map((pkg) => (
-                    <div key={pkg.id} className="flex items-center justify-between p-3 border rounded-lg bg-blue-50">
-                      <div>
-                        <p className="font-medium">{pkg.trackingNumber}</p>
-                        <div className="flex items-center gap-2 mt-1">
+                    <div key={pkg.id} className="flex items-center justify-between p-3 border rounded-lg bg-slate-50">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium">{pkg.trackingNumber}</p>
                           <Badge variant={pkg.isCOD ? "default" : "secondary"} className="text-xs">
                             {pkg.isCOD ? 'COD' : 'Non COD'}
                           </Badge>
-                          <Badge variant="outline" className="text-xs text-blue-600 border-blue-600">
-                            Proses
-                          </Badge>
                         </div>
-                        <p className="text-xs text-gray-600 mt-1">
+                        <p className="text-xs text-muted-foreground">
                           Scan: {pkg.scanTime.toLocaleTimeString('id-ID')}
                         </p>
                       </div>
@@ -265,24 +285,28 @@ const ScanPackageManager: React.FC<ScanPackageManagerProps> = ({ onStepComplete 
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Start Delivery Button */}
-            <Button 
-              onClick={handleStartDelivery}
-              disabled={!isCompleted || isStartingDelivery} 
-              className="w-full"
-              size="lg"
-            >
-              {isStartingDelivery ? 'Memulai Pengantaran...' : 
-               isCompleted ? 'Mulai Pengantaran' : 
-               `Scan ${dailyData.totalPackages - totalScanned} Paket Lagi`}
-            </Button>
-          </>
-        )}
-      </CardContent>
-    </Card>
+          {/* Start Delivery Button */}
+          <Card>
+            <CardContent className="pt-6">
+              <Button 
+                onClick={handleStartDelivery}
+                disabled={!isCompleted || isStartingDelivery} 
+                className="w-full h-12"
+                size="lg"
+              >
+                {isStartingDelivery ? 'Memulai Pengantaran...' : 
+                 isCompleted ? 'Mulai Pengantaran' : 
+                 `Scan ${dailyData.totalPackages - totalScanned} Paket Lagi`}
+              </Button>
+            </CardContent>
+          </Card>
+        </>
+      )}
+    </div>
   );
 };
 
