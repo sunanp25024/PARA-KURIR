@@ -72,13 +72,13 @@ const Dashboard = () => {
     return <div>Loading...</div>;
   }
 
-  // Dashboard khusus untuk kurir dengan layout mobile
+  // Dashboard khusus untuk kurir dengan layout mobile (TANPA tombol mode mobile)
   if (user.role === 'kurir') {
     return (
       <Layout>
         <WorkflowProvider>
           <div className="space-y-6">
-            {/* Header */}
+            {/* Header - Tanpa tombol Mode Mobile */}
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Dashboard Kurir</h1>
