@@ -132,33 +132,33 @@ const CourierWorkflowMain = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
       <div className="max-w-6xl mx-auto p-4 lg:p-6 space-y-6">
         
-        {/* Profile Header Card */}
+        {/* Profile Header Card - Lebih kompak */}
         <Card className="bg-white/95 backdrop-blur-sm shadow-lg border-0">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <Avatar className="h-16 w-16 border-4 border-blue-100">
+                <Avatar className="h-14 w-14 border-4 border-blue-100">
                   <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback className="bg-blue-500 text-white text-xl font-bold">
+                  <AvatarFallback className="bg-blue-500 text-white text-lg font-bold">
                     BS
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <h1 className="text-2xl font-bold text-slate-800">Budi Santoso</h1>
-                  <p className="text-slate-600 text-lg">ID: PISTEST2025 - Jakarta Pusat Hub</p>
+                  <p className="text-slate-600">ID: PISTEST2025 - Jakarta Pusat Hub</p>
                   <Badge className="mt-1 bg-blue-100 text-blue-700 border-blue-200">
                     KURIR
                   </Badge>
                 </div>
               </div>
-              <Button variant="outline" size="icon" className="h-12 w-12">
-                <Bell className="h-6 w-6" />
+              <Button variant="outline" size="icon" className="h-10 w-10">
+                <Bell className="h-5 w-5" />
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Alert Banner - Show if haven't completed attendance */}
+        {/* Alert Banner - Hanya saat step input */}
         {currentStep === 'input' && (
           <Alert className="bg-orange-50 border-orange-200 shadow-sm">
             <AlertTriangle className="h-5 w-5 text-orange-600" />
@@ -171,18 +171,18 @@ const CourierWorkflowMain = () => {
           </Alert>
         )}
 
-        {/* Current Action Card */}
+        {/* Current Step Card - Design yang lebih clean */}
         {stepCard && (
           <Card className="bg-white/95 backdrop-blur-sm shadow-lg border-0 overflow-hidden">
             <CardContent className="p-0">
               <div className={`bg-gradient-to-r ${stepCard.color} p-6 text-white`}>
                 <div className="flex items-center space-x-4">
-                  <div className="p-4 bg-white/20 rounded-2xl">
-                    <stepCard.icon className="h-8 w-8" />
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <stepCard.icon className="h-6 w-6" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-2xl font-bold mb-2">{stepCard.title}</h2>
-                    <p className="text-white/90 text-lg">{stepCard.subtitle}</p>
+                    <h2 className="text-xl font-bold mb-1">{stepCard.title}</h2>
+                    <p className="text-white/90">{stepCard.subtitle}</p>
                   </div>
                 </div>
               </div>
@@ -190,12 +190,12 @@ const CourierWorkflowMain = () => {
                 {currentStep !== 'performance' ? (
                   <Button 
                     size="lg" 
-                    className={`w-full h-14 text-lg bg-gradient-to-r ${stepCard.color} hover:opacity-90 shadow-lg`}
+                    className={`w-full h-12 bg-gradient-to-r ${stepCard.color} hover:opacity-90 shadow-lg`}
                     onClick={() => {
                       // This will trigger the component render which handles the step logic
                     }}
                   >
-                    <stepCard.buttonIcon className="h-6 w-6 mr-3" />
+                    <stepCard.buttonIcon className="h-5 w-5 mr-2" />
                     {stepCard.buttonText}
                   </Button>
                 ) : (
@@ -209,9 +209,9 @@ const CourierWorkflowMain = () => {
                     <Button 
                       onClick={handleStartNewDay}
                       size="lg"
-                      className="w-full h-14 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
                     >
-                      <RotateCcw className="h-6 w-6 mr-3" />
+                      <RotateCcw className="h-5 w-5 mr-2" />
                       Mulai Hari Baru
                     </Button>
                   </div>
@@ -221,53 +221,53 @@ const CourierWorkflowMain = () => {
           </Card>
         )}
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Grid yang lebih rapi */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="bg-white/95 backdrop-blur-sm shadow-md border-0">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Package className="h-6 w-6 text-blue-600" />
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Package className="h-5 w-5 text-blue-600" />
               </div>
-              <div className="text-3xl font-bold text-slate-800 mb-1">{totalPackages}</div>
+              <div className="text-2xl font-bold text-slate-800 mb-1">{totalPackages}</div>
               <p className="text-sm text-slate-600">Total Paket</p>
-              <Badge variant="secondary" className="mt-2">100%</Badge>
+              <Badge variant="secondary" className="mt-2 text-xs">100%</Badge>
             </CardContent>
           </Card>
 
           <Card className="bg-white/95 backdrop-blur-sm shadow-md border-0">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">💰</span>
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <span className="text-lg">💰</span>
               </div>
-              <div className="text-3xl font-bold text-slate-800 mb-1">{codPackages}</div>
+              <div className="text-2xl font-bold text-slate-800 mb-1">{codPackages}</div>
               <p className="text-sm text-slate-600">COD</p>
-              <Badge variant="secondary" className="mt-2">
+              <Badge variant="secondary" className="mt-2 text-xs">
                 {totalPackages > 0 ? Math.round((codPackages / totalPackages) * 100) : 0}%
               </Badge>
             </CardContent>
           </Card>
 
           <Card className="bg-white/95 backdrop-blur-sm shadow-md border-0">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <CheckCircle className="h-5 w-5 text-green-600" />
               </div>
-              <div className="text-3xl font-bold text-slate-800 mb-1">{deliveredCount}</div>
+              <div className="text-2xl font-bold text-slate-800 mb-1">{deliveredCount}</div>
               <p className="text-sm text-slate-600">Terkirim</p>
-              <Badge variant="default" className="mt-2 bg-green-600">
+              <Badge variant="default" className="mt-2 text-xs bg-green-600">
                 {totalPackages > 0 ? Math.round((deliveredCount / totalPackages) * 100) : 0}%
               </Badge>
             </CardContent>
           </Card>
 
           <Card className="bg-white/95 backdrop-blur-sm shadow-md border-0">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Clock className="h-6 w-6 text-orange-600" />
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Clock className="h-5 w-5 text-orange-600" />
               </div>
-              <div className="text-3xl font-bold text-slate-800 mb-1">{pendingCount}</div>
+              <div className="text-2xl font-bold text-slate-800 mb-1">{pendingCount}</div>
               <p className="text-sm text-slate-600">Pending</p>
-              <Badge variant="outline" className="mt-2 border-orange-300 text-orange-600">
+              <Badge variant="outline" className="mt-2 text-xs border-orange-300 text-orange-600">
                 {totalPackages > 0 ? Math.round((pendingCount / totalPackages) * 100) : 0}%
               </Badge>
             </CardContent>
