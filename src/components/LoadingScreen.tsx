@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Truck, Package } from 'lucide-react';
 
 const LoadingScreen = () => {
   return (
@@ -8,11 +7,12 @@ const LoadingScreen = () => {
       <div className="text-center">
         {/* Logo Animation */}
         <div className="relative mb-8">
-          <div className="w-24 h-24 mx-auto bg-gradient-to-r from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center shadow-2xl animate-pulse">
-            <Truck className="h-12 w-12 text-white" />
-          </div>
-          <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full flex items-center justify-center animate-bounce">
-            <Package className="h-4 w-4 text-white" />
+          <div className="w-24 h-24 mx-auto bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl animate-pulse p-4">
+            <img 
+              src="/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png" 
+              alt="INSAN MOBILE Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
         </div>
         
