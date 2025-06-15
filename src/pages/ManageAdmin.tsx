@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -116,7 +115,7 @@ const ManageAdmin = () => {
   };
 
   const handleToggleStatus = (admin: Admin) => {
-    const newStatus = admin.status === 'Aktif' ? 'Nonaktif' : 'Aktif';
+    const newStatus: 'Aktif' | 'Nonaktif' = admin.status === 'Aktif' ? 'Nonaktif' : 'Aktif';
     const updatedAdmin = { ...admin, status: newStatus };
     setAdmins(admins.map(a => a.id === admin.id ? updatedAdmin : a));
     
