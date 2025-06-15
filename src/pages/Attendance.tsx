@@ -1,237 +1,268 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, CheckCircle, MapPin, Navigation } from 'lucide-react';
-import Layout from '@/components/Layout';
-import { toast } from '@/components/ui/use-toast';
+import { Calendar } from '@/components/ui/calendar';
+import { 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  MapPin, 
+  Camera,
+  Calendar as CalendarIcon,
+  Timer,
+  AlertCircle
+} from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 const Attendance = () => {
-  const [attendanceStatus, setAttendanceStatus] = useState('not-checked-in');
-  const [checkInTime, setCheckInTime] = useState('');
-  const [checkOutTime, setCheckOutTime] = useState('');
-  const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
-  const [attendanceHistory] = useState([
-    { date: '2025-06-13', checkIn: '08:15', checkOut: '17:30', status: 'Hadir' },
-    { date: '2025-06-12', checkIn: '08:20', checkOut: '17:25', status: 'Hadir' },
-    { date: '2025-06-11', checkIn: '08:30', checkOut: '17:20', status: 'Terlambat' },
-    { date: '2025-06-10', checkIn: '08:10', checkOut: '17:35', status: 'Hadir' }
-  ]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [isCheckedIn, setIsCheckedIn] = useState(false);
+  const [checkInTime, setCheckInTime] = useState<string | null>(null);
+  const [currentLocation, setCurrentLocation] = useState('Menunggu lokasi...');
 
-  useEffect(() => {
-    // Get current location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        (error) => {
-          console.log('Error getting location:', error);
-        }
-      );
-    }
+  React.useEffect(() => {
+    // Simulasi mendapatkan lokasi
+    setTimeout(() => {
+      setCurrentLocation('Jl. Thamrin No. 1, Jakarta Pusat');
+    }, 2000);
   }, []);
 
   const handleCheckIn = () => {
-    if (!location) {
-      toast({
-        title: "Lokasi Diperlukan",
-        description: "Harap aktifkan GPS untuk check-in",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const now = new Date().toLocaleTimeString('id-ID');
-    setCheckInTime(now);
-    setAttendanceStatus('checked-in');
+    const now = new Date();
+    setIsCheckedIn(true);
+    setCheckInTime(now.toLocaleTimeString('id-ID'));
     toast({
       title: "Check-in Berhasil",
-      description: `Anda telah check-in pada ${now}`,
+      description: `Anda telah check-in pada ${now.toLocaleTimeString('id-ID')}`,
     });
   };
 
   const handleCheckOut = () => {
-    if (!location) {
-      toast({
-        title: "Lokasi Diperlukan",
-        description: "Harap aktifkan GPS untuk check-out",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const now = new Date().toLocaleTimeString('id-ID');
-    setCheckOutTime(now);
-    setAttendanceStatus('checked-out');
+    const now = new Date();
+    setIsCheckedIn(false);
+    setCheckInTime(null);
     toast({
       title: "Check-out Berhasil",
-      description: `Anda telah check-out pada ${now}`,
+      description: `Anda telah check-out pada ${now.toLocaleTimeString('id-ID')}`,
     });
   };
 
-  const getWorkingHours = () => {
-    if (checkInTime && checkOutTime) {
-      const checkIn = new Date(`2025-06-14 ${checkInTime}`);
-      const checkOut = new Date(`2025-06-14 ${checkOutTime}`);
-      const diff = (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
-      return diff.toFixed(1);
+  const attendanceHistory = [
+    { date: '2024-01-20', checkIn: '08:00', checkOut: '17:00', status: 'hadir', duration: '9 jam' },
+    { date: '2024-01-19', checkIn: '08:15', checkOut: '17:10', status: 'hadir', duration: '8 jam 55 menit' },
+    { date: '2024-01-18', checkIn: '08:30', checkOut: '17:00', status: 'terlambat', duration: '8 jam 30 menit' },
+    { date: '2024-01-17', checkIn: '08:00', checkOut: '17:00', status: 'hadir', duration: '9 jam' },
+    { date: '2024-01-16', checkIn: '-', checkOut: '-', status: 'tidak_hadir', duration: '-' },
+  ];
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'hadir':
+        return <Badge className="bg-green-500"><CheckCircle className="h-3 w-3 mr-1" />Hadir</Badge>;
+      case 'terlambat':
+        return <Badge variant="secondary"><Timer className="h-3 w-3 mr-1" />Terlambat</Badge>;
+      case 'tidak_hadir':
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Tidak Hadir</Badge>;
+      default:
+        return <Badge variant="outline">-</Badge>;
     }
-    return '0';
+  };
+
+  const monthlyStats = {
+    totalHadir: 18,
+    totalTerlambat: 2,
+    totalTidakHadir: 1,
+    totalJamKerja: '162 jam'
   };
 
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Absen</h1>
-          <p className="text-gray-600">Kelola kehadiran harian Anda</p>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Absensi</h1>
+            <p className="text-muted-foreground">
+              Kelola kehadiran dan waktu kerja Anda
+            </p>
+          </div>
+          <Badge variant={isCheckedIn ? "default" : "secondary"} className="px-4 py-2">
+            <Clock className="h-4 w-4 mr-2" />
+            {isCheckedIn ? 'Sedang Bekerja' : 'Belum Check-in'}
+          </Badge>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Status Kehadiran Hari Ini
-              </CardTitle>
-              <CardDescription>
-                {new Date().toLocaleDateString('id-ID', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span>Status:</span>
-                <Badge variant={
-                  attendanceStatus === 'checked-in' ? 'default' : 
-                  attendanceStatus === 'checked-out' ? 'default' : 'secondary'
-                }>
-                  {attendanceStatus === 'not-checked-in' && 'Belum Check-in'}
-                  {attendanceStatus === 'checked-in' && 'Sedang Bekerja'}
-                  {attendanceStatus === 'checked-out' && 'Selesai Kerja'}
-                </Badge>
-              </div>
-
-              {checkInTime && (
-                <div className="flex items-center justify-between">
-                  <span>Waktu Check-in:</span>
-                  <span className="font-medium">{checkInTime}</span>
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Check-in/out Section */}
+          <div className="md:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Absen Hari Ini
+                </CardTitle>
+                <CardDescription>
+                  {new Date().toLocaleDateString('id-ID', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Current Location */}
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MapPin className="h-4 w-4 text-gray-600" />
+                    <span className="text-sm font-medium">Lokasi Saat Ini:</span>
+                  </div>
+                  <p className="text-sm text-gray-600">{currentLocation}</p>
                 </div>
-              )}
 
-              {checkOutTime && (
-                <div className="flex items-center justify-between">
-                  <span>Waktu Check-out:</span>
-                  <span className="font-medium">{checkOutTime}</span>
-                </div>
-              )}
+                {/* Check-in Status */}
+                {isCheckedIn && checkInTime && (
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span className="text-sm font-medium text-green-800">Sudah Check-in</span>
+                    </div>
+                    <p className="text-sm text-green-700">Waktu masuk: {checkInTime}</p>
+                  </div>
+                )}
 
-              {checkInTime && checkOutTime && (
-                <div className="flex items-center justify-between">
-                  <span>Total Jam Kerja:</span>
-                  <span className="font-medium">{getWorkingHours()} jam</span>
-                </div>
-              )}
-
-              <div className="pt-4">
-                {attendanceStatus === 'not-checked-in' && (
-                  <Button onClick={handleCheckIn} className="w-full" disabled={!location}>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    {location ? 'Check-in Sekarang' : 'Menunggu GPS...'}
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  {!isCheckedIn ? (
+                    <Button onClick={handleCheckIn} className="flex-1 flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      Check-in
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={handleCheckOut} 
+                      variant="destructive" 
+                      className="flex-1 flex items-center gap-2"
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Check-out
+                    </Button>
+                  )}
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Camera className="h-4 w-4" />
+                    Foto Absen
                   </Button>
-                )}
-                
-                {attendanceStatus === 'checked-in' && (
-                  <Button onClick={handleCheckOut} variant="outline" className="w-full">
-                    <Clock className="h-4 w-4 mr-2" />
-                    Check-out
-                  </Button>
-                )}
-                
-                {attendanceStatus === 'checked-out' && (
-                  <div className="text-center text-green-600 font-medium">
-                    ✓ Absen hari ini sudah selesai
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Lokasi & GPS
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="font-medium">Area Kerja Aktif</p>
-                  <p className="text-sm text-gray-600">Jakarta Selatan</p>
                 </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="font-medium">Status GPS</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className={`w-3 h-3 rounded-full ${location ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                    <span className="text-sm">{location ? 'Aktif' : 'Tidak Aktif'}</span>
+
+                {/* Quick Info */}
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-600">08:00</p>
+                    <p className="text-sm text-gray-600">Jam Masuk</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-600">17:00</p>
+                    <p className="text-sm text-gray-600">Jam Pulang</p>
                   </div>
                 </div>
-                {location && (
-                  <div className="p-3 bg-green-50 rounded-lg">
-                    <p className="font-medium">Koordinat Saat Ini</p>
-                    <p className="text-sm text-gray-600">{location.lat.toFixed(6)}, {location.lng.toFixed(6)}</p>
-                  </div>
-                )}
-                <Button variant="outline" className="w-full" onClick={() => window.location.reload()}>
-                  <Navigation className="h-4 w-4 mr-2" />
-                  Refresh Lokasi
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Riwayat Kehadiran (7 Hari Terakhir)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {attendanceHistory.map((record, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+            {/* Attendance History */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Riwayat Absensi</CardTitle>
+                <CardDescription>Catatan kehadiran 7 hari terakhir</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {attendanceHistory.map((record, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="text-center">
+                          <p className="text-sm font-medium">{record.date}</p>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            {getStatusBadge(record.status)}
+                          </div>
+                          <p className="text-xs text-gray-600">
+                            {record.checkIn} - {record.checkOut} ({record.duration})
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Calendar */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4" />
+                  Kalender
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => date && setSelectedDate(date)}
+                  className="rounded-md border"
+                />
+              </CardContent>
+            </Card>
+
+            {/* Monthly Stats */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Statistik Bulan Ini</CardTitle>
+                <CardDescription>Ringkasan kehadiran Januari 2024</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Total Hadir</span>
+                  <Badge className="bg-green-500">{monthlyStats.totalHadir}</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Terlambat</span>
+                  <Badge variant="secondary">{monthlyStats.totalTerlambat}</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Tidak Hadir</span>
+                  <Badge variant="destructive">{monthlyStats.totalTidakHadir}</Badge>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <span className="text-sm font-medium">Total Jam Kerja</span>
+                  <span className="text-sm font-bold">{monthlyStats.totalJamKerja}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Alert */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
                   <div>
-                    <p className="font-medium">
-                      {new Date(record.date).toLocaleDateString('id-ID', { 
-                        weekday: 'long', 
-                        day: 'numeric',
-                        month: 'long'
-                      })}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Check-in: {record.checkIn} | Check-out: {record.checkOut}
+                    <p className="text-sm font-medium">Reminder</p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Jangan lupa untuk check-out setelah selesai bekerja
                     </p>
                   </div>
-                  <Badge variant={record.status === 'Hadir' ? 'default' : 'secondary'}>
-                    {record.status}
-                  </Badge>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </Layout>
   );

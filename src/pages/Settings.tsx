@@ -1,182 +1,400 @@
 
 import React, { useState } from 'react';
+import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Settings as SettingsIcon, Bell, Shield, User } from 'lucide-react';
-import Layout from '@/components/Layout';
-import { toast } from '@/components/ui/use-toast';
+import { Separator } from '@/components/ui/separator';
+import { 
+  Settings as SettingsIcon, 
+  Bell, 
+  Shield, 
+  Smartphone,
+  MapPin,
+  Clock,
+  Moon,
+  Volume2,
+  Wifi,
+  Battery,
+  Save
+} from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 const Settings = () => {
-  const [notifications, setNotifications] = useState(true);
-  const [gpsTracking, setGpsTracking] = useState(true);
-  const [autoCheckIn, setAutoCheckIn] = useState(false);
+  const [settings, setSettings] = useState({
+    // Notifikasi
+    pushNotifications: true,
+    emailNotifications: false,
+    smsNotifications: true,
+    soundAlerts: true,
+    
+    // Lokasi & Tracking
+    gpsTracking: true,
+    shareLocation: true,
+    autoLocationUpdate: false,
+    
+    // Aplikasi
+    darkMode: false,
+    autoSync: true,
+    offlineMode: false,
+    
+    // Keamanan
+    biometricLogin: false,
+    autoLock: true,
+    
+    // Kurir Spesifik
+    workingHours: {
+      start: '08:00',
+      end: '17:00'
+    },
+    breakDuration: 60,
+    maxDeliveryRadius: 10
+  });
 
-  const handleSaveSettings = () => {
+  const handleSave = () => {
+    // Simulate saving settings
+    localStorage.setItem('kurirSettings', JSON.stringify(settings));
     toast({
       title: "Pengaturan Disimpan",
-      description: "Semua perubahan telah disimpan.",
+      description: "Semua perubahan telah disimpan successfully",
     });
+  };
+
+  const handleToggle = (key: string, value: boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const handleWorkingHoursChange = (type: 'start' | 'end', value: string) => {
+    setSettings(prev => ({
+      ...prev,
+      workingHours: {
+        ...prev.workingHours,
+        [type]: value
+      }
+    }));
   };
 
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Pengaturan</h1>
-          <p className="text-gray-600">Kelola preferensi dan konfigurasi aplikasi</p>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Pengaturan</h1>
+            <p className="text-muted-foreground">
+              Kelola preferensi dan konfigurasi aplikasi Anda
+            </p>
+          </div>
+          <Button onClick={handleSave} className="flex items-center gap-2">
+            <Save className="h-4 w-4" />
+            Simpan Semua
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Notifikasi */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
                 Notifikasi
               </CardTitle>
-              <CardDescription>Atur preferensi notifikasi Anda</CardDescription>
+              <CardDescription>
+                Atur preferensi notifikasi dan peringatan
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="notifications">Aktifkan Notifikasi</Label>
-                  <p className="text-sm text-gray-600">Terima notifikasi untuk tugas baru</p>
+                <div className="space-y-0.5">
+                  <Label>Push Notifications</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Terima notifikasi langsung di perangkat
+                  </p>
                 </div>
-                <Switch 
-                  id="notifications"
-                  checked={notifications}
-                  onCheckedChange={setNotifications}
+                <Switch
+                  checked={settings.pushNotifications}
+                  onCheckedChange={(checked) => handleToggle('pushNotifications', checked)}
                 />
               </div>
 
               <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="auto-checkin">Auto Check-in</Label>
-                  <p className="text-sm text-gray-600">Check-in otomatis saat tiba di area kerja</p>
+                <div className="space-y-0.5">
+                  <Label>Email Notifications</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Terima update melalui email
+                  </p>
                 </div>
-                <Switch 
-                  id="auto-checkin"
-                  checked={autoCheckIn}
-                  onCheckedChange={setAutoCheckIn}
+                <Switch
+                  checked={settings.emailNotifications}
+                  onCheckedChange={(checked) => handleToggle('emailNotifications', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>SMS Notifications</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Terima pesan SMS untuk update penting
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.smsNotifications}
+                  onCheckedChange={(checked) => handleToggle('smsNotifications', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="flex items-center gap-2">
+                    <Volume2 className="h-4 w-4" />
+                    Suara Peringatan
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Aktifkan suara untuk notifikasi
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.soundAlerts}
+                  onCheckedChange={(checked) => handleToggle('soundAlerts', checked)}
                 />
               </div>
             </CardContent>
           </Card>
 
+          {/* Lokasi & Tracking */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Privasi & Keamanan
+                <MapPin className="h-5 w-5" />
+                Lokasi & Tracking
               </CardTitle>
-              <CardDescription>Pengaturan privasi dan keamanan</CardDescription>
+              <CardDescription>
+                Pengaturan pelacakan lokasi dan GPS
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="gps-tracking">GPS Tracking</Label>
-                  <p className="text-sm text-gray-600">Izinkan pelacakan lokasi untuk pengiriman</p>
+                <div className="space-y-0.5">
+                  <Label>GPS Tracking</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Aktifkan pelacakan GPS untuk navigasi
+                  </p>
                 </div>
-                <Switch 
-                  id="gps-tracking"
-                  checked={gpsTracking}
-                  onCheckedChange={setGpsTracking}
+                <Switch
+                  checked={settings.gpsTracking}
+                  onCheckedChange={(checked) => handleToggle('gpsTracking', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Bagikan Lokasi</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Izinkan dispatcher melihat lokasi Anda
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.shareLocation}
+                  onCheckedChange={(checked) => handleToggle('shareLocation', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Auto Update Lokasi</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Update lokasi secara otomatis setiap 30 detik
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.autoLocationUpdate}
+                  onCheckedChange={(checked) => handleToggle('autoLocationUpdate', checked)}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="current-password">Password Saat Ini</Label>
+                <Label>Radius Maksimal Pengantaran (km)</Label>
                 <Input
-                  id="current-password"
-                  type="password"
-                  placeholder="Masukkan password saat ini"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="new-password">Password Baru</Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  placeholder="Masukkan password baru"
+                  type="number"
+                  value={settings.maxDeliveryRadius}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    maxDeliveryRadius: parseInt(e.target.value) || 10
+                  }))}
+                  min="1"
+                  max="50"
                 />
               </div>
             </CardContent>
           </Card>
 
+          {/* Jam Kerja */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Preferensi Aplikasi
+                <Clock className="h-5 w-5" />
+                Jam Kerja
               </CardTitle>
-              <CardDescription>Kustomisasi tampilan dan perilaku aplikasi</CardDescription>
+              <CardDescription>
+                Atur jadwal kerja dan waktu istirahat
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="language">Bahasa</Label>
-                <Input
-                  id="language"
-                  value="Bahasa Indonesia"
-                  disabled
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Jam Mulai</Label>
+                  <Input
+                    type="time"
+                    value={settings.workingHours.start}
+                    onChange={(e) => handleWorkingHoursChange('start', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Jam Selesai</Label>
+                  <Input
+                    type="time"
+                    value={settings.workingHours.end}
+                    onChange={(e) => handleWorkingHoursChange('end', e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="timezone">Zona Waktu</Label>
+                <Label>Durasi Istirahat (menit)</Label>
                 <Input
-                  id="timezone"
-                  value="WIB (UTC+7)"
-                  disabled
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="work-area">Area Kerja Default</Label>
-                <Input
-                  id="work-area"
-                  placeholder="Jakarta Selatan"
+                  type="number"
+                  value={settings.breakDuration}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    breakDuration: parseInt(e.target.value) || 60
+                  }))}
+                  min="30"
+                  max="120"
                 />
               </div>
             </CardContent>
           </Card>
 
+          {/* Aplikasi */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <SettingsIcon className="h-5 w-5" />
-                Informasi Aplikasi
+                <Smartphone className="h-5 w-5" />
+                Aplikasi
               </CardTitle>
+              <CardDescription>
+                Pengaturan tampilan dan sinkronisasi
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span>Versi Aplikasi:</span>
-                <span className="font-medium">1.0.0</span>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="flex items-center gap-2">
+                    <Moon className="h-4 w-4" />
+                    Mode Gelap
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Gunakan tema gelap untuk aplikasi
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.darkMode}
+                  onCheckedChange={(checked) => handleToggle('darkMode', checked)}
+                />
               </div>
-              
-              <div className="flex justify-between">
-                <span>Terakhir Update:</span>
-                <span className="font-medium">14 Juni 2024</span>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="flex items-center gap-2">
+                    <Wifi className="h-4 w-4" />
+                    Auto Sync
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Sinkronisasi data secara otomatis
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.autoSync}
+                  onCheckedChange={(checked) => handleToggle('autoSync', checked)}
+                />
               </div>
-              
-              <div className="flex justify-between">
-                <span>Build:</span>
-                <span className="font-medium">20240614</span>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="flex items-center gap-2">
+                    <Battery className="h-4 w-4" />
+                    Mode Offline
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Hemat baterai dengan mode offline
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.offlineMode}
+                  onCheckedChange={(checked) => handleToggle('offlineMode', checked)}
+                />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="flex gap-4">
-          <Button onClick={handleSaveSettings}>
-            Simpan Pengaturan
-          </Button>
-          <Button variant="outline">
-            Reset ke Default
-          </Button>
-        </div>
+        {/* Keamanan */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Keamanan
+            </CardTitle>
+            <CardDescription>
+              Pengaturan keamanan dan privasi akun
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Login Biometrik</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Gunakan sidik jari atau wajah untuk login
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.biometricLogin}
+                  onCheckedChange={(checked) => handleToggle('biometricLogin', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Auto Lock</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Kunci aplikasi secara otomatis saat tidak aktif
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.autoLock}
+                  onCheckedChange={(checked) => handleToggle('autoLock', checked)}
+                />
+              </div>
+            </div>
+
+            <Separator className="my-4" />
+
+            <div className="space-y-4">
+              <Button variant="outline" className="w-full">
+                Ubah Password
+              </Button>
+              <Button variant="outline" className="w-full">
+                Reset Pengaturan
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );
