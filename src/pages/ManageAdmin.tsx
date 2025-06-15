@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, Shield, Filter, MoreVertical, UserPlus } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Shield, Filter, MoreVertical, UserPlus, Upload, Download } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -13,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Layout from '@/components/Layout';
 import { toast } from '@/hooks/use-toast';
+import ExcelImportManager from '@/components/ExcelImportManager';
 
 interface Admin {
   id: string;
@@ -33,6 +33,7 @@ const ManageAdmin = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState<Admin | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [showExcelImport, setShowExcelImport] = useState(false);
 
   const [admins] = useState<Admin[]>([
     {
@@ -104,6 +105,14 @@ const ManageAdmin = () => {
     });
   };
 
+  const handleDownloadTemplate = () => {
+    toast({
+      title: "Template Downloaded",
+      description: "Template Excel untuk admin berhasil didownload.",
+    });
+    console.log("Downloading admin template");
+  };
+
   const filteredAdmins = admins.filter(admin => {
     const matchesSearch = admin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          admin.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -136,11 +145,38 @@ const ManageAdmin = () => {
             <h1 className="text-3xl font-bold text-gray-900">Kelola Admin</h1>
             <p className="text-gray-600">Manajemen akun administrator sistem</p>
           </div>
-          <Button onClick={handleAddAdmin} className="gap-2">
-            <UserPlus className="h-4 w-4" />
-            Tambah Admin
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2">
+              <Download className="h-4 w-4" />
+              Template Excel
+            </Button>
+            <Button variant="outline" onClick={() => setShowExcelImport(true)} className="gap-2">
+              <Upload className="h-4 w-4" />
+              Import Excel
+            </Button>
+            <Button onClick={handleAddAdmin} className="gap-2">
+              <UserPlus className="h-4 w-4" />
+              Tambah Admin
+            </Button>
+          </div>
         </div>
+
+        {/* Excel Import Section */}
+        {showExcelImport && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Import Data Admin</CardTitle>
+                <Button variant="outline" onClick={() => setShowExcelImport(false)}>
+                  Tutup
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ExcelImportManager />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

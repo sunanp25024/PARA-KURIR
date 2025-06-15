@@ -5,6 +5,8 @@ import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Package, 
   Truck, 
@@ -25,12 +27,17 @@ import {
   Workflow,
   Scan,
   AlertTriangle,
-  TrendingUp
+  TrendingUp,
+  Filter,
+  Search,
+  Download
 } from 'lucide-react';
 import { WorkflowProvider } from '@/contexts/WorkflowContext';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import CourierSidebar from '@/components/CourierSidebar';
 import CourierWorkflowMain from '@/components/CourierWorkflowMain';
+import ExcelImportManager from '@/components/ExcelImportManager';
+import { toast } from '@/hooks/use-toast';
 
 // Komponen khusus untuk courier dashboard dengan workflow context
 const CourierDashboardContent = () => {
@@ -48,6 +55,11 @@ const CourierDashboardContent = () => {
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [wilayahFilter, setWilayahFilter] = useState<string>('all');
+  const [areaFilter, setAreaFilter] = useState<string>('all');
+  const [lokasiKerjaFilter, setLokasiKerjaFilter] = useState<string>('all');
+  const [showExcelImport, setShowExcelImport] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -71,6 +83,18 @@ const Dashboard = () => {
       </Layout>
     );
   }
+
+  const handleDownloadReport = (reportType: string) => {
+    toast({
+      title: "Download Laporan",
+      description: `Laporan ${reportType} sedang dipersiapkan untuk download.`,
+    });
+    console.log(`Downloading ${reportType} report`);
+  };
+
+  const handleSendNotification = () => {
+    navigate('/send-notification');
+  };
 
   // Dashboard untuk role lainnya (master-admin, admin, pic) tetap sama
   const getDashboardCards = () => {
@@ -143,7 +167,81 @@ const Dashboard = () => {
               Selamat datang, {user.name} ({user.role.replace('-', ' ').toUpperCase()})
             </p>
           </div>
+          {user.role === 'master-admin' && (
+            <Button onClick={handleSendNotification} className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Kirim Notifikasi
+            </Button>
+          )}
         </div>
+
+        {/* Filter Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filter & Pencarian Data
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Cari ID/Password..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              <Select value={wilayahFilter} onValueChange={setWilayahFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter Wilayah" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Wilayah</SelectItem>
+                  <SelectItem value="jakarta">Jakarta</SelectItem>
+                  <SelectItem value="bandung">Bandung</SelectItem>
+                  <SelectItem value="surabaya">Surabaya</SelectItem>
+                  <SelectItem value="medan">Medan</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={areaFilter} onValueChange={setAreaFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter Area" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Area</SelectItem>
+                  <SelectItem value="utara">Utara</SelectItem>
+                  <SelectItem value="selatan">Selatan</SelectItem>
+                  <SelectItem value="timur">Timur</SelectItem>
+                  <SelectItem value="barat">Barat</SelectItem>
+                  <SelectItem value="pusat">Pusat</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={lokasiKerjaFilter} onValueChange={setLokasiKerjaFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter Lokasi Kerja" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Lokasi</SelectItem>
+                  <SelectItem value="kantor-pusat">Kantor Pusat</SelectItem>
+                  <SelectItem value="cabang-1">Cabang 1</SelectItem>
+                  <SelectItem value="cabang-2">Cabang 2</SelectItem>
+                  <SelectItem value="warehouse">Warehouse</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Button variant="outline" className="gap-2">
+                <Filter className="h-4 w-4" />
+                Terapkan Filter
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -160,6 +258,71 @@ const Dashboard = () => {
             </Card>
           ))}
         </div>
+
+        {/* Download Reports Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5" />
+              Download Laporan
+            </CardTitle>
+            <CardDescription>
+              Download berbagai jenis laporan dalam format Excel
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Button variant="outline" onClick={() => handleDownloadReport('Semua Laporan')} className="gap-2">
+                <Download className="h-4 w-4" />
+                Semua Laporan
+              </Button>
+              <Button variant="outline" onClick={() => handleDownloadReport('Laporan Absen')} className="gap-2">
+                <Download className="h-4 w-4" />
+                Laporan Absen
+              </Button>
+              <Button variant="outline" onClick={() => handleDownloadReport('Laporan Kinerja')} className="gap-2">
+                <Download className="h-4 w-4" />
+                Laporan Kinerja
+              </Button>
+              <Button variant="outline" onClick={() => handleDownloadReport('Laporan Pengiriman')} className="gap-2">
+                <Download className="h-4 w-4" />
+                Laporan Pengiriman
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Excel Import Section for Master Admin */}
+        {user.role === 'master-admin' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Import Data Excel
+              </CardTitle>
+              <CardDescription>
+                Upload file Excel untuk menambahkan data dalam jumlah besar
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {showExcelImport ? (
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button variant="outline" onClick={() => setShowExcelImport(false)}>
+                      Tutup
+                    </Button>
+                  </div>
+                  <ExcelImportManager />
+                </div>
+              ) : (
+                <Button onClick={() => setShowExcelImport(true)} className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  Buka Import Manager
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Actions */}
         <Card>

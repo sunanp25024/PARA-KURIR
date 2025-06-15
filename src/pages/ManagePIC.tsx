@@ -4,12 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, Users } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Users, Upload, Download } from 'lucide-react';
 import Layout from '@/components/Layout';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
+import ExcelImportManager from '@/components/ExcelImportManager';
 
 const ManagePIC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showExcelImport, setShowExcelImport] = useState(false);
   const [pics] = useState([
     {
       id: 'PIC2025',
@@ -36,6 +38,14 @@ const ManagePIC = () => {
     });
   };
 
+  const handleDownloadTemplate = () => {
+    toast({
+      title: "Template Downloaded",
+      description: "Template Excel untuk PIC berhasil didownload.",
+    });
+    console.log("Downloading PIC template");
+  };
+
   const filteredPICs = pics.filter(pic =>
     pic.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pic.id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -49,11 +59,38 @@ const ManagePIC = () => {
             <h1 className="text-3xl font-bold text-gray-900">Kelola PIC</h1>
             <p className="text-gray-600">Manajemen Person in Charge</p>
           </div>
-          <Button onClick={handleAddPIC}>
-            <Plus className="h-4 w-4 mr-2" />
-            Tambah PIC
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2">
+              <Download className="h-4 w-4" />
+              Template Excel
+            </Button>
+            <Button variant="outline" onClick={() => setShowExcelImport(true)} className="gap-2">
+              <Upload className="h-4 w-4" />
+              Import Excel
+            </Button>
+            <Button onClick={handleAddPIC}>
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah PIC
+            </Button>
+          </div>
         </div>
+
+        {/* Excel Import Section */}
+        {showExcelImport && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Import Data PIC</CardTitle>
+                <Button variant="outline" onClick={() => setShowExcelImport(false)}>
+                  Tutup
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ExcelImportManager />
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
