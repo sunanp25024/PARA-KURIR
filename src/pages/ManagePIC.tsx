@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Plus, Search, Edit, Trash2, Users, Upload, Download, Eye, MoreHorizontal } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, User, Upload, Download, Eye, MoreHorizontal, MapPin, ToggleLeft, ToggleRight } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +34,7 @@ import { toast } from '@/hooks/use-toast';
 import ExcelImportManager from '@/components/ExcelImportManager';
 import { downloadFile } from '@/utils/downloadUtils';
 import AddPICForm from '@/components/forms/AddPICForm';
+import EditPICForm from '@/components/forms/EditPICForm';
 
 const ManagePIC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,72 +46,70 @@ const ManagePIC = () => {
   const [selectedPIC, setSelectedPIC] = useState<any>(null);
   const [pics, setPics] = useState([
     {
-      id: 'PIC2025',
-      name: 'PIC User',
-      email: 'pic@example.com',
+      id: 'PIC001',
+      name: 'Sarah Johnson',
+      email: 'sarah.johnson@company.com',
       phone: '081234567890',
+      department: 'Customer Service',
+      workLocation: 'Kantor Pusat - Jl. Sudirman',
       status: 'Aktif',
-      kurirCount: 5,
-      area: 'Jakarta Selatan',
-      joinDate: '2024-01-15',
-      lastLogin: '2024-12-15 10:30'
+      joinDate: '2024-01-15'
     },
     {
-      id: 'PIC2026',
-      name: 'PIC Bandung',
-      email: 'pic.bandung@example.com',
+      id: 'PIC002',
+      name: 'Michael Chen',
+      email: 'michael.chen@company.com',
       phone: '081234567891',
+      department: 'Operasional',
+      workLocation: 'Cabang Jakarta Timur',
       status: 'Aktif',
-      kurirCount: 8,
-      area: 'Bandung',
-      joinDate: '2024-02-20',
-      lastLogin: '2024-12-14 15:45'
+      joinDate: '2024-02-20'
     },
     {
-      id: 'PIC2027',
-      name: 'Ahmad Rahman',
-      email: 'ahmad.pic@example.com',
+      id: 'PIC003',
+      name: 'Lisa Wong',
+      email: 'lisa.wong@company.com',
       phone: '081234567892',
+      department: 'Logistik',
+      workLocation: 'Warehouse Cakung',
       status: 'Tidak Aktif',
-      kurirCount: 3,
-      area: 'Jakarta Timur',
-      joinDate: '2024-03-10',
-      lastLogin: '2024-12-10 09:15'
-    },
-    {
-      id: 'PIC2028',
-      name: 'Siti Nurhaliza',
-      email: 'siti.pic@example.com',
-      phone: '081234567893',
-      status: 'Aktif',
-      kurirCount: 12,
-      area: 'Surabaya',
-      joinDate: '2024-01-25',
-      lastLogin: '2024-12-15 08:20'
+      joinDate: '2024-03-10'
     }
   ]);
 
   const handleAddPIC = (newPIC: any) => {
     setPics([...pics, newPIC]);
     setShowAddDialog(false);
-  };
-
-  const handleDownloadTemplate = () => {
-    const templateData = `ID PIC,Nama,Email,Telepon,Area,Status,Tanggal Bergabung
-PIC2029,Nama PIC,email@example.com,081234567890,Jakarta Selatan,Aktif,2024-12-15
-PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-15`;
-    
-    downloadFile(templateData, 'template_pic.csv', 'text/csv;charset=utf-8;');
-    
     toast({
-      title: "Template Downloaded",
-      description: "Template Excel untuk PIC berhasil didownload sebagai template_pic.csv",
+      title: "PIC Ditambahkan",
+      description: `PIC ${newPIC.name} berhasil ditambahkan`,
     });
   };
 
   const handleEditPIC = (pic: any) => {
     setSelectedPIC(pic);
     setShowEditDialog(true);
+  };
+
+  const handleUpdatePIC = (updatedPIC: any) => {
+    setPics(pics.map(p => p.id === updatedPIC.id ? updatedPIC : p));
+    setShowEditDialog(false);
+    setSelectedPIC(null);
+    toast({
+      title: "PIC Diperbarui",
+      description: `Data PIC ${updatedPIC.name} berhasil diperbarui`,
+    });
+  };
+
+  const handleToggleStatus = (pic: any) => {
+    const newStatus = pic.status === 'Aktif' ? 'Tidak Aktif' : 'Aktif';
+    const updatedPIC = { ...pic, status: newStatus };
+    setPics(pics.map(p => p.id === pic.id ? updatedPIC : p));
+    
+    toast({
+      title: "Status PIC Diubah",
+      description: `Status PIC ${pic.name} berhasil diubah menjadi ${newStatus}`,
+    });
   };
 
   const handleDeletePIC = (pic: any) => {
@@ -135,11 +133,25 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
     setShowDetailDialog(true);
   };
 
+  const handleDownloadTemplate = () => {
+    const templateData = `ID PIC,Nama,Email,Telepon,Departemen,Lokasi Kerja,Status,Tanggal Bergabung
+PIC004,Nama PIC,email@example.com,081234567890,Customer Service,Kantor Pusat - Jl. Sudirman,Aktif,2024-12-15
+PIC005,Nama PIC 2,email2@example.com,081234567891,Operasional,Cabang Jakarta Timur,Aktif,2024-12-15`;
+    
+    downloadFile(templateData, 'template_pic.csv', 'text/csv;charset=utf-8;');
+    
+    toast({
+      title: "Template Downloaded",
+      description: "Template Excel untuk PIC berhasil didownload sebagai template_pic.csv",
+    });
+  };
+
   const filteredPICs = pics.filter(pic =>
     pic.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pic.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pic.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pic.area.toLowerCase().includes(searchTerm.toLowerCase())
+    pic.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pic.workLocation.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -148,7 +160,7 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Kelola PIC</h1>
-            <p className="text-gray-600">Manajemen Person in Charge</p>
+            <p className="text-gray-600">Manajemen Person In Charge (PIC)</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2">
@@ -186,7 +198,7 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
+              <User className="h-5 w-5" />
               Daftar PIC
             </CardTitle>
             <CardDescription>
@@ -198,7 +210,7 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Cari PIC berdasarkan nama, ID, email, atau area..."
+                  placeholder="Cari PIC berdasarkan nama, ID, email, departemen, atau lokasi kerja..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -211,10 +223,9 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
                 <TableHeader>
                   <TableRow>
                     <TableHead>PIC</TableHead>
-                    <TableHead>Area</TableHead>
+                    <TableHead>Departemen</TableHead>
+                    <TableHead>Lokasi Kerja</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Jumlah Kurir</TableHead>
-                    <TableHead>Login Terakhir</TableHead>
                     <TableHead>Bergabung</TableHead>
                     <TableHead className="w-[50px]">Aksi</TableHead>
                   </TableRow>
@@ -225,7 +236,7 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarFallback className="bg-green-100 text-green-600">
+                            <AvatarFallback className="bg-blue-100 text-blue-600">
                               {pic.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
                           </Avatar>
@@ -238,18 +249,18 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium">{pic.area}</span>
+                        <span className="font-medium">{pic.department}</span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm">{pic.workLocation}</span>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant={pic.status === 'Aktif' ? 'default' : 'secondary'}>
                           {pic.status}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-medium text-blue-600">{pic.kurirCount} Kurir</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-500">{pic.lastLogin}</span>
                       </TableCell>
                       <TableCell>
                         <span className="text-sm text-gray-500">{pic.joinDate}</span>
@@ -261,7 +272,7 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end" className="bg-white border shadow-lg">
                             <DropdownMenuItem onClick={() => handleViewDetails(pic)}>
                               <Eye className="mr-2 h-4 w-4" />
                               Lihat Detail
@@ -269,6 +280,19 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
                             <DropdownMenuItem onClick={() => handleEditPIC(pic)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleToggleStatus(pic)}>
+                              {pic.status === 'Aktif' ? (
+                                <>
+                                  <ToggleLeft className="mr-2 h-4 w-4" />
+                                  Nonaktifkan
+                                </>
+                              ) : (
+                                <>
+                                  <ToggleRight className="mr-2 h-4 w-4" />
+                                  Aktifkan
+                                </>
+                              )}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDeletePIC(pic)} className="text-red-600">
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -284,7 +308,7 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
               
               {filteredPICs.length === 0 && (
                 <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-500">Tidak ada PIC yang ditemukan dengan kriteria pencarian "{searchTerm}"</p>
                 </div>
               )}
@@ -308,6 +332,25 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
           </DialogContent>
         </Dialog>
 
+        {/* Edit PIC Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Edit PIC</DialogTitle>
+              <DialogDescription>
+                Ubah data PIC di bawah ini
+              </DialogDescription>
+            </DialogHeader>
+            {selectedPIC && (
+              <EditPICForm
+                pic={selectedPIC}
+                onSubmit={handleUpdatePIC}
+                onCancel={() => setShowEditDialog(false)}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+
         {/* Detail Dialog */}
         <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
           <DialogContent className="sm:max-w-[425px]">
@@ -318,7 +361,7 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16">
-                    <AvatarFallback className="bg-green-100 text-green-600 text-lg">
+                    <AvatarFallback className="bg-blue-100 text-blue-600 text-lg">
                       {selectedPIC.name.split(' ').map((n: string) => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
@@ -337,8 +380,8 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
                     <p className="text-sm">{selectedPIC.phone}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Area</label>
-                    <p className="text-sm">{selectedPIC.area}</p>
+                    <label className="text-sm font-medium text-gray-500">Departemen</label>
+                    <p className="text-sm">{selectedPIC.department}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500">Status</label>
@@ -347,16 +390,15 @@ PIC2030,Nama PIC 2,email2@example.com,081234567891,Jakarta Timur,Aktif,2024-12-1
                     </Badge>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Jumlah Kurir</label>
-                    <p className="text-sm">{selectedPIC.kurirCount} kurir</p>
-                  </div>
-                  <div>
                     <label className="text-sm font-medium text-gray-500">Bergabung</label>
                     <p className="text-sm">{selectedPIC.joinDate}</p>
                   </div>
                   <div className="col-span-2">
-                    <label className="text-sm font-medium text-gray-500">Login Terakhir</label>
-                    <p className="text-sm">{selectedPIC.lastLogin}</p>
+                    <label className="text-sm font-medium text-gray-500">Lokasi Kerja</label>
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4 text-gray-500" />
+                      <p className="text-sm">{selectedPIC.workLocation}</p>
+                    </div>
                   </div>
                 </div>
               </div>
