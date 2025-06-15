@@ -25,16 +25,22 @@ import {
   PieChart,
   Activity,
   LogIn,
-  LogOut
+  LogOut,
+  Send,
+  Download,
+  Settings
 } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart, Line, LineChart, Pie, PieChart as RechartsePie, Cell, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import { useToast } from '@/hooks/use-toast';
 import Layout from '@/components/Layout';
 import DailyPackageInput from '@/components/DailyPackageInput';
 import ScanPackageManager from '@/components/ScanPackageManager';
 import DeliveryTracking from '@/components/DeliveryTracking';
 import PendingReturnPackages from '@/components/PendingReturnPackages';
 import DailyPerformanceSummary from '@/components/DailyPerformanceSummary';
+import MessagingSystem from '@/components/MessagingSystem';
+import ExcelImportManager from '@/components/ExcelImportManager';
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
@@ -848,6 +854,7 @@ const MasterAdminDashboard = () => {
   });
 
   const [activeSection, setActiveSection] = useState('overview');
+  const { toast } = useToast();
 
   // Sample active features
   const handleFeatureClick = (feature: string) => {
