@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,9 +13,7 @@ import {
   Truck,
   Phone,
   MessageSquare,
-  Navigation,
-  Download,
-  Smartphone
+  Navigation
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -84,34 +83,12 @@ const KurirMobile = () => {
     });
   };
 
-  const handleDownloadAPK = () => {
-    // Show info about placeholder APK
-    toast({
-      title: "Info APK",
-      description: "File APK ini adalah placeholder. Untuk APK yang bisa diinstall, silakan build dengan Capacitor di local machine Anda.",
-      duration: 5000,
-    });
-    
-    // Still trigger download for demonstration
-    const link = document.createElement('a');
-    link.href = '/insan-mobile-kurir.apk';
-    link.download = 'INSAN-MOBILE-Kurir.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast({
-      title: "Download Dimulai",
-      description: "File APK INSAN MOBILE Kurir sedang didownload",
-    });
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       {/* Header */}
       <Card className="mb-4">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold">INSAN MOBILE KURIR</h1>
               <p className="text-sm text-gray-600">Kurir: Ahmad Kurniawan</p>
@@ -124,45 +101,6 @@ const KurirMobile = () => {
               <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-white' : 'bg-green-500'}`} />
               {isOnline ? 'OFFLINE' : 'ONLINE'}
             </Button>
-          </div>
-          
-          {/* Download APK Button with Info */}
-          <div className="flex gap-2">
-            <Button
-              onClick={handleDownloadAPK}
-              className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Download APK (Demo)
-            </Button>
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: 'INSAN MOBILE Kurir',
-                    text: 'Download aplikasi kurir INSAN MOBILE',
-                    url: window.location.href
-                  });
-                } else {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast({
-                    title: "Link Disalin",
-                    description: "Link aplikasi berhasil disalin ke clipboard",
-                  });
-                }
-              }}
-            >
-              <Smartphone className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          {/* Info about APK */}
-          <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-xs text-yellow-800">
-              <strong>Info:</strong> File APK ini adalah demo. Untuk APK yang bisa diinstall, butuh build dengan Capacitor di local machine.
-            </p>
           </div>
         </CardContent>
       </Card>
