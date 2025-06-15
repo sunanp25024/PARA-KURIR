@@ -23,7 +23,9 @@ import {
   Calendar,
   BarChart3,
   PieChart,
-  Activity
+  Activity,
+  LogIn,
+  LogOut
 } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart, Line, LineChart, Pie, PieChart as RechartsePie, Cell, ResponsiveContainer, XAxis, YAxis } from 'recharts';
@@ -166,6 +168,150 @@ const FilterSection = ({ role }: { role: string }) => (
           <Search className="h-4 w-4 mr-2" />
           Cari
         </Button>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+// Real-time Attendance Activity Component
+const RealtimeAttendanceActivity = () => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2">
+        <Activity className="h-5 w-5 text-blue-600" />
+        Aktivitas Absensi Terkini
+      </CardTitle>
+      <CardDescription>Update check-in/out kurir. Termasuk lokasi kerja kurir.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-4">
+        {[
+          { 
+            name: 'Budi Santoso', 
+            id: 'PISTEST2025',
+            action: 'check-out',
+            location: 'Jakarta Pusat Hub (Thamrin)',
+            time: 'sekitar 6 jam',
+            icon: LogOut,
+            color: 'text-red-600'
+          },
+          { 
+            name: 'Charlie Van Houten', 
+            id: 'KURIR003',
+            action: 'melaporkan keterlambatan',
+            location: 'Surabaya Timur Hub (Cawang)',
+            time: 'sekitar 2 jam yang lalu',
+            icon: Clock,
+            color: 'text-yellow-600'
+          },
+          { 
+            name: 'Ani Yudhoyono', 
+            id: 'KURIR002',
+            action: 'check-in',
+            location: 'Bandung Kota Hub (Kota)',
+            time: 'sekitar 3 jam yang lalu',
+            icon: LogIn,
+            color: 'text-green-600'
+          },
+          { 
+            name: 'Budi Santoso', 
+            id: 'PISTEST2025',
+            action: 'check-in',
+            location: 'Jakarta Pusat Hub (Thamrin)',
+            time: 'sekitar 3 jam yang lalu',
+            icon: LogIn,
+            color: 'text-green-600'
+          }
+        ].map((activity, index) => {
+          const IconComponent = activity.icon;
+          return (
+            <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+              <IconComponent className={`h-5 w-5 mt-0.5 ${activity.color}`} />
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{activity.name}</span>
+                  <Badge variant="outline" className="text-xs">{activity.id}</Badge>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  {activity.action} di {activity.location}
+                </p>
+                <p className="text-xs text-gray-500">
+                  dalam waktu {activity.time}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </CardContent>
+  </Card>
+);
+
+// Courier Performance Summary Component
+const CourierPerformanceSummary = () => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2">
+        <BarChart3 className="h-5 w-5 text-green-600" />
+        Ringkasan Penyelesaian Kerja Kurir
+      </CardTitle>
+      <CardDescription>Laporan ringkas setelah kurir menyelesaikan tugas harian.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-4">
+        {[
+          {
+            name: 'Ani Yudhoyono',
+            id: 'KURIR002',
+            hub: 'Bandung Kota Hub (Kota)',
+            delivered: 45,
+            success: 40,
+            return: 5,
+            pending: 0,
+            time: '7 jam'
+          },
+          {
+            name: 'Budi Santoso',
+            id: 'PISTEST2025',
+            hub: 'Jakarta Pusat Hub (Thamrin)',
+            delivered: 50,
+            success: 48,
+            return: 2,
+            pending: 0,
+            time: '6 jam'
+          },
+          {
+            name: 'Dewi Persik',
+            id: 'KURIR004',
+            hub: 'Medan Barat Hub',
+            delivered: 55,
+            success: 55,
+            return: 0,
+            pending: 0,
+            time: '17 jam yang lalu'
+          }
+        ].map((kurir, index) => (
+          <div key={index} className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+            <BarChart3 className="h-5 w-5 mt-0.5 text-blue-600" />
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-medium">{kurir.name}</span>
+                <Badge variant="outline" className="text-xs">{kurir.id}</Badge>
+              </div>
+              <p className="text-sm text-gray-600 mb-2">Dari Hub: <span className="font-medium text-blue-600">{kurir.hub}</span></p>
+              <div className="text-sm">
+                <span>Menyelesaikan pekerjaan: </span>
+                <span className="font-bold">{kurir.delivered}</span>
+                <span> paket dibawa, </span>
+                <span className="font-bold text-green-600">{kurir.success}</span>
+                <span> terkirim, </span>
+                <span className="font-bold text-red-600">{kurir.return}</span>
+                <span> retur/pending.</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">dalam waktu sekitar {kurir.time}</p>
+            </div>
+          </div>
+        ))}
       </div>
     </CardContent>
   </Card>
@@ -397,6 +543,12 @@ const PICDashboard = () => {
         </Card>
       </div>
 
+      {/* New Real-time Monitoring Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RealtimeAttendanceActivity />
+        <CourierPerformanceSummary />
+      </div>
+
       {/* Charts and Analytics */}
       <Tabs defaultValue="daily" className="w-full">
         <TabsList>
@@ -500,80 +652,6 @@ const PICDashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Real-time Kurir Performance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Real-time Absensi Kurir</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { name: 'Ahmad Kurniawan', status: 'Hadir', time: '07:30', location: 'Jakarta Selatan' },
-                { name: 'Budi Santoso', status: 'Hadir', time: '07:45', location: 'Jakarta Timur' },
-                { name: 'Siti Nurhaliza', status: 'Hadir', time: '08:00', location: 'Jakarta Pusat' },
-                { name: 'Dedi Mulyadi', status: 'Terlambat', time: '08:30', location: 'Jakarta Barat' },
-                { name: 'Rina Sari', status: 'Tidak Hadir', time: '-', location: 'Jakarta Utara' }
-              ].map((kurir, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className={`h-3 w-3 rounded-full ${
-                      kurir.status === 'Hadir' ? 'bg-green-500' : 
-                      kurir.status === 'Terlambat' ? 'bg-yellow-500' : 'bg-red-500'
-                    }`} />
-                    <div>
-                      <p className="font-medium">{kurir.name}</p>
-                      <p className="text-sm text-gray-600">{kurir.location}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant={
-                      kurir.status === 'Hadir' ? 'default' : 
-                      kurir.status === 'Terlambat' ? 'secondary' : 'destructive'
-                    }>
-                      {kurir.status}
-                    </Badge>
-                    <p className="text-sm text-gray-500 mt-1">{kurir.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Ringkasan Kinerja Kurir</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { name: 'Ahmad Kurniawan', delivered: 12, target: 15, rate: 80, trend: '+5%' },
-                { name: 'Budi Santoso', delivered: 10, target: 12, rate: 83, trend: '+2%' },
-                { name: 'Siti Nurhaliza', delivered: 8, target: 10, rate: 80, trend: '-3%' },
-                { name: 'Dedi Mulyadi', delivered: 9, target: 15, rate: 60, trend: '-10%' },
-                { name: 'Rina Sari', delivered: 6, target: 8, rate: 75, trend: '+8%' }
-              ].map((kurir, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{kurir.name}</p>
-                    <p className="text-sm text-gray-600">{kurir.delivered}/{kurir.target} paket</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm ${kurir.trend.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                      {kurir.trend}
-                    </span>
-                    <Badge variant={kurir.rate >= 80 ? 'default' : kurir.rate >= 70 ? 'secondary' : 'destructive'}>
-                      {kurir.rate}%
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };
@@ -649,6 +727,12 @@ const AdminDashboard = () => {
             <p className="text-xs text-muted-foreground">Keseluruhan</p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* New Real-time Monitoring Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RealtimeAttendanceActivity />
+        <CourierPerformanceSummary />
       </div>
 
       {/* Charts similar to PIC but with broader scope */}
@@ -834,6 +918,12 @@ const MasterAdminDashboard = () => {
             <p className="text-xs text-muted-foreground">Menunggu</p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* New Real-time Monitoring Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RealtimeAttendanceActivity />
+        <CourierPerformanceSummary />
       </div>
 
       {/* National Performance Charts */}
