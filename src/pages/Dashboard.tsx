@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -41,6 +40,7 @@ import CourierAttendanceActivity from '@/components/CourierAttendanceActivity';
 import CourierWorkSummary from '@/components/CourierWorkSummary';
 import CourierPerformanceCharts from '@/components/CourierPerformanceCharts';
 import { toast } from '@/hooks/use-toast';
+import { downloadFile, generateSampleData } from '@/utils/downloadUtils';
 
 // Komponen khusus untuk courier dashboard dengan workflow context
 const CourierDashboardContent = () => {
@@ -88,11 +88,16 @@ const Dashboard = () => {
   }
 
   const handleDownloadReport = (reportType: string) => {
+    const data = generateSampleData(reportType);
+    const filename = `laporan_${reportType.toLowerCase().replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+    
+    downloadFile(data, filename, 'text/csv;charset=utf-8;');
+    
     toast({
-      title: "Download Laporan",
-      description: `Laporan ${reportType} sedang dipersiapkan untuk download.`,
+      title: "Download Berhasil",
+      description: `Laporan ${reportType} berhasil didownload sebagai ${filename}`,
     });
-    console.log(`Downloading ${reportType} report`);
+    console.log(`Downloaded ${reportType} report as ${filename}`);
   };
 
   const handleSendNotification = () => {
@@ -244,7 +249,16 @@ const Dashboard = () => {
                   </SelectContent>
                 </Select>
                 
-                <Button variant="outline" className="gap-2 border-blue-200 text-blue-600 hover:bg-blue-50">
+                <Button 
+                  onClick={() => {
+                    toast({
+                      title: "Filter Diterapkan",
+                      description: `Filter: Wilayah=${wilayahFilter}, Area=${areaFilter}, Lokasi=${lokasiKerjaFilter}`,
+                    });
+                  }}
+                  variant="outline" 
+                  className="gap-2 border-blue-200 text-blue-600 hover:bg-blue-50"
+                >
                   <Filter className="h-4 w-4" />
                   Terapkan Filter
                 </Button>
@@ -255,7 +269,14 @@ const Dashboard = () => {
           {/* Stats Cards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {dashboardCards.map((card, index) => (
-              <Card key={index} className="shadow-sm border-0 bg-white hover:shadow-md transition-shadow">
+              <Card key={index} className="shadow-sm border-0 bg-white hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => {
+                  toast({
+                    title: card.title,
+                    description: `Menampilkan detail ${card.title}: ${card.value}`,
+                  });
+                }}
+              >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                   <CardTitle className="text-sm font-medium text-gray-600">{card.title}</CardTitle>
                   <div className="p-2 bg-blue-50 rounded-lg">
@@ -289,7 +310,7 @@ const Dashboard = () => {
                   Download Laporan
                 </CardTitle>
                 <CardDescription>
-                  Download berbagai jenis laporan dalam format Excel
+                  Download berbagai jenis laporan dalam format CSV
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -342,7 +363,13 @@ const Dashboard = () => {
                     <Button 
                       key={index}
                       variant="outline" 
-                      onClick={() => navigate(action.path)}
+                      onClick={() => {
+                        navigate(action.path);
+                        toast({
+                          title: "Navigasi",
+                          description: `Menuju ke ${action.label}`,
+                        });
+                      }}
                       className="flex flex-col gap-2 h-20 border-blue-200 text-blue-700 hover:bg-blue-50"
                     >
                       <action.icon className="h-5 w-5" />

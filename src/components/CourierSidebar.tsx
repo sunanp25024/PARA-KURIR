@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Sidebar,
   SidebarContent,
@@ -24,6 +25,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from '@/hooks/use-toast';
 
 const menuItems = [
   {
@@ -61,10 +63,25 @@ const menuItems = [
 
 const CourierSidebar = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const navigate = useNavigate();
+
+  const handleNavigation = (url: string, title: string) => {
+    navigate(url);
+    toast({
+      title: "Navigasi",
+      description: `Menuju ke ${title}`,
+    });
+  };
 
   const handleLogout = () => {
+    toast({
+      title: "Logout",
+      description: "Anda telah berhasil logout dari sistem",
+    });
     localStorage.removeItem('user');
-    window.location.href = '/login';
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 1000);
   };
 
   return (
@@ -89,11 +106,15 @@ const CourierSidebar = () => {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={item.isActive}>
-                    <a href={item.url}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={item.isActive}
+                    onClick={() => handleNavigation(item.url, item.title)}
+                  >
+                    <button className="w-full flex items-center gap-2 px-3 py-2 text-left">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
-                    </a>
+                    </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
