@@ -57,7 +57,7 @@ class CourierService {
   // Profile management
   async getCourierProfile(courierId: string): Promise<CourierProfile | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('id', courierId)
@@ -68,7 +68,7 @@ class CourierService {
         return null;
       }
 
-      return data as unknown as CourierProfile;
+      return data as CourierProfile;
     } catch (error) {
       console.error('Error fetching courier profile:', error);
       return null;
@@ -77,7 +77,7 @@ class CourierService {
 
   async updateCourierProfile(courierId: string, updates: Partial<CourierProfile>): Promise<boolean> {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('profiles')
         .update(updates)
         .eq('id', courierId);
@@ -97,7 +97,7 @@ class CourierService {
   // Package management
   async createDailyPackages(packages: Omit<DailyPackage, 'id' | 'created_at' | 'updated_at'>[]): Promise<boolean> {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('daily_packages')
         .insert(packages);
 
@@ -115,7 +115,7 @@ class CourierService {
 
   async getDailyPackages(courierId: string, date?: string): Promise<DailyPackage[]> {
     try {
-      let query = supabase
+      let query = (supabase as any)
         .from('daily_packages')
         .select('*')
         .eq('courier_id', courierId)
@@ -149,7 +149,7 @@ class CourierService {
         return [];
       }
 
-      return (data || []) as unknown as DailyPackage[];
+      return (data || []) as DailyPackage[];
     } catch (error) {
       console.error('Error fetching daily packages:', error);
       return [];
@@ -179,7 +179,7 @@ class CourierService {
         updateData.returned_at = new Date().toISOString();
       }
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('daily_packages')
         .update(updateData)
         .eq('id', packageId);
@@ -198,7 +198,7 @@ class CourierService {
 
   async deletePackage(packageId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('daily_packages')
         .delete()
         .eq('id', packageId);
@@ -218,7 +218,7 @@ class CourierService {
   // Summary management
   async getDailySummary(courierId: string, date: string): Promise<DailySummary | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('daily_summaries')
         .select('*')
         .eq('courier_id', courierId)
@@ -230,7 +230,7 @@ class CourierService {
         return null;
       }
 
-      return data as unknown as DailySummary;
+      return data as DailySummary;
     } catch (error) {
       console.error('Error fetching daily summary:', error);
       return null;
@@ -275,7 +275,7 @@ class CourierService {
         updateData.delivery_started_at = new Date().toISOString();
       }
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('daily_packages')
         .update(updateData)
         .in('id', packageIds);
