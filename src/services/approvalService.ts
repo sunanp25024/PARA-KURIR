@@ -5,7 +5,7 @@ export interface ApprovalRequest {
   id: string;
   requester_id: string;
   requester_name: string;
-  request_type: 'create_admin' | 'edit_admin' | 'toggle_status' | 'delete_admin';
+  request_type: 'create_admin' | 'edit_admin' | 'toggle_status' | 'delete_admin' | 'import_pic_data' | 'import_kurir_data';
   target_admin_id: string | null;
   request_data: any;
   current_data: any | null;
@@ -50,6 +50,37 @@ export const approvalService = {
     return data;
   },
 
+  // Create bulk approval requests for import data
+  async createBulkImportApprovalRequest(
+    requesterId: string,
+    requesterName: string,
+    requestType: 'import_pic_data' | 'import_kurir_data',
+    importData: any[]
+  ) {
+    const { data, error } = await supabase
+      .from('approval_requests')
+      .insert([
+        {
+          requester_id: requesterId,
+          requester_name: requesterName,
+          request_type: requestType,
+          target_admin_id: null,
+          request_data: { importData, totalRecords: importData.length },
+          current_data: null,
+          status: 'pending'
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating bulk import approval request:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
   // Get all pending approval requests
   async getPendingRequests() {
     const { data, error } = await supabase
@@ -66,7 +97,6 @@ export const approvalService = {
     return data as ApprovalRequest[];
   },
 
-  // Get all approval requests
   async getAllRequests() {
     const { data, error } = await supabase
       .from('approval_requests')
@@ -81,7 +111,6 @@ export const approvalService = {
     return data as ApprovalRequest[];
   },
 
-  // Approve or reject a request
   async updateRequestStatus(
     requestId: string,
     status: 'approved' | 'rejected',

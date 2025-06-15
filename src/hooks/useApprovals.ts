@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { approvalService, ApprovalRequest } from '@/services/approvalService';
 import { toast } from '@/hooks/use-toast';
@@ -74,6 +73,36 @@ export const useApprovals = () => {
     }
   };
 
+  const createBulkImportApprovalRequest = async (
+    requesterId: string,
+    requesterName: string,
+    requestType: 'import_pic_data' | 'import_kurir_data',
+    importData: any[]
+  ) => {
+    try {
+      await approvalService.createBulkImportApprovalRequest(
+        requesterId,
+        requesterName,
+        requestType,
+        importData
+      );
+      
+      toast({
+        title: "Import Request Terkirim",
+        description: `Permintaan import ${importData.length} data telah dikirim ke Master Admin untuk persetujuan`,
+      });
+      
+      // Refresh pending requests
+      await fetchPendingRequests();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal mengirim import request untuk persetujuan",
+        variant: "destructive"
+      });
+    }
+  };
+
   const approveRequest = async (requestId: string, approverId: string, notes?: string) => {
     try {
       await approvalService.updateRequestStatus(requestId, 'approved', approverId, notes);
@@ -127,6 +156,7 @@ export const useApprovals = () => {
     fetchPendingRequests,
     fetchAllRequests,
     createApprovalRequest,
+    createBulkImportApprovalRequest,
     approveRequest,
     rejectRequest
   };

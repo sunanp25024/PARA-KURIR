@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, XCircle, Clock, Eye, UserPlus, Edit, ToggleLeft, Trash2 } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Eye, UserPlus, Edit, ToggleLeft, Trash2, Upload, FileSpreadsheet } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { useApprovals } from '@/hooks/useApprovals';
 import { ApprovalRequest } from '@/services/approvalService';
@@ -55,6 +55,8 @@ const ApprovalRequests = () => {
       case 'edit_admin': return <Edit className="h-4 w-4" />;
       case 'toggle_status': return <ToggleLeft className="h-4 w-4" />;
       case 'delete_admin': return <Trash2 className="h-4 w-4" />;
+      case 'import_pic_data': return <Upload className="h-4 w-4" />;
+      case 'import_kurir_data': return <Upload className="h-4 w-4" />;
       default: return <Clock className="h-4 w-4" />;
     }
   };
@@ -65,6 +67,8 @@ const ApprovalRequests = () => {
       case 'edit_admin': return 'Edit Admin';
       case 'toggle_status': return 'Ubah Status';
       case 'delete_admin': return 'Hapus Admin';
+      case 'import_pic_data': return 'Import Data PIC';
+      case 'import_kurir_data': return 'Import Data Kurir';
       default: return type;
     }
   };
@@ -80,6 +84,44 @@ const ApprovalRequests = () => {
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
+  };
+
+  const renderImportDataPreview = (requestData: any) => {
+    if (requestData.importData && Array.isArray(requestData.importData)) {
+      return (
+        <div className="mt-2">
+          <Label className="text-sm font-medium text-gray-500">
+            Data Import ({requestData.totalRecords || requestData.importData.length} records)
+          </Label>
+          <div className="max-h-40 overflow-auto border rounded mt-1">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs">ID</TableHead>
+                  <TableHead className="text-xs">Nama</TableHead>
+                  <TableHead className="text-xs">Area/Wilayah</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {requestData.importData.slice(0, 5).map((item: any, index: number) => (
+                  <TableRow key={index}>
+                    <TableCell className="text-xs">{item.id}</TableCell>
+                    <TableCell className="text-xs">{item.nama}</TableCell>
+                    <TableCell className="text-xs">{item.area || item.wilayah}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            {requestData.importData.length > 5 && (
+              <div className="text-center text-xs text-gray-500 p-2">
+                ... dan {requestData.importData.length - 5} data lainnya
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+    return null;
   };
 
   const renderRequestTable = (requests: ApprovalRequest[], showActions = false) => (
@@ -102,7 +144,12 @@ const ApprovalRequests = () => {
                 <div>
                   <p className="font-medium">{getRequestTypeLabel(request.request_type)}</p>
                   <p className="text-sm text-gray-500">
-                    {request.target_admin_id ? `Target: ${request.target_admin_id}` : 'Admin Baru'}
+                    {request.request_type.includes('import') 
+                      ? `${request.request_data?.totalRecords || 0} records`
+                      : request.target_admin_id 
+                        ? `Target: ${request.target_admin_id}` 
+                        : 'Admin Baru'
+                    }
                   </p>
                 </div>
               </div>
@@ -241,7 +288,7 @@ const ApprovalRequests = () => {
 
         {/* Detail Dialog */}
         <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>Detail Approval Request</DialogTitle>
             </DialogHeader>
@@ -266,12 +313,16 @@ const ApprovalRequests = () => {
                   </div>
                 </div>
                 
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Data Request</Label>
-                  <pre className="text-xs bg-gray-100 p-3 rounded mt-1 overflow-auto max-h-32">
-                    {JSON.stringify(selectedRequest.request_data, null, 2)}
-                  </pre>
-                </div>
+                {selectedRequest.request_type.includes('import') ? (
+                  renderImportDataPreview(selectedRequest.request_data)
+                ) : (
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Data Request</Label>
+                    <pre className="text-xs bg-gray-100 p-3 rounded mt-1 overflow-auto max-h-32">
+                      {JSON.stringify(selectedRequest.request_data, null, 2)}
+                    </pre>
+                  </div>
+                )}
 
                 {selectedRequest.current_data && (
                   <div>

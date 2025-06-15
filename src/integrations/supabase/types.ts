@@ -67,6 +67,8 @@ export type Database = {
         | "edit_admin"
         | "toggle_status"
         | "delete_admin"
+        | "import_pic_data"
+        | "import_kurir_data"
       approval_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -188,6 +190,8 @@ export const Constants = {
         "edit_admin",
         "toggle_status",
         "delete_admin",
+        "import_pic_data",
+        "import_kurir_data",
       ],
       approval_status: ["pending", "approved", "rejected"],
     },

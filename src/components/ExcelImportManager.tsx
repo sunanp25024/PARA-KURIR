@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Upload, Download, FileSpreadsheet, CheckCircle, AlertCircle, Users } from 'lucide-react';
+import { Upload, Download, FileSpreadsheet, CheckCircle, AlertCircle, Users, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useApprovals } from '@/hooks/useApprovals';
 
 const ExcelImportManager = () => {
   const [importType, setImportType] = useState('kurir');
@@ -14,6 +15,13 @@ const ExcelImportManager = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { createBulkImportApprovalRequest } = useApprovals();
+  
+  // Get user role from localStorage
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userRole = user.role || '';
+  const isMasterAdmin = userRole === 'master_admin';
+  const isAdmin = userRole === 'admin';
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -66,25 +74,53 @@ const ExcelImportManager = () => {
     }
   };
 
-  const handleImportData = () => {
+  const handleImportData = async () => {
     setIsProcessing(true);
     
-    // Simulate data import
-    setTimeout(() => {
-      const validData = uploadedData.filter(item => item.status === 'Valid');
-      
-      toast({
-        title: "Import Berhasil",
-        description: `${validData.length} data berhasil diimport ke sistem`,
-      });
-      
-      setUploadedData([]);
-      setIsProcessing(false);
-      
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+    const validData = uploadedData.filter(item => item.status === 'Valid');
+    
+    if (isMasterAdmin) {
+      // Master Admin can import directly
+      setTimeout(() => {
+        toast({
+          title: "Import Berhasil",
+          description: `${validData.length} data berhasil diimport ke sistem`,
+        });
+        
+        setUploadedData([]);
+        setIsProcessing(false);
+        
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }, 1500);
+    } else if (isAdmin) {
+      // Admin needs approval for import
+      try {
+        const requestType = importType === 'pic' ? 'import_pic_data' : 'import_kurir_data';
+        
+        await createBulkImportApprovalRequest(
+          user.id,
+          user.name,
+          requestType,
+          validData
+        );
+        
+        setUploadedData([]);
+        setIsProcessing(false);
+        
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } catch (error) {
+        setIsProcessing(false);
+        toast({
+          title: "Error",
+          description: "Gagal mengirim request import untuk persetujuan",
+          variant: "destructive"
+        });
       }
-    }, 1500);
+    }
   };
 
   const downloadTemplate = () => {
@@ -112,6 +148,12 @@ const ExcelImportManager = () => {
           </CardTitle>
           <CardDescription>
             Upload file Excel untuk menambahkan data user dalam jumlah besar
+            {isAdmin && (
+              <span className="block text-orange-600 text-sm mt-1">
+                <Clock className="h-4 w-4 inline mr-1" />
+                Import Anda akan memerlukan persetujuan Master Admin
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -163,8 +205,21 @@ const ExcelImportManager = () => {
               <div className="flex items-center justify-between">
                 <h3 className="font-medium">Preview Data ({uploadedData.length} baris)</h3>
                 <Button onClick={handleImportData} disabled={isProcessing}>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  {isProcessing ? 'Mengimport...' : 'Import Data'}
+                  {isProcessing ? 'Memproses...' : (
+                    <>
+                      {isAdmin ? (
+                        <>
+                          <Clock className="h-4 w-4 mr-2" />
+                          Request Import
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Import Data
+                        </>
+                      )}
+                    </>
+                  )}
                 </Button>
               </div>
               
