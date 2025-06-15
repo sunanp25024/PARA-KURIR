@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Package, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Package, AlertTriangle, CheckCircle, ArrowRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useWorkflow } from '@/contexts/WorkflowContext';
 
@@ -82,11 +82,18 @@ const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete })
       title: "Data Tersimpan",
       description: `Total paket hari ini: ${total} (COD: ${cod}, Non COD: ${nonCod})`,
     });
+  };
 
+  const handleProceedToScan = () => {
+    toast({
+      title: "Melanjutkan ke Scan Paket",
+      description: "Beralih ke tahap scan dan kelola paket",
+    });
+    
     // Auto progress to next step
     setTimeout(() => {
       onStepComplete?.();
-    }, 1000);
+    }, 500);
   };
 
   const handleReset = () => {
@@ -194,13 +201,22 @@ const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete })
               Simpan Data Paket
             </Button>
           ) : (
-            <Button 
-              onClick={handleReset} 
-              variant="outline"
-              className="flex-1"
-            >
-              Reset & Input Ulang
-            </Button>
+            <div className="flex gap-2 w-full">
+              <Button 
+                onClick={handleProceedToScan} 
+                className="flex-1"
+              >
+                <ArrowRight className="h-4 w-4 mr-2" />
+                Lanjut ke Scan Paket
+              </Button>
+              <Button 
+                onClick={handleReset} 
+                variant="outline"
+                size="sm"
+              >
+                Reset
+              </Button>
+            </div>
           )}
         </div>
       </CardContent>
