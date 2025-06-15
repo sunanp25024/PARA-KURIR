@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, Shield, Filter, MoreHorizontal, UserPlus, Upload, Download, Eye, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Shield, Filter, MoreHorizontal, UserPlus, Upload, Download, Eye, ToggleLeft, ToggleRight, Clock } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -24,6 +24,7 @@ import Layout from '@/components/Layout';
 import { toast } from '@/hooks/use-toast';
 import ExcelImportManager from '@/components/ExcelImportManager';
 import EditAdminForm from '@/components/forms/EditAdminForm';
+import { useApprovals } from '@/hooks/useApprovals';
 
 interface Admin {
   id: string;
@@ -47,6 +48,22 @@ const ManageAdmin = () => {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showExcelImport, setShowExcelImport] = useState(false);
+  const [newAdminData, setNewAdminData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: '',
+    area: ''
+  });
+
+  // Get current user info (in real app, this would come from auth context)
+  const currentUser = {
+    id: 'ADMIN2025',
+    name: 'Admin User',
+    role: 'Admin' // This determines if approval is needed
+  };
+
+  const { createApprovalRequest, pendingRequests } = useApprovals();
 
   const [admins, setAdmins] = useState<Admin[]>([
     {
@@ -95,8 +112,43 @@ const ManageAdmin = () => {
     }
   ]);
 
-  const handleAddAdmin = () => {
-    setIsAddDialogOpen(true);
+  // Check if current user needs approval for actions
+  const needsApproval = currentUser.role === 'Admin';
+
+  const handleAddAdmin = async () => {
+    if (needsApproval) {
+      // Create approval request for adding admin
+      await createApprovalRequest(
+        currentUser.id,
+        currentUser.name,
+        'create_admin',
+        newAdminData
+      );
+      setIsAddDialogOpen(false);
+      setNewAdminData({ name: '', email: '', phone: '', role: '', area: '' });
+    } else {
+      // Direct action for Master Admin
+      const newAdmin: Admin = {
+        id: `ADMIN${Date.now()}`,
+        name: newAdminData.name,
+        email: newAdminData.email,
+        phone: newAdminData.phone,
+        role: newAdminData.role as Admin['role'],
+        area: newAdminData.area,
+        status: 'Aktif',
+        lastLogin: '',
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+      
+      setAdmins([...admins, newAdmin]);
+      setIsAddDialogOpen(false);
+      setNewAdminData({ name: '', email: '', phone: '', role: '', area: '' });
+      
+      toast({
+        title: "Admin Ditambahkan",
+        description: "Admin baru berhasil ditambahkan ke sistem.",
+      });
+    }
   };
 
   const handleEditAdmin = (admin: Admin) => {
@@ -104,25 +156,54 @@ const ManageAdmin = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateAdmin = (updatedAdmin: Admin) => {
-    setAdmins(admins.map(a => a.id === updatedAdmin.id ? updatedAdmin : a));
-    setIsEditDialogOpen(false);
-    setSelectedAdmin(null);
-    toast({
-      title: "Admin Diperbarui",
-      description: `Data admin ${updatedAdmin.name} berhasil diperbarui`,
-    });
+  const handleUpdateAdmin = async (updatedAdmin: Admin) => {
+    if (needsApproval) {
+      // Create approval request for editing admin
+      await createApprovalRequest(
+        currentUser.id,
+        currentUser.name,
+        'edit_admin',
+        updatedAdmin,
+        updatedAdmin.id,
+        selectedAdmin
+      );
+      setIsEditDialogOpen(false);
+      setSelectedAdmin(null);
+    } else {
+      // Direct action for Master Admin
+      setAdmins(admins.map(a => a.id === updatedAdmin.id ? updatedAdmin : a));
+      setIsEditDialogOpen(false);
+      setSelectedAdmin(null);
+      toast({
+        title: "Admin Diperbarui",
+        description: `Data admin ${updatedAdmin.name} berhasil diperbarui`,
+      });
+    }
   };
 
-  const handleToggleStatus = (admin: Admin) => {
+  const handleToggleStatus = async (admin: Admin) => {
     const newStatus: 'Aktif' | 'Nonaktif' = admin.status === 'Aktif' ? 'Nonaktif' : 'Aktif';
-    const updatedAdmin = { ...admin, status: newStatus };
-    setAdmins(admins.map(a => a.id === admin.id ? updatedAdmin : a));
     
-    toast({
-      title: "Status Admin Diubah",
-      description: `Status admin ${admin.name} berhasil diubah menjadi ${newStatus}`,
-    });
+    if (needsApproval) {
+      // Create approval request for toggle status
+      await createApprovalRequest(
+        currentUser.id,
+        currentUser.name,
+        'toggle_status',
+        { newStatus },
+        admin.id,
+        admin
+      );
+    } else {
+      // Direct action for Master Admin
+      const updatedAdmin = { ...admin, status: newStatus };
+      setAdmins(admins.map(a => a.id === admin.id ? updatedAdmin : a));
+      
+      toast({
+        title: "Status Admin Diubah",
+        description: `Status admin ${admin.name} berhasil diubah menjadi ${newStatus}`,
+      });
+    }
   };
 
   const handleDeleteAdmin = (admin: Admin) => {
@@ -130,15 +211,32 @@ const ManageAdmin = () => {
     setShowDeleteDialog(true);
   };
 
-  const confirmDeleteAdmin = () => {
-    setAdmins(admins.filter(a => a.id !== selectedAdmin.id));
-    setShowDeleteDialog(false);
-    setSelectedAdmin(null);
-    toast({
-      title: "Admin Dihapus",
-      description: `Admin ${selectedAdmin.name} telah dihapus dari sistem`,
-      variant: "destructive"
-    });
+  const confirmDeleteAdmin = async () => {
+    if (!selectedAdmin) return;
+    
+    if (needsApproval) {
+      // Create approval request for deleting admin
+      await createApprovalRequest(
+        currentUser.id,
+        currentUser.name,
+        'delete_admin',
+        { adminId: selectedAdmin.id },
+        selectedAdmin.id,
+        selectedAdmin
+      );
+      setShowDeleteDialog(false);
+      setSelectedAdmin(null);
+    } else {
+      // Direct action for Master Admin
+      setAdmins(admins.filter(a => a.id !== selectedAdmin.id));
+      setShowDeleteDialog(false);
+      setSelectedAdmin(null);
+      toast({
+        title: "Admin Dihapus",
+        description: `Admin ${selectedAdmin.name} telah dihapus dari sistem`,
+        variant: "destructive"
+      });
+    }
   };
 
   const handleViewDetails = (admin: Admin) => {
@@ -185,6 +283,14 @@ const ManageAdmin = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Kelola Admin</h1>
             <p className="text-gray-600">Manajemen akun administrator sistem</p>
+            {needsApproval && (
+              <div className="flex items-center gap-2 mt-2">
+                <Clock className="h-4 w-4 text-orange-600" />
+                <span className="text-sm text-orange-600">
+                  Sebagai Admin, semua perubahan memerlukan persetujuan Master Admin
+                </span>
+              </div>
+            )}
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2">
@@ -195,12 +301,31 @@ const ManageAdmin = () => {
               <Upload className="h-4 w-4" />
               Import Excel
             </Button>
-            <Button onClick={handleAddAdmin} className="gap-2">
+            <Button onClick={() => setIsAddDialogOpen(true)} className="gap-2">
               <UserPlus className="h-4 w-4" />
-              Tambah Admin
+              {needsApproval ? 'Request Tambah Admin' : 'Tambah Admin'}
             </Button>
           </div>
         </div>
+
+        {/* Pending Requests Alert */}
+        {needsApproval && pendingRequests.length > 0 && (
+          <Card className="border-orange-200 bg-orange-50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-orange-600" />
+                <div>
+                  <p className="font-medium text-orange-800">
+                    Anda memiliki {pendingRequests.length} request yang sedang menunggu persetujuan
+                  </p>
+                  <p className="text-sm text-orange-600">
+                    Request Anda akan diproses oleh Master Admin
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Excel Import Section */}
         {showExcelImport && (
@@ -385,24 +510,24 @@ const ManageAdmin = () => {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleEditAdmin(admin)}>
                               <Edit className="mr-2 h-4 w-4" />
-                              Edit
+                              {needsApproval ? 'Request Edit' : 'Edit'}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleToggleStatus(admin)}>
                               {admin.status === 'Aktif' ? (
                                 <>
                                   <ToggleLeft className="mr-2 h-4 w-4" />
-                                  Nonaktifkan
+                                  {needsApproval ? 'Request Nonaktifkan' : 'Nonaktifkan'}
                                 </>
                               ) : (
                                 <>
                                   <ToggleRight className="mr-2 h-4 w-4" />
-                                  Aktifkan
+                                  {needsApproval ? 'Request Aktifkan' : 'Aktifkan'}
                                 </>
                               )}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDeleteAdmin(admin)} className="text-red-600">
                               <Trash2 className="mr-2 h-4 w-4" />
-                              Hapus
+                              {needsApproval ? 'Request Hapus' : 'Hapus'}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -426,39 +551,60 @@ const ManageAdmin = () => {
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Tambah Admin Baru</DialogTitle>
+              <DialogTitle>
+                {needsApproval ? 'Request Tambah Admin Baru' : 'Tambah Admin Baru'}
+              </DialogTitle>
               <DialogDescription>
-                Tambahkan administrator baru ke sistem.
+                {needsApproval 
+                  ? 'Request untuk menambahkan administrator baru akan dikirim ke Master Admin untuk persetujuan.'
+                  : 'Tambahkan administrator baru ke sistem.'
+                }
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="name" className="text-right">Nama</Label>
-                <Input id="name" className="col-span-3" />
+                <Input 
+                  id="name" 
+                  className="col-span-3" 
+                  value={newAdminData.name}
+                  onChange={(e) => setNewAdminData(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="email" className="text-right">Email</Label>
-                <Input id="email" type="email" className="col-span-3" />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  className="col-span-3" 
+                  value={newAdminData.email}
+                  onChange={(e) => setNewAdminData(prev => ({ ...prev, email: e.target.value }))}
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="phone" className="text-right">Telepon</Label>
-                <Input id="phone" className="col-span-3" />
+                <Input 
+                  id="phone" 
+                  className="col-span-3" 
+                  value={newAdminData.phone}
+                  onChange={(e) => setNewAdminData(prev => ({ ...prev, phone: e.target.value }))}
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="role" className="text-right">Role</Label>
-                <Select>
+                <Select value={newAdminData.role} onValueChange={(value) => setNewAdminData(prev => ({ ...prev, role: value }))}>
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Pilih role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="admin-area">Admin Area</SelectItem>
+                    <SelectItem value="Admin">Admin</SelectItem>
+                    <SelectItem value="Admin Area">Admin Area</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="area" className="text-right">Area</Label>
-                <Select>
+                <Select value={newAdminData.area} onValueChange={(value) => setNewAdminData(prev => ({ ...prev, area: value }))}>
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Pilih area" />
                   </SelectTrigger>
@@ -471,14 +617,8 @@ const ManageAdmin = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" onClick={() => {
-                toast({
-                  title: "Admin Ditambahkan",
-                  description: "Admin baru berhasil ditambahkan ke sistem.",
-                });
-                setIsAddDialogOpen(false);
-              }}>
-                Tambah Admin
+              <Button type="submit" onClick={handleAddAdmin}>
+                {needsApproval ? 'Kirim Request' : 'Tambah Admin'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -488,9 +628,14 @@ const ManageAdmin = () => {
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Edit Admin</DialogTitle>
+              <DialogTitle>
+                {needsApproval ? 'Request Edit Admin' : 'Edit Admin'}
+              </DialogTitle>
               <DialogDescription>
-                Ubah data admin di bawah ini
+                {needsApproval 
+                  ? 'Request untuk mengubah data admin akan dikirim ke Master Admin untuk persetujuan.'
+                  : 'Ubah data admin di bawah ini'
+                }
               </DialogDescription>
             </DialogHeader>
             {selectedAdmin && (
@@ -563,16 +708,20 @@ const ManageAdmin = () => {
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Konfirmasi Hapus Admin</AlertDialogTitle>
+              <AlertDialogTitle>
+                {needsApproval ? 'Konfirmasi Request Hapus Admin' : 'Konfirmasi Hapus Admin'}
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                Apakah Anda yakin ingin menghapus admin "{selectedAdmin?.name}"? 
-                Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.
+                {needsApproval 
+                  ? `Apakah Anda yakin ingin mengirim request untuk menghapus admin "${selectedAdmin?.name}"? Request akan dikirim ke Master Admin untuk persetujuan.`
+                  : `Apakah Anda yakin ingin menghapus admin "${selectedAdmin?.name}"? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.`
+                }
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Batal</AlertDialogCancel>
               <AlertDialogAction onClick={confirmDeleteAdmin} className="bg-red-600 hover:bg-red-700">
-                Hapus
+                {needsApproval ? 'Kirim Request' : 'Hapus'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

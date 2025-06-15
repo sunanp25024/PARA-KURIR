@@ -9,7 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      approval_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          current_data: Json | null
+          id: string
+          notes: string | null
+          request_data: Json
+          request_type: Database["public"]["Enums"]["approval_request_type"]
+          requester_id: string
+          requester_name: string
+          status: Database["public"]["Enums"]["approval_status"]
+          target_admin_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          current_data?: Json | null
+          id?: string
+          notes?: string | null
+          request_data: Json
+          request_type: Database["public"]["Enums"]["approval_request_type"]
+          requester_id: string
+          requester_name: string
+          status?: Database["public"]["Enums"]["approval_status"]
+          target_admin_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          current_data?: Json | null
+          id?: string
+          notes?: string | null
+          request_data?: Json
+          request_type?: Database["public"]["Enums"]["approval_request_type"]
+          requester_id?: string
+          requester_name?: string
+          status?: Database["public"]["Enums"]["approval_status"]
+          target_admin_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +62,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      approval_request_type:
+        | "create_admin"
+        | "edit_admin"
+        | "toggle_status"
+        | "delete_admin"
+      approval_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +182,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      approval_request_type: [
+        "create_admin",
+        "edit_admin",
+        "toggle_status",
+        "delete_admin",
+      ],
+      approval_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const
