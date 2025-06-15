@@ -41,6 +41,7 @@ const CourierDashboardContent = () => {
     currentStep,
     setCurrentStep,
     dailyPackages,
+    scannedPackages,
     deliveryPackages,
     deliveredPackages,
     pendingPackages,
@@ -67,7 +68,7 @@ const CourierDashboardContent = () => {
 
   // Hitung stats dari workflow context
   const totalPackages = dailyPackages.length;
-  const scannedPackages = deliveryPackages.length;
+  const scannedCount = scannedPackages.length;
   const deliveredCount = deliveredPackages.length;
   const pendingCount = pendingPackages.length;
 
@@ -122,7 +123,7 @@ const CourierDashboardContent = () => {
               <Scan className="h-4 w-4 text-purple-600" />
               <span className="text-xs font-medium text-purple-800">Scan</span>
             </div>
-            <div className="text-lg font-bold text-purple-900">{scannedPackages}</div>
+            <div className="text-lg font-bold text-purple-900">{scannedCount}</div>
           </div>
 
           <div className="flex-shrink-0 bg-green-50 p-3 rounded-lg min-w-24">

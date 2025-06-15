@@ -15,7 +15,7 @@ interface PendingReturnPackagesProps {
 }
 
 const PendingReturnPackages: React.FC<PendingReturnPackagesProps> = ({ onStepComplete }) => {
-  const { pendingPackages, returnToWarehouse } = useWorkflow();
+  const { pendingPackages, returnAllPendingToWarehouse } = useWorkflow();
   const [leaderName, setLeaderName] = useState('');
   const [photoTaken, setPhotoTaken] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -56,9 +56,7 @@ const PendingReturnPackages: React.FC<PendingReturnPackagesProps> = ({ onStepCom
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     // Return all pending packages to warehouse
-    pendingItems.forEach(pkg => {
-      returnToWarehouse(pkg.id, leaderName.trim(), 'photo_taken');
-    });
+    returnAllPendingToWarehouse(leaderName.trim(), 'photo_taken');
     
     // Reset form
     setLeaderName('');

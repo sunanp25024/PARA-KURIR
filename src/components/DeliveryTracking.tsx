@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Camera, CheckCircle, Package, AlertTriangle, Clock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useWorkflow } from '@/contexts/WorkflowContext';
@@ -23,10 +24,11 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
     markAsPending
   } = useWorkflow();
 
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [recipientName, setRecipientName] = useState('');
   const [photoTaken, setPhotoTaken] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleTakePhoto = () => {
     setPhotoTaken(true);
@@ -37,7 +39,7 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
   };
 
   const handleCompleteDelivery = async () => {
-    if (!selectedItem || !recipientName.trim() || !photoTaken) {
+    if (!selectedPackageId || !recipientName.trim() || !photoTaken) {
       toast({
         title: "Data Tidak Lengkap",
         description: "Pastikan foto bukti dan nama penerima sudah diisi",
@@ -51,13 +53,14 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    markAsDelivered(selectedItem, recipientName.trim(), 'photo_taken');
+    markAsDelivered(selectedPackageId, recipientName.trim(), 'photo_taken');
     
     // Reset form
-    setSelectedItem(null);
+    setSelectedPackageId(null);
     setRecipientName('');
     setPhotoTaken(false);
     setIsProcessing(false);
+    setDialogOpen(false);
 
     toast({
       title: "Pengiriman Selesai",
@@ -70,25 +73,15 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
     }, 500);
   };
 
-  const handleMarkAsPending = async (packageId?: string) => {
-    const targetPackageId = packageId || selectedItem;
-    if (!targetPackageId) return;
-
+  const handleMarkAsPending = async (packageId: string) => {
     setIsProcessing(true);
 
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     const reason = 'Tidak dapat terkirim';
-    markAsPending(targetPackageId, reason);
+    markAsPending(packageId, reason);
     
-    // Reset form if it was the selected item
-    if (targetPackageId === selectedItem) {
-      setSelectedItem(null);
-      setRecipientName('');
-      setPhotoTaken(false);
-    }
-
     setIsProcessing(false);
 
     toast({
@@ -100,6 +93,13 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
     setTimeout(() => {
       onStepComplete?.();
     }, 500);
+  };
+
+  const openDeliveryDialog = (packageId: string) => {
+    setSelectedPackageId(packageId);
+    setRecipientName('');
+    setPhotoTaken(false);
+    setDialogOpen(true);
   };
 
   const inDeliveryItems = deliveryPackages.filter(pkg => 
@@ -117,7 +117,7 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Pengantaran Aktif ({inDeliveryItems.length})
+            Pengantaran ({inDeliveryItems.length})
           </CardTitle>
           <CardDescription>
             Kelola proses pengantaran paket. Setiap paket dapat ditandai sebagai: Terkirim atau Pending.
@@ -145,9 +145,7 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
               {inDeliveryItems.map((item) => (
                 <div 
                   key={item.id} 
-                  className={`p-4 border rounded-lg transition-colors ${
-                    selectedItem === item.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
-                  }`}
+                  className="p-4 border rounded-lg bg-orange-50 border-orange-200"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div>
@@ -156,25 +154,77 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
                         {item.isCOD ? 'COD' : 'Non COD'}
                       </Badge>
                     </div>
-                    <Badge variant="outline">Dalam Pengantaran</Badge>
+                    <Badge variant="outline" className="text-orange-600 border-orange-600">
+                      Dalam Pengantaran
+                    </Badge>
                   </div>
 
                   {/* Quick Action Buttons for each package */}
                   <div className="grid grid-cols-2 gap-2">
-                    <Button 
-                      size="sm" 
-                      onClick={() => setSelectedItem(item.id)}
-                      variant={selectedItem === item.id ? "default" : "outline"}
-                      disabled={isProcessing}
-                    >
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Terkirim
-                    </Button>
+                    <Dialog open={dialogOpen && selectedPackageId === item.id} onOpenChange={setDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          onClick={() => openDeliveryDialog(item.id)}
+                          disabled={isProcessing}
+                          className="w-full"
+                        >
+                          <Camera className="h-3 w-3 mr-1" />
+                          Foto Bukti & Nama Penerima
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Selesaikan Pengiriman</DialogTitle>
+                          <DialogDescription>
+                            Paket: {item.trackingNumber}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="recipient">Nama Penerima</Label>
+                            <Input
+                              id="recipient"
+                              value={recipientName}
+                              onChange={(e) => setRecipientName(e.target.value)}
+                              placeholder="Masukkan nama penerima"
+                              disabled={isProcessing}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Foto Bukti Pengiriman</Label>
+                            <Button 
+                              onClick={handleTakePhoto}
+                              variant={photoTaken ? "outline" : "default"}
+                              className="w-full"
+                              disabled={isProcessing}
+                            >
+                              <Camera className="h-4 w-4 mr-2" />
+                              {photoTaken ? 'Foto Sudah Diambil ✓' : 'Ambil Foto Bukti'}
+                            </Button>
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-2 pt-4">
+                            <Button 
+                              onClick={handleCompleteDelivery}
+                              disabled={!recipientName.trim() || !photoTaken || isProcessing}
+                              className="w-full"
+                            >
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              {isProcessing ? 'Memproses...' : 'Selesaikan Pengiriman'}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    
                     <Button 
                       size="sm" 
                       variant="outline"
                       onClick={() => handleMarkAsPending(item.id)}
                       disabled={isProcessing}
+                      className="w-full"
                     >
                       <Clock className="h-3 w-3 mr-1" />
                       Pending
@@ -182,58 +232,6 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
                   </div>
                 </div>
               ))}
-            </div>
-          )}
-
-          {/* Delivery Form - Only show when item is selected for "Terkirim" */}
-          {selectedItem && (
-            <div className="mt-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
-              <h4 className="font-medium mb-4">Proses Pengantaran - {deliveryPackages.find(p => p.id === selectedItem)?.trackingNumber}</h4>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="recipient">Nama Penerima</Label>
-                  <Input
-                    id="recipient"
-                    value={recipientName}
-                    onChange={(e) => setRecipientName(e.target.value)}
-                    placeholder="Masukkan nama penerima"
-                    disabled={isProcessing}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Foto Bukti Pengiriman</Label>
-                  <Button 
-                    onClick={handleTakePhoto}
-                    variant={photoTaken ? "outline" : "default"}
-                    className="w-full"
-                    disabled={isProcessing}
-                  >
-                    <Camera className="h-4 w-4 mr-2" />
-                    {photoTaken ? 'Foto Sudah Diambil ✓' : 'Ambil Foto Bukti'}
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2">
-                  <Button 
-                    onClick={handleCompleteDelivery}
-                    disabled={!recipientName.trim() || !photoTaken || isProcessing}
-                    className="w-full"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    {isProcessing ? 'Memproses...' : 'Selesaikan Pengiriman'}
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setSelectedItem(null)}
-                    variant="outline"
-                    className="w-full"
-                    disabled={isProcessing}
-                  >
-                    Batal
-                  </Button>
-                </div>
-              </div>
             </div>
           )}
         </CardContent>

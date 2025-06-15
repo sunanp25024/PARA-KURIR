@@ -7,6 +7,10 @@ interface Package {
   isCOD: boolean;
 }
 
+interface ScannedPackage extends Package {
+  scanTime: Date;
+}
+
 interface DeliveredPackage extends Package {
   recipientName: string;
   proofPhoto: string;
@@ -25,11 +29,15 @@ interface WorkflowContextType {
   currentStep: 'input' | 'scan' | 'delivery' | 'pending' | 'performance';
   setCurrentStep: (step: 'input' | 'scan' | 'delivery' | 'pending' | 'performance') => void;
   
-  // Daily packages (from input step)
+  // Daily packages (from input step) - template packages
   dailyPackages: Package[];
   setDailyPackages: (packages: Package[]) => void;
   
-  // Delivery packages (from scan step)
+  // Scanned packages (from scan step)
+  scannedPackages: ScannedPackage[];
+  setScannedPackages: (packages: ScannedPackage[]) => void;
+  
+  // Delivery packages (packages ready for delivery)
   deliveryPackages: Package[];
   setDeliveryPackages: (packages: Package[]) => void;
   
@@ -37,7 +45,7 @@ interface WorkflowContextType {
   deliveredPackages: DeliveredPackage[];
   setDeliveredPackages: (packages: DeliveredPackage[]) => void;
   
-  // Pending/Return packages
+  // Pending packages
   pendingPackages: PendingPackage[];
   setPendingPackages: (packages: PendingPackage[]) => void;
   
@@ -48,9 +56,12 @@ interface WorkflowContextType {
   canProceedToPerformance: () => boolean;
   
   // Action helpers
+  addScannedPackage: (trackingNumber: string, isCOD: boolean) => void;
+  removeScannedPackage: (id: string) => void;
+  startDelivery: () => void;
   markAsDelivered: (packageId: string, recipientName: string, proofPhoto: string) => void;
   markAsPending: (packageId: string, reason: string) => void;
-  returnToWarehouse: (packageId: string, leaderName: string, returnPhoto: string) => void;
+  returnAllPendingToWarehouse: (leaderName: string, returnPhoto: string) => void;
   
   // Auto progression
   autoProgressToNextStep: () => void;
@@ -61,6 +72,7 @@ const WorkflowContext = createContext<WorkflowContextType | undefined>(undefined
 export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentStep, setCurrentStep] = useState<'input' | 'scan' | 'delivery' | 'pending' | 'performance'>('input');
   const [dailyPackages, setDailyPackages] = useState<Package[]>([]);
+  const [scannedPackages, setScannedPackages] = useState<ScannedPackage[]>([]);
   const [deliveryPackages, setDeliveryPackages] = useState<Package[]>([]);
   const [deliveredPackages, setDeliveredPackages] = useState<DeliveredPackage[]>([]);
   const [pendingPackages, setPendingPackages] = useState<PendingPackage[]>([]);
@@ -68,12 +80,20 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Load data from localStorage on mount
   useEffect(() => {
     const savedDailyPackages = localStorage.getItem('dailyPackages');
+    const savedScannedPackages = localStorage.getItem('scannedPackages');
     const savedDeliveryPackages = localStorage.getItem('deliveryPackages');
     const savedDeliveredPackages = localStorage.getItem('deliveredPackages');
     const savedPendingPackages = localStorage.getItem('pendingPackages');
     const savedCurrentStep = localStorage.getItem('currentWorkflowStep');
 
     if (savedDailyPackages) setDailyPackages(JSON.parse(savedDailyPackages));
+    if (savedScannedPackages) {
+      const packages = JSON.parse(savedScannedPackages);
+      setScannedPackages(packages.map((pkg: any) => ({
+        ...pkg,
+        scanTime: new Date(pkg.scanTime)
+      })));
+    }
     if (savedDeliveryPackages) setDeliveryPackages(JSON.parse(savedDeliveryPackages));
     if (savedDeliveredPackages) setDeliveredPackages(JSON.parse(savedDeliveredPackages));
     if (savedPendingPackages) setPendingPackages(JSON.parse(savedPendingPackages));
@@ -84,6 +104,10 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     localStorage.setItem('dailyPackages', JSON.stringify(dailyPackages));
   }, [dailyPackages]);
+
+  useEffect(() => {
+    localStorage.setItem('scannedPackages', JSON.stringify(scannedPackages));
+  }, [scannedPackages]);
 
   useEffect(() => {
     localStorage.setItem('deliveryPackages', JSON.stringify(deliveryPackages));
@@ -102,12 +126,42 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [currentStep]);
 
   const canProceedToScan = () => dailyPackages.length > 0;
-  const canProceedToDelivery = () => deliveryPackages.length > 0;
+  const canProceedToDelivery = () => scannedPackages.length > 0;
   const canProceedToPending = () => pendingPackages.some(pkg => !pkg.returnedAt);
   const canProceedToPerformance = () => {
-    const totalPackages = deliveryPackages.length;
-    const completedPackages = deliveredPackages.length + pendingPackages.filter(pkg => pkg.returnedAt).length;
-    return totalPackages > 0 && totalPackages === completedPackages;
+    const totalDelivery = deliveryPackages.length;
+    const completedDelivery = deliveredPackages.length + pendingPackages.filter(pkg => pkg.returnedAt).length;
+    return totalDelivery > 0 && totalDelivery === completedDelivery;
+  };
+
+  const addScannedPackage = (trackingNumber: string, isCOD: boolean) => {
+    // Check for duplicates
+    if (scannedPackages.some(pkg => pkg.trackingNumber === trackingNumber)) {
+      return false; // Duplicate
+    }
+
+    const newPackage: ScannedPackage = {
+      id: `scan_${Date.now()}_${Math.random()}`,
+      trackingNumber,
+      isCOD,
+      scanTime: new Date()
+    };
+
+    setScannedPackages(prev => [...prev, newPackage]);
+    return true;
+  };
+
+  const removeScannedPackage = (id: string) => {
+    setScannedPackages(prev => prev.filter(pkg => pkg.id !== id));
+  };
+
+  const startDelivery = () => {
+    const deliveryItems = scannedPackages.map(pkg => ({
+      id: pkg.id,
+      trackingNumber: pkg.trackingNumber,
+      isCOD: pkg.isCOD
+    }));
+    setDeliveryPackages(deliveryItems);
   };
 
   const markAsDelivered = (packageId: string, recipientName: string, proofPhoto: string) => {
@@ -134,9 +188,9 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const returnToWarehouse = (packageId: string, leaderName: string, returnPhoto: string) => {
+  const returnAllPendingToWarehouse = (leaderName: string, returnPhoto: string) => {
     setPendingPackages(prev => prev.map(pkg => 
-      pkg.id === packageId 
+      !pkg.returnedAt 
         ? { ...pkg, leaderName, returnPhoto, returnedAt: new Date() }
         : pkg
     ));
@@ -144,10 +198,6 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const autoProgressToNextStep = () => {
     console.log('Auto progress check - current step:', currentStep);
-    console.log('Daily packages:', dailyPackages.length);
-    console.log('Delivery packages:', deliveryPackages.length);
-    console.log('Delivered packages:', deliveredPackages.length);
-    console.log('Pending packages:', pendingPackages.length);
     
     switch (currentStep) {
       case 'input':
@@ -190,6 +240,8 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setCurrentStep,
       dailyPackages,
       setDailyPackages,
+      scannedPackages,
+      setScannedPackages,
       deliveryPackages,
       setDeliveryPackages,
       deliveredPackages,
@@ -200,9 +252,12 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       canProceedToDelivery,
       canProceedToPending,
       canProceedToPerformance,
+      addScannedPackage,
+      removeScannedPackage,
+      startDelivery,
       markAsDelivered,
       markAsPending,
-      returnToWarehouse,
+      returnAllPendingToWarehouse,
       autoProgressToNextStep
     }}>
       {children}
