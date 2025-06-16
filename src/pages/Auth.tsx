@@ -7,11 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Truck, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import { Truck, AlertTriangle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/components/ui/use-toast';
 
 const Auth = () => {
-  const { signIn, signUp, user, loading } = useAuth();
+  const { signIn, signInWithId, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
   
   const [email, setEmail] = useState('');
@@ -23,6 +24,7 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [useIdLogin, setUseIdLogin] = useState(true);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -37,16 +39,26 @@ const Auth = () => {
     setError('');
 
     try {
-      const { error } = await signIn(email, password);
+      let result;
+      if (useIdLogin) {
+        result = await signInWithId(email, password);
+      } else {
+        result = await signIn(email, password);
+      }
       
-      if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          setError('Email atau password salah');
-        } else if (error.message.includes('Email not confirmed')) {
+      if (result.error) {
+        if (result.error.message.includes('Invalid login credentials') || result.error.message.includes('Invalid credentials')) {
+          setError(useIdLogin ? 'ID atau password salah' : 'Email atau password salah');
+        } else if (result.error.message.includes('Email not confirmed')) {
           setError('Silakan verifikasi email Anda terlebih dahulu');
         } else {
-          setError(error.message);
+          setError(result.error.message);
         }
+      } else {
+        toast({
+          title: "Login Berhasil",
+          description: "Selamat datang di INSAN MOBILE!",
+        });
       }
     } catch (err) {
       setError('Terjadi kesalahan saat login');
@@ -87,7 +99,10 @@ const Auth = () => {
         }
       } else {
         setError('');
-        alert('Pendaftaran berhasil! Silakan cek email untuk verifikasi akun.');
+        toast({
+          title: "Pendaftaran Berhasil!",
+          description: "Silakan cek email untuk verifikasi akun.",
+        });
       }
     } catch (err) {
       setError('Terjadi kesalahan saat mendaftar');
@@ -99,7 +114,10 @@ const Auth = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Memuat aplikasi...</p>
+        </div>
       </div>
     );
   }
@@ -107,18 +125,27 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="w-full max-w-md">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate('/')}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Kembali ke Beranda
+        </Button>
+
         <div className="text-center mb-8">
           <div className="mx-auto w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-4">
             <Truck className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Courier Mobile App</h1>
-          <p className="text-gray-600">Sistem Workflow Harian Kurir</p>
+          <h1 className="text-2xl font-bold text-gray-900">INSAN MOBILE</h1>
+          <p className="text-gray-600">Aplikasi Kurir Professional</p>
         </div>
 
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Masuk</TabsTrigger>
-            <TabsTrigger value="signup">Daftar</TabsTrigger>
+            <TabsTrigger value="signup">Daftar Baru</TabsTrigger>
           </TabsList>
 
           <TabsContent value="signin">
@@ -126,19 +153,42 @@ const Auth = () => {
               <CardHeader>
                 <CardTitle>Masuk ke Akun</CardTitle>
                 <CardDescription>
-                  Masukkan email dan password untuk mengakses aplikasi
+                  Login sebagai kurir untuk menggunakan aplikasi mobile
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                <div className="mb-4">
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      type="button"
+                      variant={useIdLogin ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setUseIdLogin(true)}
+                    >
+                      Login dengan ID
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={!useIdLogin ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setUseIdLogin(false)}
+                    >
+                      Login dengan Email
+                    </Button>
+                  </div>
+                </div>
+
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div>
-                    <Label htmlFor="signin-email">Email</Label>
+                    <Label htmlFor="signin-email">
+                      {useIdLogin ? 'ID Kurir' : 'Email'}
+                    </Label>
                     <Input
                       id="signin-email"
-                      type="email"
+                      type={useIdLogin ? "text" : "email"}
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="nama@perusahaan.com"
+                      onChange={(e) => setEmail(useIdLogin ? e.target.value.toUpperCase() : e.target.value)}
+                      placeholder={useIdLogin ? "Contoh: PISTEST2025" : "nama@perusahaan.com"}
                       required
                       disabled={isLoading}
                     />
@@ -184,6 +234,14 @@ const Auth = () => {
                     {isLoading ? 'Memproses...' : 'Masuk'}
                   </Button>
                 </form>
+
+                {useIdLogin && (
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <p className="text-sm font-medium text-blue-800 mb-1">🔑 Akun Demo Kurir:</p>
+                    <p className="text-xs text-blue-700"><strong>ID:</strong> PISTEST2025</p>
+                    <p className="text-xs text-blue-700"><strong>Password:</strong> 123456</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -191,9 +249,9 @@ const Auth = () => {
           <TabsContent value="signup">
             <Card>
               <CardHeader>
-                <CardTitle>Daftar Akun Baru</CardTitle>
+                <CardTitle>Daftar Akun Kurir</CardTitle>
                 <CardDescription>
-                  Buat akun kurir untuk menggunakan aplikasi
+                  Buat akun baru untuk kurir
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -289,6 +347,12 @@ const Auth = () => {
                     {isLoading ? 'Memproses...' : 'Daftar'}
                   </Button>
                 </form>
+
+                <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+                  <p className="text-sm text-yellow-800">
+                    ⚠️ <strong>Catatan:</strong> Akun baru perlu disetujui oleh Admin/PIC sebelum dapat digunakan.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
