@@ -239,7 +239,7 @@ class CourierService {
 
   async updateDailySummary(courierId: string, date: string): Promise<boolean> {
     try {
-      const { error } = await supabase.rpc('update_daily_summary', {
+      const { error } = await (supabase as any).rpc('update_daily_summary', {
         courier_uuid: courierId,
         summary_date: date
       });
