@@ -11,7 +11,7 @@ const Index = () => {
   useEffect(() => {
     // Check if running as PWA/standalone app
     const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
-                  window.navigator.standalone === true ||
+                  (window.navigator as any).standalone === true ||
                   document.referrer.includes('android-app://');
 
     if (!loading && isPWA) {
@@ -27,7 +27,7 @@ const Index = () => {
 
   // Show loading while checking auth status for PWA
   const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
-                window.navigator.standalone === true ||
+                (window.navigator as any).standalone === true ||
                 document.referrer.includes('android-app://');
 
   if (loading && isPWA) {
