@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/hooks/useAuth';
+import PWAUpdatePrompt from '@/components/PWAUpdatePrompt';
 
 // Pages
 import Auth from '@/pages/Auth';
@@ -28,6 +29,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/kurir-mobile" element={<KurirMobile />} />
               
               {/* Redirect unknown routes to home */}
@@ -35,6 +37,7 @@ function App() {
             </Routes>
           </div>
           <Toaster />
+          <PWAUpdatePrompt />
         </AuthProvider>
       </Router>
     </QueryClientProvider>
