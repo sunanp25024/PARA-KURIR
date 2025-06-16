@@ -6,6 +6,7 @@ import { AuthProvider } from '@/hooks/useAuth';
 
 // Pages
 import Auth from '@/pages/Auth';
+import Login from '@/pages/Login';
 import KurirMobile from '@/pages/KurirMobile';
 import Index from '@/pages/Index';
 

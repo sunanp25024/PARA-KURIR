@@ -2,25 +2,35 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import LandingPage from './LandingPage';
 
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading) {
+    // Check if running as PWA/standalone app
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                  window.navigator.standalone === true ||
+                  document.referrer.includes('android-app://');
+
+    if (!loading && isPWA) {
+      // If PWA/standalone mode, redirect based on auth status
       if (user) {
-        // If user is logged in, redirect to courier mobile page
         navigate('/kurir-mobile');
       } else {
-        // If user is not logged in, redirect to auth page
         navigate('/auth');
       }
     }
+    // If not PWA (regular web browser), show landing page
   }, [user, loading, navigate]);
 
-  // Show loading while checking auth status
-  if (loading) {
+  // Show loading while checking auth status for PWA
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                window.navigator.standalone === true ||
+                document.referrer.includes('android-app://');
+
+  if (loading && isPWA) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-center">
@@ -31,7 +41,8 @@ const Index = () => {
     );
   }
 
-  return null;
+  // For regular web browsers, show landing page
+  return <LandingPage />;
 };
 
 export default Index;
