@@ -26,6 +26,7 @@ import { AuthProvider } from "./contexts/SimpleAuthContext";
 import { WorkflowProvider } from "./contexts/WorkflowContext";
 import { RealtimeProvider } from "./components/RealtimeProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { DevStatus } from "./components/DevStatus";
 
 const queryClient = new QueryClient();
 
