@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, Eye, ToggleLeft, ToggleRight, MoreHorizontal } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Shield, Filter, MoreHorizontal, UserPlus, Upload, Download, Eye, ToggleLeft, ToggleRight, Clock } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,257 +22,409 @@ import {
 } from '@/components/ui/alert-dialog';
 import Layout from '@/components/Layout';
 import { toast } from '@/hooks/use-toast';
-import { apiService, type User } from '@/services/apiService';
-import { useAuth } from '@/hooks/useAuth';
+import ExcelImportManager from '@/components/ExcelImportManager';
+import EditAdminForm from '@/components/forms/EditAdminForm';
+import { useApprovals } from '@/hooks/useApprovals';
+
+interface Admin {
+  id: string;
+  name: string;
+  email: string;
+  status: 'Aktif' | 'Nonaktif';
+  lastLogin: string;
+  area: string;
+  role: 'Super Admin' | 'Admin' | 'Admin Area';
+  createdAt: string;
+  phone?: string;
+}
 
 const ManageAdmin = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [areaFilter, setAreaFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [selectedAdmin, setSelectedAdmin] = useState<User | null>(null);
+  const [selectedAdmin, setSelectedAdmin] = useState<Admin | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [showExcelImport, setShowExcelImport] = useState(false);
   const [newAdminData, setNewAdminData] = useState({
-    user_id: '',
     name: '',
     email: '',
     phone: '',
-    role: 'Admin',
-    wilayah: '',
-    area: '',
-    lokasi_kerja: '',
-    password: '',
-    status: 'Aktif'
+    role: '',
+    area: ''
   });
 
-  const { user: currentUser } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
-
-  // Load users from database
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    try {
-      setIsLoading(true);
-      const allUsers = await apiService.getUsers();
-      // Filter to show only Admin roles
-      const adminUsers = allUsers.filter(user => 
-        user.role === 'Admin' || user.role === 'Super Admin' || user.role === 'Admin Area'
-      );
-      setUsers(adminUsers);
-    } catch (error) {
-      console.error('Error loading users:', error);
-      toast({
-        title: "Error",
-        description: "Gagal memuat data admin",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  // Get current user info (in real app, this would come from auth context)
+  const currentUser = {
+    id: 'ADMIN2025',
+    name: 'Admin User',
+    role: 'Admin' // This determines if approval is needed
   };
 
-  // Check if current user is Master Admin
-  const isMasterAdmin = currentUser?.role === 'Master Admin';
+  const { createApprovalRequest, pendingRequests } = useApprovals();
 
-  // Handle Add Admin
+  const [admins, setAdmins] = useState<Admin[]>([
+    {
+      id: 'ADMIN2025',
+      name: 'Admin User',
+      email: 'admin@example.com',
+      status: 'Aktif',
+      lastLogin: '2024-06-14',
+      area: 'Jakarta',
+      role: 'Super Admin',
+      createdAt: '2024-01-15',
+      phone: '+62812345678'
+    },
+    {
+      id: 'ADMIN2026',
+      name: 'Admin Bandung',
+      email: 'admin.bandung@example.com',
+      status: 'Aktif',
+      lastLogin: '2024-06-13',
+      area: 'Bandung',
+      role: 'Admin Area',
+      createdAt: '2024-02-20',
+      phone: '+62812345679'
+    },
+    {
+      id: 'ADMIN2027',
+      name: 'Admin Surabaya',
+      email: 'admin.surabaya@example.com',
+      status: 'Nonaktif',
+      lastLogin: '2024-06-10',
+      area: 'Surabaya',
+      role: 'Admin Area',
+      createdAt: '2024-03-10',
+      phone: '+62812345680'
+    },
+    {
+      id: 'ADMIN2028',
+      name: 'Admin Central',
+      email: 'admin.central@example.com',
+      status: 'Aktif',
+      lastLogin: '2024-06-14',
+      area: 'Jakarta',
+      role: 'Admin',
+      createdAt: '2024-04-05',
+      phone: '+62812345681'
+    }
+  ]);
+
+  // Check if current user needs approval for actions
+  const needsApproval = currentUser.role === 'Admin';
+
   const handleAddAdmin = async () => {
-    if (!isMasterAdmin) {
-      toast({
-        title: "Akses Ditolak",
-        description: "Hanya Master Admin yang dapat menambah admin",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const newUser = await apiService.createUser(newAdminData);
-      await loadUsers();
+    if (needsApproval) {
+      // Create approval request for adding admin
+      await createApprovalRequest(
+        currentUser.id,
+        currentUser.name,
+        'create_admin',
+        newAdminData
+      );
       setIsAddDialogOpen(false);
-      setNewAdminData({
-        user_id: '',
-        name: '',
-        email: '',
-        phone: '',
-        role: 'Admin',
-        wilayah: '',
-        area: '',
-        lokasi_kerja: '',
-        password: '',
-        status: 'Aktif'
-      });
+      setNewAdminData({ name: '', email: '', phone: '', role: '', area: '' });
+    } else {
+      // Direct action for Master Admin
+      const newAdmin: Admin = {
+        id: `ADMIN${Date.now()}`,
+        name: newAdminData.name,
+        email: newAdminData.email,
+        phone: newAdminData.phone,
+        role: newAdminData.role as Admin['role'],
+        area: newAdminData.area,
+        status: 'Aktif',
+        lastLogin: '',
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+      
+      setAdmins([...admins, newAdmin]);
+      setIsAddDialogOpen(false);
+      setNewAdminData({ name: '', email: '', phone: '', role: '', area: '' });
+      
       toast({
-        title: "Berhasil",
-        description: "Admin baru berhasil ditambahkan"
+        title: "Admin Ditambahkan",
+        description: "Admin baru berhasil ditambahkan ke sistem.",
       });
-    } catch (error) {
-      console.error('Error adding admin:', error);
-      toast({
-        title: "Error",
-        description: "Gagal menambahkan admin",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Handle Edit Admin
-  const handleEditAdmin = (admin: User) => {
-    if (!isMasterAdmin) {
-      toast({
-        title: "Akses Ditolak",
-        description: "Hanya Master Admin yang dapat mengedit admin",
-        variant: "destructive"
-      });
-      return;
-    }
+  const handleEditAdmin = (admin: Admin) => {
     setSelectedAdmin(admin);
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateAdmin = async () => {
-    if (!selectedAdmin) return;
-
-    try {
-      setIsLoading(true);
-      await apiService.updateUser(selectedAdmin.id, selectedAdmin);
-      await loadUsers();
+  const handleUpdateAdmin = async (updatedAdmin: Admin) => {
+    if (needsApproval) {
+      // Create approval request for editing admin
+      await createApprovalRequest(
+        currentUser.id,
+        currentUser.name,
+        'edit_admin',
+        updatedAdmin,
+        updatedAdmin.id,
+        selectedAdmin
+      );
       setIsEditDialogOpen(false);
+      setSelectedAdmin(null);
+    } else {
+      // Direct action for Master Admin
+      setAdmins(admins.map(a => a.id === updatedAdmin.id ? updatedAdmin : a));
+      setIsEditDialogOpen(false);
+      setSelectedAdmin(null);
       toast({
-        title: "Berhasil",
-        description: "Data admin berhasil diperbarui"
+        title: "Admin Diperbarui",
+        description: `Data admin ${updatedAdmin.name} berhasil diperbarui`,
       });
-    } catch (error) {
-      console.error('Error updating admin:', error);
-      toast({
-        title: "Error",
-        description: "Gagal memperbarui data admin",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Handle Toggle Status
-  const handleToggleStatus = async (admin: User) => {
-    if (!isMasterAdmin) {
+  const handleToggleStatus = async (admin: Admin) => {
+    const newStatus: 'Aktif' | 'Nonaktif' = admin.status === 'Aktif' ? 'Nonaktif' : 'Aktif';
+    
+    if (needsApproval) {
+      // Create approval request for toggle status
+      await createApprovalRequest(
+        currentUser.id,
+        currentUser.name,
+        'toggle_status',
+        { newStatus },
+        admin.id,
+        admin
+      );
+    } else {
+      // Direct action for Master Admin
+      const updatedAdmin = { ...admin, status: newStatus };
+      setAdmins(admins.map(a => a.id === admin.id ? updatedAdmin : a));
+      
       toast({
-        title: "Akses Ditolak",
-        description: "Hanya Master Admin yang dapat mengubah status admin",
-        variant: "destructive"
+        title: "Status Admin Diubah",
+        description: `Status admin ${admin.name} berhasil diubah menjadi ${newStatus}`,
       });
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const newStatus = admin.status === 'Aktif' ? 'Nonaktif' : 'Aktif';
-      await apiService.updateUser(admin.id, { status: newStatus });
-      await loadUsers();
-      toast({
-        title: "Berhasil",
-        description: `Status admin berhasil diubah menjadi ${newStatus}`
-      });
-    } catch (error) {
-      console.error('Error updating status:', error);
-      toast({
-        title: "Error",
-        description: "Gagal mengubah status admin",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Handle Delete Admin
-  const handleDeleteAdmin = async () => {
-    if (!selectedAdmin || !isMasterAdmin) return;
+  const handleDeleteAdmin = (admin: Admin) => {
+    setSelectedAdmin(admin);
+    setShowDeleteDialog(true);
+  };
 
-    try {
-      setIsLoading(true);
-      await apiService.deleteUser(selectedAdmin.id);
-      await loadUsers();
+  const confirmDeleteAdmin = async () => {
+    if (!selectedAdmin) return;
+    
+    if (needsApproval) {
+      // Create approval request for deleting admin
+      await createApprovalRequest(
+        currentUser.id,
+        currentUser.name,
+        'delete_admin',
+        { adminId: selectedAdmin.id },
+        selectedAdmin.id,
+        selectedAdmin
+      );
       setShowDeleteDialog(false);
+      setSelectedAdmin(null);
+    } else {
+      // Direct action for Master Admin
+      setAdmins(admins.filter(a => a.id !== selectedAdmin.id));
+      setShowDeleteDialog(false);
+      setSelectedAdmin(null);
       toast({
-        title: "Berhasil",
-        description: "Admin berhasil dihapus"
-      });
-    } catch (error) {
-      console.error('Error deleting admin:', error);
-      toast({
-        title: "Error",
-        description: "Gagal menghapus admin",
+        title: "Admin Dihapus",
+        description: `Admin ${selectedAdmin.name} telah dihapus dari sistem`,
         variant: "destructive"
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Handle View Details
-  const handleViewDetails = (admin: User) => {
+  const handleViewDetails = (admin: Admin) => {
     setSelectedAdmin(admin);
     setShowDetailDialog(true);
   };
 
-  // Filter users based on search and filters
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.user_id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-    const matchesArea = areaFilter === 'all' || user.area === areaFilter;
+  const handleDownloadTemplate = () => {
+    toast({
+      title: "Template Downloaded",
+      description: "Template Excel untuk admin berhasil didownload.",
+    });
+    console.log("Downloading admin template");
+  };
+
+  const filteredAdmins = admins.filter(admin => {
+    const matchesSearch = admin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         admin.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         admin.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || admin.status === statusFilter;
+    const matchesArea = areaFilter === 'all' || admin.area === areaFilter;
     
     return matchesSearch && matchesStatus && matchesArea;
   });
 
+  const areas = [...new Set(admins.map(admin => admin.area))];
+  const activeAdmins = admins.filter(admin => admin.status === 'Aktif').length;
+  const totalAdmins = admins.length;
+
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case 'Super Admin': return 'destructive';
+      case 'Admin': return 'default';
+      case 'Admin Area': return 'secondary';
+      default: return 'outline';
+    }
+  };
+
   return (
     <Layout>
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Manage Admin</h1>
-            <p className="text-gray-600">Kelola data administrator sistem</p>
+            <h1 className="text-3xl font-bold text-gray-900">Kelola Admin</h1>
+            <p className="text-gray-600">Manajemen akun administrator sistem</p>
+            {needsApproval && (
+              <div className="flex items-center gap-2 mt-2">
+                <Clock className="h-4 w-4 text-orange-600" />
+                <span className="text-sm text-orange-600">
+                  Sebagai Admin, semua perubahan memerlukan persetujuan Master Admin
+                </span>
+              </div>
+            )}
           </div>
-          {isMasterAdmin && (
-            <Button onClick={() => setIsAddDialogOpen(true)} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Tambah Admin
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2">
+              <Download className="h-4 w-4" />
+              Template Excel
             </Button>
-          )}
+            <Button variant="outline" onClick={() => setShowExcelImport(true)} className="gap-2">
+              <Upload className="h-4 w-4" />
+              Import Excel
+            </Button>
+            <Button onClick={() => setIsAddDialogOpen(true)} className="gap-2">
+              <UserPlus className="h-4 w-4" />
+              {needsApproval ? 'Request Tambah Admin' : 'Tambah Admin'}
+            </Button>
+          </div>
         </div>
 
-        {/* Filters */}
+        {/* Pending Requests Alert */}
+        {needsApproval && pendingRequests.length > 0 && (
+          <Card className="border-orange-200 bg-orange-50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-orange-600" />
+                <div>
+                  <p className="font-medium text-orange-800">
+                    Anda memiliki {pendingRequests.length} request yang sedang menunggu persetujuan
+                  </p>
+                  <p className="text-sm text-orange-600">
+                    Request Anda akan diproses oleh Master Admin
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Excel Import Section */}
+        {showExcelImport && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Import Data Admin</CardTitle>
+                <Button variant="outline" onClick={() => setShowExcelImport(false)}>
+                  Tutup
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ExcelImportManager />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="text-2xl font-bold">{totalAdmins}</p>
+                  <p className="text-sm text-gray-600">Total Admin</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                <div>
+                  <p className="text-2xl font-bold">{activeAdmins}</p>
+                  <p className="text-sm text-gray-600">Admin Aktif</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 bg-red-500 rounded-full"></div>
+                <div>
+                  <p className="text-2xl font-bold">{totalAdmins - activeAdmins}</p>
+                  <p className="text-sm text-gray-600">Admin Nonaktif</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                <div>
+                  <p className="text-2xl font-bold">{areas.length}</p>
+                  <p className="text-sm text-gray-600">Area Coverage</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
         <Card>
           <CardHeader>
-            <CardTitle>Filter & Pencarian</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Daftar Administrator
+            </CardTitle>
+            <CardDescription>
+              Total: {admins.length} Admin terdaftar | Aktif: {activeAdmins}
+            </CardDescription>
           </CardHeader>
+          
           <CardContent>
-            <div className="flex gap-4 items-center">
+            {/* Filters */}
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
               <div className="flex-1">
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Cari nama, email, atau ID..."
+                    placeholder="Cari admin berdasarkan nama, ID, atau email..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
                   />
                 </div>
               </div>
+              
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Status" />
+                <SelectTrigger className="w-full md:w-[180px]">
+                  <SelectValue placeholder="Filter Status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Semua Status</SelectItem>
@@ -279,55 +432,70 @@ const ManageAdmin = () => {
                   <SelectItem value="Nonaktif">Nonaktif</SelectItem>
                 </SelectContent>
               </Select>
+              
               <Select value={areaFilter} onValueChange={setAreaFilter}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Area" />
+                <SelectTrigger className="w-full md:w-[180px]">
+                  <SelectValue placeholder="Filter Area" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Semua Area</SelectItem>
-                  <SelectItem value="Jakarta">Jakarta</SelectItem>
-                  <SelectItem value="Bandung">Bandung</SelectItem>
-                  <SelectItem value="Surabaya">Surabaya</SelectItem>
+                  {areas.map((area) => (
+                    <SelectItem key={area} value={area}>{area}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Admin Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Daftar Admin ({filteredUsers.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="text-center py-4">Loading...</div>
-            ) : (
+            {/* Table */}
+            <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Nama</TableHead>
-                    <TableHead>Email</TableHead>
+                    <TableHead>Admin</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Area</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Aksi</TableHead>
+                    <TableHead>Last Login</TableHead>
+                    <TableHead className="w-[50px]">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.user_id}</TableCell>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.role}</TableCell>
-                      <TableCell>{user.area}</TableCell>
+                  {filteredAdmins.map((admin) => (
+                    <TableRow key={admin.id}>
                       <TableCell>
-                        <Badge variant={user.status === 'Aktif' ? 'default' : 'secondary'}>
-                          {user.status}
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <Shield className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{admin.name}</p>
+                            <p className="text-sm text-gray-500">{admin.id}</p>
+                            <p className="text-sm text-gray-500">{admin.email}</p>
+                            <p className="text-xs text-gray-400">{admin.phone}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <Badge variant={getRoleBadgeVariant(admin.role)}>
+                          {admin.role}
                         </Badge>
                       </TableCell>
+                      
+                      <TableCell>
+                        <span className="text-sm">{admin.area}</span>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <Badge variant={admin.status === 'Aktif' ? 'default' : 'secondary'}>
+                          {admin.status}
+                        </Badge>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <span className="text-sm text-gray-600">{admin.lastLogin}</span>
+                      </TableCell>
+                      
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -335,37 +503,32 @@ const ManageAdmin = () => {
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewDetails(user)}>
+                          <DropdownMenuContent align="end" className="bg-white border shadow-lg">
+                            <DropdownMenuItem onClick={() => handleViewDetails(admin)}>
                               <Eye className="mr-2 h-4 w-4" />
                               Lihat Detail
                             </DropdownMenuItem>
-                            {isMasterAdmin && (
-                              <>
-                                <DropdownMenuItem onClick={() => handleEditAdmin(user)}>
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
-                                  {user.status === 'Aktif' ? (
-                                    <ToggleLeft className="mr-2 h-4 w-4" />
-                                  ) : (
-                                    <ToggleRight className="mr-2 h-4 w-4" />
-                                  )}
-                                  {user.status === 'Aktif' ? 'Nonaktifkan' : 'Aktifkan'}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => {
-                                    setSelectedAdmin(user);
-                                    setShowDeleteDialog(true);
-                                  }}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Hapus
-                                </DropdownMenuItem>
-                              </>
-                            )}
+                            <DropdownMenuItem onClick={() => handleEditAdmin(admin)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              {needsApproval ? 'Request Edit' : 'Edit'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleToggleStatus(admin)}>
+                              {admin.status === 'Aktif' ? (
+                                <>
+                                  <ToggleLeft className="mr-2 h-4 w-4" />
+                                  {needsApproval ? 'Request Nonaktifkan' : 'Nonaktifkan'}
+                                </>
+                              ) : (
+                                <>
+                                  <ToggleRight className="mr-2 h-4 w-4" />
+                                  {needsApproval ? 'Request Aktifkan' : 'Aktifkan'}
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteAdmin(admin)} className="text-red-600">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              {needsApproval ? 'Request Hapus' : 'Hapus'}
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -373,91 +536,89 @@ const ManageAdmin = () => {
                   ))}
                 </TableBody>
               </Table>
-            )}
+              
+              {filteredAdmins.length === 0 && (
+                <div className="text-center py-8">
+                  <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">Tidak ada admin yang ditemukan dengan kriteria pencarian "{searchTerm}"</p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
         {/* Add Admin Dialog */}
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Tambah Admin Baru</DialogTitle>
+              <DialogTitle>
+                {needsApproval ? 'Request Tambah Admin Baru' : 'Tambah Admin Baru'}
+              </DialogTitle>
               <DialogDescription>
-                Lengkapi data admin baru di bawah ini
+                {needsApproval 
+                  ? 'Request untuk menambahkan administrator baru akan dikirim ke Master Admin untuk persetujuan.'
+                  : 'Tambahkan administrator baru ke sistem.'
+                }
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="user_id">User ID</Label>
-                <Input
-                  id="user_id"
-                  value={newAdminData.user_id}
-                  onChange={(e) => setNewAdminData({...newAdminData, user_id: e.target.value})}
-                  placeholder="Contoh: ADMIN2028"
-                />
-              </div>
-              <div>
-                <Label htmlFor="name">Nama Lengkap</Label>
-                <Input
-                  id="name"
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">Nama</Label>
+                <Input 
+                  id="name" 
+                  className="col-span-3" 
                   value={newAdminData.name}
-                  onChange={(e) => setNewAdminData({...newAdminData, name: e.target.value})}
+                  onChange={(e) => setNewAdminData(prev => ({ ...prev, name: e.target.value }))}
                 />
               </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  className="col-span-3" 
                   value={newAdminData.email}
-                  onChange={(e) => setNewAdminData({...newAdminData, email: e.target.value})}
+                  onChange={(e) => setNewAdminData(prev => ({ ...prev, email: e.target.value }))}
                 />
               </div>
-              <div>
-                <Label htmlFor="phone">Nomor Telepon</Label>
-                <Input
-                  id="phone"
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="phone" className="text-right">Telepon</Label>
+                <Input 
+                  id="phone" 
+                  className="col-span-3" 
                   value={newAdminData.phone}
-                  onChange={(e) => setNewAdminData({...newAdminData, phone: e.target.value})}
+                  onChange={(e) => setNewAdminData(prev => ({ ...prev, phone: e.target.value }))}
                 />
               </div>
-              <div>
-                <Label htmlFor="role">Role</Label>
-                <Select value={newAdminData.role} onValueChange={(value) => setNewAdminData({...newAdminData, role: value})}>
-                  <SelectTrigger>
-                    <SelectValue />
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="role" className="text-right">Role</Label>
+                <Select value={newAdminData.role} onValueChange={(value) => setNewAdminData(prev => ({ ...prev, role: value }))}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Pilih role" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Admin">Admin</SelectItem>
-                    <SelectItem value="Super Admin">Super Admin</SelectItem>
                     <SelectItem value="Admin Area">Admin Area</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="area">Area</Label>
-                <Input
-                  id="area"
-                  value={newAdminData.area}
-                  onChange={(e) => setNewAdminData({...newAdminData, area: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={newAdminData.password}
-                  onChange={(e) => setNewAdminData({...newAdminData, password: e.target.value})}
-                />
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="area" className="text-right">Area</Label>
+                <Select value={newAdminData.area} onValueChange={(value) => setNewAdminData(prev => ({ ...prev, area: value }))}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Pilih area" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {areas.map((area) => (
+                      <SelectItem key={area} value={area}>{area}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                Batal
-              </Button>
-              <Button onClick={handleAddAdmin} disabled={isLoading}>
-                {isLoading ? 'Menyimpan...' : 'Simpan'}
+              <Button type="submit" onClick={handleAddAdmin}>
+                {needsApproval ? 'Kirim Request' : 'Tambah Admin'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -465,129 +626,81 @@ const ManageAdmin = () => {
 
         {/* Edit Admin Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Edit Admin</DialogTitle>
+              <DialogTitle>
+                {needsApproval ? 'Request Edit Admin' : 'Edit Admin'}
+              </DialogTitle>
               <DialogDescription>
-                Perbarui data admin
+                {needsApproval 
+                  ? 'Request untuk mengubah data admin akan dikirim ke Master Admin untuk persetujuan.'
+                  : 'Ubah data admin di bawah ini'
+                }
               </DialogDescription>
             </DialogHeader>
             {selectedAdmin && (
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="edit_name">Nama Lengkap</Label>
-                  <Input
-                    id="edit_name"
-                    value={selectedAdmin.name}
-                    onChange={(e) => setSelectedAdmin({...selectedAdmin, name: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit_email">Email</Label>
-                  <Input
-                    id="edit_email"
-                    type="email"
-                    value={selectedAdmin.email}
-                    onChange={(e) => setSelectedAdmin({...selectedAdmin, email: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit_phone">Nomor Telepon</Label>
-                  <Input
-                    id="edit_phone"
-                    value={selectedAdmin.phone}
-                    onChange={(e) => setSelectedAdmin({...selectedAdmin, phone: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit_role">Role</Label>
-                  <Select value={selectedAdmin.role} onValueChange={(value) => setSelectedAdmin({...selectedAdmin, role: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Admin">Admin</SelectItem>
-                      <SelectItem value="Super Admin">Super Admin</SelectItem>
-                      <SelectItem value="Admin Area">Admin Area</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="edit_area">Area</Label>
-                  <Input
-                    id="edit_area"
-                    value={selectedAdmin.area}
-                    onChange={(e) => setSelectedAdmin({...selectedAdmin, area: e.target.value})}
-                  />
-                </div>
-              </div>
+              <EditAdminForm
+                admin={selectedAdmin}
+                onSubmit={handleUpdateAdmin}
+                onCancel={() => setIsEditDialogOpen(false)}
+              />
             )}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                Batal
-              </Button>
-              <Button onClick={handleUpdateAdmin} disabled={isLoading}>
-                {isLoading ? 'Menyimpan...' : 'Simpan'}
-              </Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* View Details Dialog */}
+        {/* Detail Dialog */}
         <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Detail Admin</DialogTitle>
             </DialogHeader>
             {selectedAdmin && (
               <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Shield className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">{selectedAdmin.name}</h3>
+                    <p className="text-gray-500">{selectedAdmin.id}</p>
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="font-medium">User ID</Label>
-                    <p>{selectedAdmin.user_id}</p>
+                    <label className="text-sm font-medium text-gray-500">Email</label>
+                    <p className="text-sm">{selectedAdmin.email}</p>
                   </div>
                   <div>
-                    <Label className="font-medium">Nama Lengkap</Label>
-                    <p>{selectedAdmin.name}</p>
+                    <label className="text-sm font-medium text-gray-500">Telepon</label>
+                    <p className="text-sm">{selectedAdmin.phone}</p>
                   </div>
                   <div>
-                    <Label className="font-medium">Email</Label>
-                    <p>{selectedAdmin.email}</p>
+                    <label className="text-sm font-medium text-gray-500">Role</label>
+                    <Badge variant={getRoleBadgeVariant(selectedAdmin.role)}>
+                      {selectedAdmin.role}
+                    </Badge>
                   </div>
                   <div>
-                    <Label className="font-medium">Nomor Telepon</Label>
-                    <p>{selectedAdmin.phone}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">Role</Label>
-                    <p>{selectedAdmin.role}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">Area</Label>
-                    <p>{selectedAdmin.area}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">Wilayah</Label>
-                    <p>{selectedAdmin.wilayah}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">Lokasi Kerja</Label>
-                    <p>{selectedAdmin.lokasi_kerja}</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">Status</Label>
+                    <label className="text-sm font-medium text-gray-500">Status</label>
                     <Badge variant={selectedAdmin.status === 'Aktif' ? 'default' : 'secondary'}>
                       {selectedAdmin.status}
                     </Badge>
                   </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Area</label>
+                    <p className="text-sm">{selectedAdmin.area}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Bergabung</label>
+                    <p className="text-sm">{selectedAdmin.createdAt}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Last Login</label>
+                    <p className="text-sm">{selectedAdmin.lastLogin}</p>
+                  </div>
                 </div>
               </div>
             )}
-            <DialogFooter>
-              <Button onClick={() => setShowDetailDialog(false)}>
-                Tutup
-              </Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -595,16 +708,20 @@ const ManageAdmin = () => {
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+              <AlertDialogTitle>
+                {needsApproval ? 'Konfirmasi Request Hapus Admin' : 'Konfirmasi Hapus Admin'}
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                Apakah Anda yakin ingin menghapus admin "{selectedAdmin?.name}"? 
-                Tindakan ini tidak dapat dibatalkan.
+                {needsApproval 
+                  ? `Apakah Anda yakin ingin mengirim request untuk menghapus admin "${selectedAdmin?.name}"? Request akan dikirim ke Master Admin untuk persetujuan.`
+                  : `Apakah Anda yakin ingin menghapus admin "${selectedAdmin?.name}"? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.`
+                }
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Batal</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteAdmin} className="bg-red-600 hover:bg-red-700">
-                {isLoading ? 'Menghapus...' : 'Hapus'}
+              <AlertDialogAction onClick={confirmDeleteAdmin} className="bg-red-600 hover:bg-red-700">
+                {needsApproval ? 'Kirim Request' : 'Hapus'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

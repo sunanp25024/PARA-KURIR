@@ -1,52 +1,63 @@
+
 import { useEffect, useState } from 'react';
-import { apiService, type User } from '@/services/apiService';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
 
 export const useAuth = () => {
+  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadCurrentUser = async () => {
-      try {
-        const userId = localStorage.getItem('currentUserId');
-        if (userId) {
-          const userData = await apiService.getUserByUserId(userId);
-          setUser(userData);
-        }
-      } catch (error) {
-        console.error('Error loading user:', error);
-        setUser(null);
-      } finally {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
         setLoading(false);
       }
-    };
+    );
 
-    loadCurrentUser();
+    return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (userId: string, password: string) => {
-    try {
-      const userData = await apiService.getUserByUserId(userId);
-      if (userData) {
-        localStorage.setItem('currentUserId', userId);
-        setUser(userData);
-        return { user: userData, error: null };
-      }
-      return { user: null, error: 'Invalid credentials' };
-    } catch (error) {
-      return { user: null, error: 'Login failed' };
-    }
+  const signIn = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    return { data, error };
   };
 
-  const signOut = () => {
-    localStorage.removeItem('currentUserId');
-    setUser(null);
+  const signUp = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`
+      }
+    });
+    return { data, error };
+  };
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    return { error };
   };
 
   return {
+    session,
     user,
     loading,
     signIn,
-    signOut,
+    signUp,
+    signOut
   };
 };

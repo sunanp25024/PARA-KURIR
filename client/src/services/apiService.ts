@@ -90,19 +90,6 @@ class ApiService {
     });
   }
 
-  async updateUser(id: string, updates: Partial<User>): Promise<User> {
-    return this.request<User>(`/users/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(updates),
-    });
-  }
-
-  async deleteUser(id: string): Promise<void> {
-    return this.request<void>(`/users/${id}`, {
-      method: 'DELETE',
-    });
-  }
-
   // Package operations
   async getPackages(kurirId?: string): Promise<Package[]> {
     const query = kurirId ? `?kurirId=${encodeURIComponent(kurirId)}` : '';
