@@ -64,18 +64,19 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=*, geolocation=*');
   
-  // Enhanced CSP for production security
+  // Enhanced CSP for production security with Replit support
   const cspDirectives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://replit.com",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https:",
+    "img-src 'self' data: blob: https: via.placeholder.com",
     "font-src 'self' data:",
     "connect-src 'self' wss: ws: https:",
     "media-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self'"
+    "form-action 'self'",
+    "manifest-src 'self'"
   ].join('; ');
   
   res.setHeader('Content-Security-Policy', cspDirectives);

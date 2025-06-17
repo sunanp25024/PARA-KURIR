@@ -14,6 +14,7 @@ export const useSupabaseData = () => {
       setUsers(data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
+      setUsers([]);
     }
   };
 
