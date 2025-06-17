@@ -69,7 +69,7 @@ interface WorkflowContextType {
 
 const WorkflowContext = createContext<WorkflowContextType | undefined>(undefined);
 
-export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
   const [currentStep, setCurrentStep] = useState<'input' | 'scan' | 'delivery' | 'pending' | 'performance'>('input');
   const [dailyPackages, setDailyPackages] = useState<Package[]>([]);
   const [scannedPackages, setScannedPackages] = useState<ScannedPackage[]>([]);

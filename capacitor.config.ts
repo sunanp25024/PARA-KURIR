@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.insan.mobile',
-  appName: 'INSAN Mobile',
+  appId: 'com.parakurir.mobile',
+  appName: 'PARA KURIR',
   webDir: 'dist/client',
   server: {
     androidScheme: 'https'

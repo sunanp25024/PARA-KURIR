@@ -6,6 +6,7 @@ import { authenticateWithSupabase } from "./supabase";
 import { supabaseStorage } from "./supabaseStorage";
 import { insertUserSchema, insertApprovalRequestSchema, insertKurirActivitySchema, insertPackageSchema, insertAttendanceSchema } from "@shared/schema";
 import multer from 'multer';
+import { authLimiter, apiLimiter, uploadLimiter, securityHeaders, validateInput, validateEnvironment } from './security';
 
 // Global WebSocket connections for real-time updates
 const wsConnections = new Set<any>();
@@ -35,10 +36,17 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Validate environment variables
+  validateEnvironment();
+  
+  // Apply security middleware
+  app.use(securityHeaders);
+  app.use(validateInput);
+  
   // Initialize Supabase Storage bucket
   await supabaseStorage.createBucketIfNotExists();
 
-  // Authentication routes
+  // Authentication routes (with rate limiting)
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
