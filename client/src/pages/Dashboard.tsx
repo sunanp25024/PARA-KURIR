@@ -381,7 +381,8 @@ const Dashboard = () => {
           {/* Stats Cards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {dashboardCards.map((card, index) => (
-              <Card key={index} className="shadow-md border-slate-200/60 bg-white/90 backdrop-blur-sm hover:shadow-lg transition-all duration-300 cursor-pointer group"
+              <Card key={index} className="card-modern hover:shadow-xl transition-all duration-300 cursor-pointer group animate-scale-in border border-border/50"
+                style={{ animationDelay: `${index * 0.1}s` }}
                 onClick={() => {
                   toast({
                     title: card.title,
@@ -390,14 +391,14 @@ const Dashboard = () => {
                 }}
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                  <CardTitle className="text-sm font-medium text-slate-600">{card.title}</CardTitle>
-                  <div className={`p-3 rounded-xl ${card.color} group-hover:scale-110 transition-transform`}>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
+                  <div className={`p-3 rounded-xl ${card.color} group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
                     <card.icon className="h-5 w-5" />
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-slate-900 mb-2">{card.value}</div>
-                  <p className="text-sm text-slate-500">{card.description}</p>
+                  <div className="text-3xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{card.value}</div>
+                  <p className="text-sm text-muted-foreground">{card.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -532,9 +533,9 @@ const Dashboard = () => {
                 </Card>
 
                 {/* Quick Actions */}
-                <Card className="shadow-md border-slate-200/60 bg-white/90 backdrop-blur-sm">
+                <Card className="card-modern shadow-lg border border-border/50">
                   <CardHeader>
-                    <CardTitle className="text-lg text-slate-800">Aksi Cepat</CardTitle>
+                    <CardTitle className="text-lg text-foreground">Aksi Cepat</CardTitle>
                     <CardDescription>Fitur yang sering digunakan</CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -543,6 +544,7 @@ const Dashboard = () => {
                         <Button 
                           key={index}
                           variant="outline" 
+                          className={`flex flex-col gap-2 h-20 border ${action.color} transition-all duration-300 hover:shadow-md hover:-translate-y-0.5`}
                           onClick={() => {
                             navigate(action.path);
                             toast({
@@ -550,7 +552,6 @@ const Dashboard = () => {
                               description: `Menuju ke ${action.label}`,
                             });
                           }}
-                          className={`flex flex-col gap-2 h-20 border ${action.color} transition-all duration-200 hover:shadow-md`}
                         >
                           <action.icon className="h-5 w-5" />
                           <span className="text-xs text-center font-medium">{action.label}</span>

@@ -270,43 +270,51 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
 
   return (
     <Layout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Kelola Kurir</h1>
-            <p className="text-gray-600">Manajemen kurir dan performa</p>
-            {isPIC && (
-              <p className="text-sm text-blue-600 mt-1">Anda memiliki akses read-only untuk data kurir</p>
-            )}
-            {!canManage && !isPIC && (
-              <p className="text-sm text-red-600 mt-1">Anda tidak memiliki akses untuk mengelola kurir</p>
+      <div className="space-y-6 animate-fade-in">
+        <div className="card-modern p-6 shadow-lg border border-border/50">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent mb-2">Kelola Kurir</h1>
+              <p className="text-muted-foreground text-lg">Manajemen kurir dan performa</p>
+              {isPIC && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <p className="text-sm text-blue-600">Anda memiliki akses read-only untuk data kurir</p>
+                </div>
+              )}
+              {!canManage && !isPIC && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <p className="text-sm text-red-600">Anda tidak memiliki akses untuk mengelola kurir</p>
+                </div>
+              )}
+            </div>
+            {canManage && (
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2 hover:shadow-md transition-all duration-300">
+                  <Download className="h-4 w-4" />
+                  Template Excel
+                </Button>
+                <Button variant="outline" onClick={() => setShowExcelImport(true)} className="gap-2 hover:shadow-md transition-all duration-300">
+                  <Upload className="h-4 w-4" />
+                  Import Excel
+                </Button>
+                <Button onClick={() => setShowAddDialog(true)} className="btn-modern gap-2">
+                  <Plus className="h-4 w-4" />
+                  {isAdmin ? 'Request Tambah Kurir' : 'Tambah Kurir'}
+                </Button>
+              </div>
             )}
           </div>
-          {canManage && (
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2">
-                <Download className="h-4 w-4" />
-                Template Excel
-              </Button>
-              <Button variant="outline" onClick={() => setShowExcelImport(true)} className="gap-2">
-                <Upload className="h-4 w-4" />
-                Import Excel
-              </Button>
-              <Button onClick={() => setShowAddDialog(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                {isAdmin ? 'Request Tambah Kurir' : 'Tambah Kurir'}
-              </Button>
-            </div>
-          )}
         </div>
 
         {/* Excel Import Section - Only for those who can manage */}
         {showExcelImport && canManage && (
-          <Card>
+          <Card className="card-modern shadow-lg border border-border/50 animate-slide-up">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Import Data Kurir</CardTitle>
-                <Button variant="outline" onClick={() => setShowExcelImport(false)}>
+                <CardTitle className="text-foreground">Import Data Kurir</CardTitle>
+                <Button variant="outline" onClick={() => setShowExcelImport(false)} className="hover:shadow-md transition-all duration-300">
                   Tutup
                 </Button>
               </div>
@@ -317,7 +325,7 @@ KURIR005,Nama Kurir 2,email2@example.com,081234567891,Jakarta Timur,Cabang Cakun
           </Card>
         )}
 
-        <Card>
+        <Card className="card-modern shadow-lg border border-border/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
