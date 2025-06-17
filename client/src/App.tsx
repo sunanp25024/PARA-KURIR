@@ -22,7 +22,7 @@ import SendNotification from "./pages/SendNotification";
 import NotFound from "./pages/NotFound";
 import KurirMobile from "./pages/KurirMobile";
 import ApprovalRequests from "./pages/ApprovalRequests";
-import { AuthProvider } from "./contexts/SimpleAuthContext";
+import { AuthProvider } from "./contexts/Auth";
 import { WorkflowProvider } from "./contexts/WorkflowContext";
 import { RealtimeProvider } from "./components/RealtimeProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
