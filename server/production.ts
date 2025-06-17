@@ -43,27 +43,15 @@ export const corsConfig = cors({
   ]
 });
 
-// Security headers with Helmet
+// Security headers with Helmet - fixed configuration
 export const securityConfig = helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-      scriptSrc: ["'self'", "https:"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https:", "wss:"],
-      fontSrc: ["'self'", "https:"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
-    },
-  },
+  contentSecurityPolicy: false, // Disable CSP for API server
   crossOriginEmbedderPolicy: false,
-  hsts: {
+  hsts: process.env.NODE_ENV === 'production' ? {
     maxAge: 31536000,
     includeSubDomains: true,
     preload: true
-  }
+  } : false
 });
 
 // Rate limiting configurations
