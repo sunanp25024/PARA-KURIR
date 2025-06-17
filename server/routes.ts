@@ -50,11 +50,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
+      console.log('Login attempt:', { email, hasPassword: !!password, environment: process.env.NODE_ENV });
+      
+      if (!email || !password) {
+        console.log('Missing email or password');
+        return res.status(400).json({ error: "Email and password required" });
+      }
       
       // First try Supabase authentication
       const { user: supabaseUser, error: supabaseError } = await authenticateWithSupabase(email, password);
       
       if (supabaseUser && !supabaseError) {
+        console.log('Supabase authentication successful');
         // Map Supabase user to our user format
         const user = {
           id: supabaseUser.id,
@@ -74,34 +81,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Fallback to local database authentication
-      const users = await storage.getAllUsers();
-      const user = users.find(u => u.email === email);
-      if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
+      console.log('Supabase auth failed, trying local database:', supabaseError);
       
-      // For demo purposes, accept common passwords
-      if (password === '123456' || password === 'password') {
-        return res.json({
-          user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            wilayah: user.wilayah,
-            area: user.area,
-            lokasi_kerja: user.lokasi_kerja,
-            phone: user.phone,
-            status: user.status
-          },
-          session: { user_id: user.id }
-        });
-      } else {
-        return res.status(401).json({ error: "Invalid credentials" });
+      // Fallback to local database authentication
+      try {
+        const users = await storage.getAllUsers();
+        console.log('Database users count:', users.length);
+        const user = users.find(u => u.email === email);
+        console.log('User found in database:', user ? 'Yes' : 'No');
+        
+        if (!user) {
+          console.log('User not found for email:', email);
+          return res.status(401).json({ error: "Invalid credentials" });
+        }
+        
+        // For demo purposes, accept common passwords
+        console.log('Testing password against accepted values');
+        if (password === '123456' || password === 'password') {
+          console.log('Password accepted, returning user data');
+          return res.json({
+            user: {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+              wilayah: user.wilayah,
+              area: user.area,
+              lokasi_kerja: user.lokasi_kerja,
+              phone: user.phone,
+              status: user.status
+            },
+            session: { user_id: user.id }
+          });
+        } else {
+          console.log('Password rejected:', password);
+          return res.status(401).json({ error: "Invalid credentials" });
+        }
+      } catch (dbError) {
+        console.error('Database error during authentication:', dbError);
+        return res.status(500).json({ error: "Database authentication failed" });
       }
     } catch (error) {
-      console.error('Authentication error:', error);
+      console.error('General authentication error:', error);
       return res.status(500).json({ error: "Authentication failed" });
     }
   });
