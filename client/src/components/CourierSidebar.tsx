@@ -85,46 +85,67 @@ const CourierSidebar = () => {
   };
 
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b p-4">
-        <div className="flex items-center gap-3 mb-3">
-          <img 
-            src="/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png" 
-            alt="INSAN MOBILE" 
-            className="h-6 w-auto"
-          />
-          <div>
-            <p className="text-sm font-medium">INSAN MOBILE</p>
-            <p className="text-xs text-muted-foreground">Mobile Express</p>
+    <Sidebar className="bg-gradient-to-b from-background to-secondary/20 border-r border-border/50">
+      <SidebarHeader className="p-6 border-b border-border/50">
+        <div className="glass-card p-4 rounded-xl mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-primary to-primary/80 rounded-lg">
+              <Package className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-foreground">INSAN MOBILE</p>
+              <p className="text-sm text-muted-foreground">Courier Dashboard</p>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src="/placeholder.svg" />
-            <AvatarFallback>{user.name?.charAt(0) || 'U'}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user.name || 'Kurir'}</p>
-            <p className="text-xs text-muted-foreground">Kurir</p>
+        
+        <div className="card-modern p-4 shadow-lg">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-12 w-12 border-2 border-primary/20">
+              <AvatarImage src="/placeholder.svg" />
+              <AvatarFallback className="bg-gradient-to-r from-primary to-primary/80 text-white text-lg font-bold">
+                {user.name?.charAt(0).toUpperCase() || 'K'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-semibold text-foreground truncate">{user.name || 'Kurir'}</p>
+              <p className="text-sm text-muted-foreground truncate">{user.area || 'Area Tidak Diketahui'}</p>
+              <p className="text-xs text-primary font-medium">{user.role?.toUpperCase() || 'COURIER'}</p>
+            </div>
           </div>
         </div>
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent className="p-4">
         <SidebarGroup>
-          <SidebarGroupLabel>Menu Utama</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4 px-2">
+            Menu Kurir
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+            <SidebarMenu className="space-y-2">
+              {menuItems.map((item, index) => (
+                <SidebarMenuItem key={item.title} className="animate-slide-in" style={{ animationDelay: `${index * 0.1}s` }}>
                   <SidebarMenuButton 
                     asChild 
                     isActive={item.isActive}
                     onClick={() => handleNavigation(item.url, item.title)}
                   >
-                    <button className="w-full flex items-center gap-2 px-3 py-2 text-left">
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                    <button className={`w-full justify-start p-3 rounded-xl transition-all duration-300 group flex items-center ${
+                      item.isActive 
+                        ? 'bg-gradient-to-r from-primary/10 to-primary/5 text-primary border border-primary/20 shadow-lg' 
+                        : 'hover:bg-muted/70 hover:shadow-md hover:scale-[1.02]'
+                    }`}>
+                      <div className={`p-2 rounded-lg mr-3 transition-colors ${
+                        item.isActive 
+                          ? 'bg-primary text-white' 
+                          : 'bg-muted group-hover:bg-primary/20'
+                      }`}>
+                        <item.icon className="h-4 w-4" />
+                      </div>
+                      <span className="font-medium">{item.title}</span>
+                      {item.isActive && (
+                        <div className="ml-auto w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                      )}
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -134,14 +155,16 @@ const CourierSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t p-4">
+      <SidebarFooter className="border-t border-border/50 p-4">
         <Button 
-          variant="outline" 
+          variant="ghost" 
           onClick={handleLogout}
-          className="w-full justify-start"
+          className="w-full justify-start p-3 rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 group"
         >
-          <LogOut className="h-4 w-4 mr-2" />
-          Logout
+          <div className="p-2 rounded-lg mr-3 bg-red-100 dark:bg-red-900/30 group-hover:bg-red-200 dark:group-hover:bg-red-900/50 transition-colors">
+            <LogOut className="h-4 w-4" />
+          </div>
+          <span className="font-medium">Logout</span>
         </Button>
       </SidebarFooter>
     </Sidebar>
