@@ -46,17 +46,34 @@ export const useSupabaseData = () => {
 
   const refreshData = async () => {
     setLoading(true);
-    await Promise.all([
-      fetchUsers(),
-      fetchPackages(),
-      fetchActivities(),
-      fetchAttendance()
-    ]);
-    setLoading(false);
+    try {
+      await Promise.all([
+        fetchUsers(),
+        fetchPackages(),
+        fetchActivities(),
+        fetchAttendance()
+      ]);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    refreshData();
+    // Add timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Data loading timeout, setting loading to false');
+        setLoading(false);
+      }
+    }, 10000); // 10 second timeout
+
+    refreshData().finally(() => {
+      clearTimeout(timeout);
+    });
+
+    return () => clearTimeout(timeout);
   }, []);
 
   return {

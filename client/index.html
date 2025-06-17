@@ -28,12 +28,8 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png" />
     
-    <!-- Preload critical resources -->
-    <link rel="preload" href="/manifest.json" as="fetch" crossorigin />
-    
-    <!-- Security Headers -->
+    <!-- Security Headers - Remove X-Frame-Options from meta -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="X-Frame-Options" content="DENY" />
     
     <!-- Performance optimizations -->
     <meta name="format-detection" content="telephone=no" />
@@ -119,7 +115,6 @@
       });
     </script>
     
-    <!-- Development banner -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+
   </body>
 </html>

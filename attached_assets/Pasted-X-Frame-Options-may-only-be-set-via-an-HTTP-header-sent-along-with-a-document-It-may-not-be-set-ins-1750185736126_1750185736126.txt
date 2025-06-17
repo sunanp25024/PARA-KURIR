@@ -1,0 +1,12 @@
+X-Frame-Options may only be set via an HTTP header sent along with a document. It may not be set inside <meta>.Pahami error ini
+login:1 Refused to load the script 'https://replit.com/public/js/replit-dev-banner.js' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval'". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+Pahami error ini
+VM64 login:6 SW registered:  ServiceWorkerRegistration
+login:1 [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) <input type=​"password" class=​"flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:​border-0 file:​bg-transparent file:​text-sm file:​font-medium file:​text-foreground placeholder:​text-muted-foreground focus-visible:​outline-none focus-visible:​ring-2 focus-visible:​ring-ring focus-visible:​ring-offset-2 disabled:​cursor-not-allowed disabled:​opacity-50 md:​text-sm" id=​"password" placeholder=​"Masukkan password akun testing" required value=​"123456">​
+login:1 Error while trying to use the following icon from the Manifest: https://para-kurir.replit.app/icons/icon-144x144.png (Download error or resource isn't a valid image)Pahami error ini
+index-CYxJSgew.js:427 Real-time sync connected
+index-CYxJSgew.js:427 WebSocket connection confirmed: Object
+login:1 The resource https://para-kurir.replit.app/manifest.json was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Pahami peringatan ini
+dashboard:1 The resource https://para-kurir.replit.app/manifest.json was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Pahami peringatan ini
+dashboard:1 A preload for 'https://para-kurir.replit.app/manifest.json' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.Pahami peringatan ini
+dashboard:1 The resource https://para-kurir.replit.app/manifest.json was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Pahami peringatan ini
