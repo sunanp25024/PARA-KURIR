@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
 const SupabaseAuth = () => {
@@ -19,23 +19,15 @@ const SupabaseAuth = () => {
     setLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
-      if (error) {
-        toast({
-          title: "Login Gagal",
-          description: error.message,
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Login Berhasil",
-          description: "Anda berhasil masuk ke sistem",
-        });
-      }
-    } catch (error) {
+      await signIn(email, password);
       toast({
-        title: "Error",
-        description: "Terjadi kesalahan saat login",
+        title: "Login Berhasil",
+        description: "Anda berhasil masuk ke sistem",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Login Gagal",
+        description: error.message || "Terjadi kesalahan saat login",
         variant: "destructive"
       });
     } finally {
@@ -48,23 +40,15 @@ const SupabaseAuth = () => {
     setLoading(true);
 
     try {
-      const { error } = await signUp(email, password);
-      if (error) {
-        toast({
-          title: "Registrasi Gagal",
-          description: error.message,
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Registrasi Berhasil",
-          description: "Silakan cek email untuk verifikasi akun",
-        });
-      }
-    } catch (error) {
+      await signUp(email, password);
       toast({
-        title: "Error",
-        description: "Terjadi kesalahan saat registrasi",
+        title: "Registrasi Berhasil",
+        description: "Akun berhasil dibuat, silakan login",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Registrasi Gagal",
+        description: error.message || "Terjadi kesalahan saat registrasi",
         variant: "destructive"
       });
     } finally {
@@ -84,7 +68,7 @@ const SupabaseAuth = () => {
             />
           </div>
           <CardTitle className="text-2xl font-bold text-indigo-700">INSAN MOBILE</CardTitle>
-          <CardDescription>Sistem Autentikasi Supabase</CardDescription>
+          <CardDescription>Sistem Autentikasi</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">

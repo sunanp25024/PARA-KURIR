@@ -1,5 +1,6 @@
+
 // Supabase has been completely migrated to Neon PostgreSQL
-// This file contains only type definitions for backward compatibility
+// This file is kept only for type compatibility
 
 export interface Database {
   public: {
@@ -9,5 +10,5 @@ export interface Database {
   }
 }
 
-// No Supabase client - all operations use server-side API routes
-console.log('Migration complete: Using Neon PostgreSQL with server-side operations');
+// All database operations now use server-side API routes with Neon PostgreSQL
+export const supabase = null; // Explicitly set to null to prevent usage

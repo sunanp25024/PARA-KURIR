@@ -1,6 +1,6 @@
 
-const CACHE_NAME = 'insan-mobile-v2';
-const API_CACHE_NAME = 'insan-api-v2';
+const CACHE_NAME = 'insan-mobile-v3';
+const API_CACHE_NAME = 'insan-api-v3';
 
 // Assets to cache for offline functionality
 const STATIC_ASSETS = [
