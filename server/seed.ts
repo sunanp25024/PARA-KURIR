@@ -191,7 +191,12 @@ export async function seedDatabase() {
     ];
 
     for (const attendance of attendanceRecords) {
-      await storage.createAttendance(attendance);
+      try {
+        await storage.createAttendance(attendance);
+        console.log(`Created attendance for: ${attendance.kurir_id}`);
+      } catch (error) {
+        console.log(`Attendance already exists for: ${attendance.kurir_id}`);
+      }
     }
     console.log("Attendance seeded successfully");
 
@@ -216,7 +221,12 @@ export async function seedDatabase() {
     ];
 
     for (const activity of activities) {
-      await storage.createKurirActivity(activity);
+      try {
+        await storage.createKurirActivity(activity);
+        console.log(`Created activity for: ${activity.kurir_id}`);
+      } catch (error) {
+        console.log(`Activity creation failed for: ${activity.kurir_id}`);
+      }
     }
     console.log("Activities seeded successfully");
 
