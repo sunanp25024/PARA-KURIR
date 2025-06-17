@@ -35,7 +35,7 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = sessionStorage.getItem('user');
     if (userData) {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
@@ -51,7 +51,7 @@ const Profile = () => {
 
   const handleSave = () => {
     const updatedUser = { ...user, ...profileData };
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    sessionStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
     setIsEditing(false);
     toast({

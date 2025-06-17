@@ -49,14 +49,15 @@ const CourierWorkflowMain = () => {
     setDeliveredPackages([]);
     setPendingPackages([]);
     
-    // Clear localStorage
-    localStorage.removeItem('dailyPackageData');
-    localStorage.removeItem('dailyPackages');
-    localStorage.removeItem('scannedPackages');
-    localStorage.removeItem('deliveryPackages');
-    localStorage.removeItem('deliveredPackages');
-    localStorage.removeItem('pendingPackages');
-    localStorage.removeItem('currentWorkflowStep');
+    // Clear sessionStorage for this session
+    const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+    sessionStorage.removeItem(`dailyPackageData_${sessionId}`);
+    sessionStorage.removeItem(`dailyPackages_${sessionId}`);
+    sessionStorage.removeItem(`scannedPackages_${sessionId}`);
+    sessionStorage.removeItem(`deliveryPackages_${sessionId}`);
+    sessionStorage.removeItem(`deliveredPackages_${sessionId}`);
+    sessionStorage.removeItem(`pendingPackages_${sessionId}`);
+    sessionStorage.removeItem(`currentWorkflowStep_${sessionId}`);
     
     // Reset to input step
     setCurrentStep('input');

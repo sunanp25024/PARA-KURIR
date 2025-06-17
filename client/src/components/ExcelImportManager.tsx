@@ -17,8 +17,8 @@ const ExcelImportManager = () => {
   const { toast } = useToast();
   const { createBulkImportApprovalRequest } = useApprovals();
   
-  // Get user role from localStorage
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  // Get user role from sessionStorage
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const userRole = user.role || '';
   const isMasterAdmin = userRole === 'master_admin';
   const isAdmin = userRole === 'admin';

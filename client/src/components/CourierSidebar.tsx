@@ -62,7 +62,7 @@ const menuItems = [
 ];
 
 const CourierSidebar = () => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const navigate = useNavigate();
 
   const handleNavigation = (url: string, title: string) => {
@@ -78,7 +78,7 @@ const CourierSidebar = () => {
       title: "Logout",
       description: "Anda telah berhasil logout dari sistem",
     });
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
     setTimeout(() => {
       window.location.href = '/login';
     }, 1000);

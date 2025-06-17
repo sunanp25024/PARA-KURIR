@@ -55,7 +55,8 @@ const Settings = () => {
 
   const handleSave = () => {
     // Simulate saving settings
-    localStorage.setItem('kurirSettings', JSON.stringify(settings));
+    const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+    sessionStorage.setItem(`kurirSettings_${sessionId}`, JSON.stringify(settings));
     toast({
       title: "Pengaturan Disimpan",
       description: "Semua perubahan telah disimpan successfully",

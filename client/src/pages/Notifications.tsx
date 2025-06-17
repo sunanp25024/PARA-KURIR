@@ -13,7 +13,7 @@ const Notifications = () => {
   const { allRequests, loading } = useApprovals();
   
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = sessionStorage.getItem('user');
     if (userData) {
       setUser(JSON.parse(userData));
     }

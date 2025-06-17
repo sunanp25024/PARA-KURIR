@@ -56,8 +56,8 @@ const ManageAdmin = () => {
     area: ''
   });
 
-  // Get current user info from localStorage
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  // Get current user info from sessionStorage
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const currentUser = {
     id: user.user_id || 'ADMIN2025',
     name: user.name || 'Admin User',

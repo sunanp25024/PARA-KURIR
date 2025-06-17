@@ -77,14 +77,15 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
   const [deliveredPackages, setDeliveredPackages] = useState<DeliveredPackage[]>([]);
   const [pendingPackages, setPendingPackages] = useState<PendingPackage[]>([]);
 
-  // Load data from localStorage on mount
+  // Load data from sessionStorage on mount - tab-specific workflow data
   useEffect(() => {
-    const savedDailyPackages = localStorage.getItem('dailyPackages');
-    const savedScannedPackages = localStorage.getItem('scannedPackages');
-    const savedDeliveryPackages = localStorage.getItem('deliveryPackages');
-    const savedDeliveredPackages = localStorage.getItem('deliveredPackages');
-    const savedPendingPackages = localStorage.getItem('pendingPackages');
-    const savedCurrentStep = localStorage.getItem('currentWorkflowStep');
+    const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+    const savedDailyPackages = sessionStorage.getItem(`dailyPackages_${sessionId}`);
+    const savedScannedPackages = sessionStorage.getItem(`scannedPackages_${sessionId}`);
+    const savedDeliveryPackages = sessionStorage.getItem(`deliveryPackages_${sessionId}`);
+    const savedDeliveredPackages = sessionStorage.getItem(`deliveredPackages_${sessionId}`);
+    const savedPendingPackages = sessionStorage.getItem(`pendingPackages_${sessionId}`);
+    const savedCurrentStep = sessionStorage.getItem(`currentWorkflowStep_${sessionId}`);
 
     if (savedDailyPackages) setDailyPackages(JSON.parse(savedDailyPackages));
     if (savedScannedPackages) {
@@ -100,29 +101,35 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
     if (savedCurrentStep) setCurrentStep(savedCurrentStep as any);
   }, []);
 
-  // Save to localStorage when data changes
+  // Save to sessionStorage when data changes - tab-specific workflow data
   useEffect(() => {
-    localStorage.setItem('dailyPackages', JSON.stringify(dailyPackages));
+    const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+    sessionStorage.setItem(`dailyPackages_${sessionId}`, JSON.stringify(dailyPackages));
   }, [dailyPackages]);
 
   useEffect(() => {
-    localStorage.setItem('scannedPackages', JSON.stringify(scannedPackages));
+    const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+    sessionStorage.setItem(`scannedPackages_${sessionId}`, JSON.stringify(scannedPackages));
   }, [scannedPackages]);
 
   useEffect(() => {
-    localStorage.setItem('deliveryPackages', JSON.stringify(deliveryPackages));
+    const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+    sessionStorage.setItem(`deliveryPackages_${sessionId}`, JSON.stringify(deliveryPackages));
   }, [deliveryPackages]);
 
   useEffect(() => {
-    localStorage.setItem('deliveredPackages', JSON.stringify(deliveredPackages));
+    const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+    sessionStorage.setItem(`deliveredPackages_${sessionId}`, JSON.stringify(deliveredPackages));
   }, [deliveredPackages]);
 
   useEffect(() => {
-    localStorage.setItem('pendingPackages', JSON.stringify(pendingPackages));
+    const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+    sessionStorage.setItem(`pendingPackages_${sessionId}`, JSON.stringify(pendingPackages));
   }, [pendingPackages]);
 
   useEffect(() => {
-    localStorage.setItem('currentWorkflowStep', currentStep);
+    const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+    sessionStorage.setItem(`currentWorkflowStep_${sessionId}`, currentStep);
   }, [currentStep]);
 
   const canProceedToScan = () => dailyPackages.length > 0;

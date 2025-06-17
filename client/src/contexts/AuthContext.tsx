@@ -70,6 +70,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       setSession(result.session);
       
+      // Save to sessionStorage for tab isolation
+      sessionStorage.setItem('user', JSON.stringify(result.user));
+      sessionStorage.setItem('session_id', Date.now().toString());
+      
       return { data: result, error: null };
     } catch (error) {
       return { data: null, error: 'Network error' };
@@ -86,6 +90,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setUserProfile(null);
     setSession(null);
+    
+    // Clear sessionStorage
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('session_id');
   };
 
   const updateProfile = async (updates: Partial<UserProfile>) => {

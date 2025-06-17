@@ -30,8 +30,9 @@ const DailyPerformanceSummary = () => {
   const [showSummary, setShowSummary] = useState(false);
 
   useEffect(() => {
-    // Calculate performance from localStorage data
-    const dailyData = JSON.parse(localStorage.getItem('dailyPackageData') || '{"totalPackages": 0}');
+    // Calculate performance from sessionStorage data
+    const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+    const dailyData = JSON.parse(sessionStorage.getItem(`dailyPackageData_${sessionId}`) || '{"totalPackages": 0}');
     const delivered = 12; // Mock data - in real app, get from delivery tracking
     const returned = 3; // Mock data - in real app, get from pending returns
     const pending = dailyData.totalPackages - delivered - returned;

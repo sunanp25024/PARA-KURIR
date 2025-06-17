@@ -48,8 +48,8 @@ const ManageKurir = () => {
   const [selectedKurir, setSelectedKurir] = useState<any>(null);
   const { createApprovalRequest } = useApprovals();
   
-  // Get user role from localStorage
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  // Get user role from sessionStorage
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const userRole = user.role || '';
   const isMasterAdmin = userRole === 'master-admin';
   const isAdmin = userRole === 'admin';

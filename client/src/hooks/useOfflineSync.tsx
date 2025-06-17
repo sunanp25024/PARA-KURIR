@@ -49,7 +49,8 @@ export const useOfflineSync = () => {
 
   const savePendingSyncData = (data: OfflineData[]) => {
     try {
-      localStorage.setItem('offline_sync_data', JSON.stringify(data));
+      const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+      sessionStorage.setItem(`offline_sync_data_${sessionId}`, JSON.stringify(data));
       setPendingSync(data);
     } catch (error) {
       console.error('Error saving offline sync data:', error);

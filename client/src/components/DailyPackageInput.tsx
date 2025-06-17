@@ -22,7 +22,8 @@ const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete })
 
   useEffect(() => {
     // Load existing data
-    const savedData = localStorage.getItem('dailyPackageData');
+    const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+    const savedData = sessionStorage.getItem(`dailyPackageData_${sessionId}`);
     if (savedData) {
       const data = JSON.parse(savedData);
       setTotalPackages(data.totalPackages.toString());
@@ -62,7 +63,8 @@ const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete })
       savedAt: new Date().toISOString()
     };
 
-    localStorage.setItem('dailyPackageData', JSON.stringify(packageData));
+    const sessionId = sessionStorage.getItem('session_id') || Date.now().toString();
+    sessionStorage.setItem(`dailyPackageData_${sessionId}`, JSON.stringify(packageData));
     
     // Generate daily packages for workflow context
     const dailyPackages = Array.from({ length: total }, (_, i) => ({

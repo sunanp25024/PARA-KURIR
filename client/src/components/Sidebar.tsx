@@ -16,7 +16,7 @@ const Sidebar = ({ userRole, userName }: SidebarProps) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
     toast({
       title: "Logout Berhasil",
       description: "Anda telah keluar dari aplikasi"
