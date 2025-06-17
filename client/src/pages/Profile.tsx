@@ -65,21 +65,21 @@ const Profile = () => {
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight">Profil Saya</h1>
-                  <p className="text-muted-foreground">
-                    Kelola informasi pribadi dan performa pengantaran Anda
-                  </p>
-                </div>
-                {!isEditing && (
-                  <Button onClick={() => setIsEditing(true)} className="flex items-center gap-2">
-                    <Edit className="h-4 w-4" />
-                    Edit Profil
-                  </Button>
-                )}
-              </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Profil Saya</h1>
+              <p className="text-muted-foreground">
+                Kelola informasi pribadi dan performa pengantaran Anda
+              </p>
+            </div>
+            {!isEditing && (
+              <Button onClick={() => setIsEditing(true)} className="flex items-center gap-2">
+                <Edit className="h-4 w-4" />
+                Edit Profil
+              </Button>
+            )}
+          </div>
 
-              <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3">
                 {/* Main Profile Card */}
                 <div className="md:col-span-2 space-y-6">
                   <Card>
@@ -193,6 +193,8 @@ const Profile = () => {
                   </Card>
                 </div>
               </div>
+          </div>
+        </div>
       </CourierLayout>
     );
   }
