@@ -345,20 +345,7 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ onStepComplete }) =
         </Card>
       )}
 
-      {/* Continue Button */}
-      {inDeliveryItems.length === 0 && deliveryPackages.length > 0 && (
-        <Card className="border-2 border-blue-200 bg-blue-50">
-          <CardContent className="pt-6">
-            <Button 
-              onClick={() => onStepComplete?.()}
-              className="w-full h-16 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            >
-              <ArrowRight className="h-6 w-6 mr-2" />
-              Lanjut ke Step Berikutnya
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+
     </div>
   );
 };
