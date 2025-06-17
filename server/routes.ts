@@ -7,7 +7,6 @@ import { supabaseStorage } from "./supabaseStorage";
 import { insertUserSchema, insertApprovalRequestSchema, insertKurirActivitySchema, insertPackageSchema, insertAttendanceSchema } from "@shared/schema";
 import multer from 'multer';
 import { authLimiter, apiLimiter, uploadLimiter, securityHeaders, validateInput, validateEnvironment } from './security';
-import { applyProductionMiddleware, rateLimits } from './production';
 
 // Global WebSocket connections for real-time updates
 const wsConnections = new Set<any>();
@@ -40,17 +39,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Validate environment variables
   validateEnvironment();
   
-  // Apply production middleware (CORS, Security, Compression)
-  applyProductionMiddleware(app);
-  
-  // Apply custom security middleware
+  // Apply security middleware
+  app.use(securityHeaders);
   app.use(validateInput);
   
   // Initialize Supabase Storage bucket
   await supabaseStorage.createBucketIfNotExists();
 
-  // Authentication routes (with production rate limiting)
-  app.post("/api/auth/login", rateLimits.auth, async (req, res) => {
+  // Authentication routes (with rate limiting)
+  app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
       
@@ -111,8 +108,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: "Logged out successfully" });
   });
 
-  // User routes (with API rate limiting)
-  app.get("/api/users", rateLimits.api, async (req, res) => {
+  // User routes
+  app.get("/api/users", async (req, res) => {
     try {
       const users = await storage.getAllUsers();
       res.json(users);
@@ -133,7 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/users", rateLimits.api, async (req, res) => {
+  app.post("/api/users", async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       const user = await storage.createUser(userData);
@@ -287,8 +284,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // File upload routes for delivery photos (with upload rate limiting)
-  app.post("/api/upload/delivery-photo", rateLimits.upload, upload.single('photo'), async (req, res) => {
+  // File upload routes for delivery photos
+  app.post("/api/upload/delivery-photo", upload.single('photo'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No photo file provided" });
@@ -336,23 +333,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   
-  // WebSocket server for real-time updates with CORS support
+  // WebSocket server for real-time updates on different path
   const wss = new WebSocketServer({ 
     server: httpServer,
-    path: '/ws-api',
-    verifyClient: (info: any) => {
-      // Allow connections from Vercel frontend domains
-      const origin = info.origin;
-      const allowedOrigins = [
-        'http://localhost:3000',
-        'http://localhost:5173',
-        'https://para-kurir.vercel.app',
-        process.env.FRONTEND_URL
-      ].filter(Boolean);
-      
-      // Allow if no origin (mobile apps) or if origin is in allowed list
-      return !origin || allowedOrigins.some(allowed => origin.includes(allowed));
-    }
+    path: '/ws-api' // Use different path to avoid conflicts
   });
   
   wss.on('connection', (ws) => {
