@@ -51,6 +51,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
+      // First try Supabase Auth
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (supabaseUrl && supabaseKey) {
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (authData?.user && !authError) {
+          // Get user profile from Supabase
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', authData.user.id)
+            .single();
+
+          const user = { id: authData.user.id, email: authData.user.email || email };
+          const profile = profileData || {
+            id: authData.user.id,
+            user_id: authData.user.id,
+            name: authData.user.user_metadata?.name || 'User',
+            email: authData.user.email || email,
+            role: authData.user.user_metadata?.role || 'kurir',
+            wilayah: authData.user.user_metadata?.wilayah || 'Jakarta',
+            area: authData.user.user_metadata?.area || 'Pusat',
+            lokasi_kerja: authData.user.user_metadata?.lokasi_kerja || 'Kantor Pusat',
+            phone: authData.user.user_metadata?.phone || '081234567890',
+            status: 'aktif'
+          };
+
+          setUser(user);
+          setUserProfile(profile);
+          setSession(authData.session);
+          
+          return { data: { user, session: authData.session }, error: null };
+        }
+      }
+
+      // Fallback to local auth API
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

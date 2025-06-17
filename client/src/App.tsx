@@ -25,6 +25,7 @@ import ApprovalRequests from "./pages/ApprovalRequests";
 import { AuthProvider } from "./contexts/AuthContext";
 import { WorkflowProvider } from "./contexts/WorkflowContext";
 import { RealtimeProvider } from "./components/RealtimeProvider";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -38,24 +39,107 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
+                {/* Public routes */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/manage-admin" element={<ManageAdmin />} />
-                <Route path="/manage-pic" element={<ManagePIC />} />
-                <Route path="/manage-kurir" element={<ManageKurir />} />
-                <Route path="/attendance" element={<Attendance />} />
-                <Route path="/performance" element={<Performance />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/approval" element={<Approval />} />
-                <Route path="/approval-requests" element={<ApprovalRequests />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/reports" element={<Reports />} />
-                <Route path="/approval-status" element={<ApprovalStatus />} />
-                <Route path="/send-notification" element={<SendNotification />} />
-                <Route path="/kurir-mobile" element={<KurirMobile />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                
+                {/* Protected routes with role-based access */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Master Admin only routes */}
+                <Route path="/manage-admin" element={
+                  <ProtectedRoute allowedRoles={['master_admin']}>
+                    <ManageAdmin />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/manage-pic" element={
+                  <ProtectedRoute allowedRoles={['master_admin']}>
+                    <ManagePIC />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/manage-kurir" element={
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin']}>
+                    <ManageKurir />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/approval" element={
+                  <ProtectedRoute allowedRoles={['master_admin']}>
+                    <Approval />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Admin and Master Admin routes */}
+                <Route path="/approval-requests" element={
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin']}>
+                    <ApprovalRequests />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/reports" element={
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin']}>
+                    <Reports />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/send-notification" element={
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin']}>
+                    <SendNotification />
+                  </ProtectedRoute>
+                } />
+                
+                {/* PIC and above routes */}
+                <Route path="/attendance" element={
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin', 'pic']}>
+                    <Attendance />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/performance" element={
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin', 'pic']}>
+                    <Performance />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/notifications" element={
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin', 'pic']}>
+                    <Notifications />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/approval-status" element={
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin', 'pic']}>
+                    <ApprovalStatus />
+                  </ProtectedRoute>
+                } />
+                
+                {/* All authenticated users routes */}
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Kurir specific route */}
+                <Route path="/kurir-mobile" element={
+                  <ProtectedRoute allowedRoles={['kurir']}>
+                    <KurirMobile />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

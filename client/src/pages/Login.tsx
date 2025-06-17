@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-import { apiService } from '@/services/apiService';
+import { useAuth } from '@/contexts/AuthContext';
+import { TestingGuide } from '@/components/TestingGuide';
 
 const Login = () => {
   const [id, setId] = useState('');
