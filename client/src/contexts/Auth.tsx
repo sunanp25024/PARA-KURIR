@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { SessionManager } from '@/utils/sessionUtils';
 
 interface User {
   id: string;
@@ -20,15 +21,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Check for existing user session on app start
+  // Check for existing user session on app start - use sessionStorage for tab isolation
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
+    const savedUser = SessionManager.getCurrentUser();
     if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        localStorage.removeItem('user');
-      }
+      setUser(savedUser);
     }
   }, []);
 
@@ -49,8 +46,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await response.json();
       setUser(result.user);
       
-      // Save user data to localStorage for persistence
-      localStorage.setItem('user', JSON.stringify(result.user));
+      // Save user data to sessionStorage for tab-specific persistence
+      SessionManager.setCurrentUser(result.user);
       
       return { data: result, error: null };
     } catch (error) {
@@ -62,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = () => {
     setUser(null);
-    localStorage.removeItem('user');
+    SessionManager.clearSession();
   };
 
   return (

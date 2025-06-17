@@ -76,24 +76,45 @@ const Dashboard = () => {
   const { users, packages, activities, attendance, loading, refreshData } = useSupabaseData();
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = sessionStorage.getItem('user');
     if (userData) {
       try {
         setUser(JSON.parse(userData));
       } catch (error) {
         console.error('Error parsing user data:', error);
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
         navigate('/');
       }
     } else {
       // Add timeout to prevent infinite loading on user data
       const timeout = setTimeout(() => {
-        console.warn('User data not found in localStorage, redirecting to login');
+        console.warn('User data not found in sessionStorage, redirecting to login');
         navigate('/');
       }, 2000);
       
       return () => clearTimeout(timeout);
     }
+
+    // Listen for user changes in this tab (e.g., logout from another component)
+    const handleUserChange = () => {
+      const currentUser = sessionStorage.getItem('user');
+      if (!currentUser) {
+        navigate('/');
+      } else {
+        try {
+          setUser(JSON.parse(currentUser));
+        } catch (error) {
+          navigate('/');
+        }
+      }
+    };
+
+    // Check for user changes periodically
+    const interval = setInterval(handleUserChange, 1000);
+    
+    return () => {
+      clearInterval(interval);
+    };
   }, [navigate]);
 
   if (!user) {

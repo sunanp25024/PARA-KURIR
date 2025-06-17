@@ -151,6 +151,13 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Recent Changes:
+- June 17, 2025: Multi-user session isolation implemented
+  - Replaced localStorage with sessionStorage for tab-specific user sessions
+  - Created SessionManager utility for proper session handling across tabs
+  - Updated data fetching hooks to filter data based on current session user
+  - Implemented role-based data filtering (kurir sees only own data, admin sees area data, etc.)
+  - Added session change detection to refresh data when user switches
+  - Each browser tab now maintains independent user sessions without interference
 - June 17, 2025: Dashboard loading issues completely resolved and PWA icons fixed
   - Fixed infinite loading by adding proper localStorage persistence for user authentication
   - Created complete set of PWA icons in SVG format (72x72 to 512x512)

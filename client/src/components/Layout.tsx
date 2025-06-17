@@ -12,7 +12,7 @@ const Layout = ({ children }: LayoutProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = sessionStorage.getItem('user');
     if (!userData) {
       navigate('/login');
       return;
@@ -24,6 +24,28 @@ const Layout = ({ children }: LayoutProps) => {
     } catch (error) {
       navigate('/login');
     }
+
+    // Listen for user changes in this tab
+    const handleUserChange = () => {
+      const currentUser = sessionStorage.getItem('user');
+      if (!currentUser) {
+        navigate('/login');
+      } else {
+        try {
+          const newUser = JSON.parse(currentUser);
+          setUser(newUser);
+        } catch (error) {
+          navigate('/login');
+        }
+      }
+    };
+
+    // Check for user changes periodically
+    const interval = setInterval(handleUserChange, 1000);
+    
+    return () => {
+      clearInterval(interval);
+    };
   }, [navigate]);
 
   if (!user) {
