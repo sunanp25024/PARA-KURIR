@@ -151,6 +151,14 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Recent Changes:
+- June 17, 2025: Complete sidebar navigation and routing system fixed
+  - Fixed role naming inconsistency (master-admin -> master_admin)
+  - Updated sidebar menu permissions to match role hierarchy correctly
+  - Enhanced routing access control for all roles (Master Admin, Admin, PIC, Kurir)
+  - Implemented role-specific layouts (Kurir uses CourierSidebar, others use regular Sidebar)
+  - Added missing /approval-status route for Admin users
+  - Fixed page layouts for kurir-specific pages (Attendance, Performance, Settings)
+  - Ensured all navigation links are accessible according to role permissions
 - June 17, 2025: Multi-user session isolation implemented
   - Replaced localStorage with sessionStorage for tab-specific user sessions
   - Created SessionManager utility for proper session handling across tabs

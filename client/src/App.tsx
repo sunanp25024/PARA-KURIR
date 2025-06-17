@@ -65,13 +65,13 @@ const App = () => (
                 } />
                 
                 <Route path="/manage-pic" element={
-                  <ProtectedRoute allowedRoles={['master_admin']}>
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin']}>
                     <ManagePIC />
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/manage-kurir" element={
-                  <ProtectedRoute allowedRoles={['master_admin', 'admin']}>
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin', 'pic']}>
                     <ManageKurir />
                   </ProtectedRoute>
                 } />
@@ -90,8 +90,14 @@ const App = () => (
                 } />
                 
                 <Route path="/reports" element={
-                  <ProtectedRoute allowedRoles={['master_admin', 'admin']}>
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin', 'pic']}>
                     <Reports />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/approval-status" element={
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin']}>
+                    <ApprovalStatus />
                   </ProtectedRoute>
                 } />
                 

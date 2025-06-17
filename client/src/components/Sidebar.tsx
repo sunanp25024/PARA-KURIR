@@ -32,7 +32,7 @@ const Sidebar = ({ userRole, userName }: SidebarProps) => {
     }];
 
     switch (userRole) {
-      case 'master-admin':
+      case 'master_admin':
         return [...baseItems, {
           icon: Shield,
           label: 'Manage Admin',
@@ -64,9 +64,13 @@ const Sidebar = ({ userRole, userName }: SidebarProps) => {
           label: 'Manage Kurir',
           path: '/manage-kurir'
         }, {
-          icon: Bell,
+          icon: CheckSquare,
           label: 'Status Persetujuan',
           path: '/approval-status'
+        }, {
+          icon: Bell,
+          label: 'Notifikasi',
+          path: '/notifications'
         }];
       case 'pic':
         return [...baseItems, {
