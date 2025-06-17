@@ -150,7 +150,12 @@ export const useApprovals = () => {
 
   const rejectRequest = async (requestId: string, approverId: string, notes?: string) => {
     try {
-      await approvalService.updateRequestStatus(requestId, 'rejected', approverId, notes);
+      await apiService.updateApprovalRequest(requestId, {
+        status: 'rejected',
+        approved_by: approverId,
+        approved_at: new Date().toISOString(),
+        notes: notes
+      });
       toast({
         title: "Request Ditolak",
         description: "Permintaan telah ditolak",
