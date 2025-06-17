@@ -51,7 +51,7 @@
       "url": "/kurir-mobile",
       "icons": [
         {
-          "src": "/icons/icon-96x96.png",
+          "src": "/icons/icon-96x96.svg",
           "sizes": "96x96"
         }
       ]
@@ -63,7 +63,7 @@
       "url": "/kurir-mobile?step=scan",
       "icons": [
         {
-          "src": "/icons/icon-96x96.png",
+          "src": "/icons/icon-96x96.svg",
           "sizes": "96x96"
         }
       ]
