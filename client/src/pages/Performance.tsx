@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import CourierSidebar from '@/components/CourierSidebar';
+import CourierLayout from '@/components/CourierLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -88,11 +88,8 @@ const Performance: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <CourierSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-auto p-6 bg-gradient-to-br from-background via-background to-secondary/30">
-          <div className="space-y-6">
+    <CourierLayout>
+      <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
               <div>
@@ -261,10 +258,8 @@ const Performance: React.FC = () => {
                 </Card>
               </TabsContent>
             </Tabs>
-          </div>
-        </main>
       </div>
-    </div>
+    </CourierLayout>
   );
 };
 
