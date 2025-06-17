@@ -1,0 +1,66 @@
+main.tsx:20 Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://reactjs.org/link/invalid-hook-call for tips about how to debug and fix this problem.
+console.error @ main.tsx:20Pahami error ini
+chunk-QCHXOAYK.js?v=64c83427:1066 Uncaught TypeError: Cannot read properties of null (reading 'useState')
+    at useState (chunk-QCHXOAYK.js?v=64c83427:1066:29)
+    at useRealtimeSync (useRealtimeSync.tsx:11:41)
+    at RealtimeProvider (RealtimeProvider.tsx:10:3)
+    at renderWithHooks (chunk-RPCDYKBN.js?v=5140c9e7:11548:26)
+    at mountIndeterminateComponent (chunk-RPCDYKBN.js?v=5140c9e7:14926:21)
+    at beginWork (chunk-RPCDYKBN.js?v=5140c9e7:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js?v=5140c9e7:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js?v=5140c9e7:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js?v=5140c9e7:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=5140c9e7:19765:15)Pahami error ini
+2main.tsx:20 Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://reactjs.org/link/invalid-hook-call for tips about how to debug and fix this problem.
+console.error @ main.tsx:20Pahami error ini
+chunk-QCHXOAYK.js?v=64c83427:1066 Uncaught TypeError: Cannot read properties of null (reading 'useState')
+    at useState (chunk-QCHXOAYK.js?v=64c83427:1066:29)
+    at useRealtimeSync (useRealtimeSync.tsx:11:41)
+    at RealtimeProvider (RealtimeProvider.tsx:10:3)
+    at renderWithHooks (chunk-RPCDYKBN.js?v=5140c9e7:11548:26)
+    at mountIndeterminateComponent (chunk-RPCDYKBN.js?v=5140c9e7:14926:21)
+    at beginWork (chunk-RPCDYKBN.js?v=5140c9e7:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js?v=5140c9e7:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js?v=5140c9e7:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js?v=5140c9e7:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=5140c9e7:19765:15)Pahami error ini
+main.tsx:20 The above error occurred in the <RealtimeProvider> component:
+
+    at RealtimeProvider (https://60ec4291-7139-49fc-b8a9-e4efe04ec781-00-ta7spxym972i.spock.replit.dev/src/components/RealtimeProvider.tsx:19:36)
+    at WorkflowProvider (https://60ec4291-7139-49fc-b8a9-e4efe04ec781-00-ta7spxym972i.spock.replit.dev/src/contexts/WorkflowContextSimple.tsx:20:36)
+    at AuthProvider (https://60ec4291-7139-49fc-b8a9-e4efe04ec781-00-ta7spxym972i.spock.replit.dev/src/contexts/Auth.tsx:20:32)
+    at QueryClientProvider (https://60ec4291-7139-49fc-b8a9-e4efe04ec781-00-ta7spxym972i.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=5140c9e7:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+console.error @ main.tsx:20Pahami error ini
+chunk-RPCDYKBN.js?v=5140c9e7:19413 Uncaught TypeError: Cannot read properties of null (reading 'useState')
+    at useState (chunk-QCHXOAYK.js?v=64c83427:1066:29)
+    at useRealtimeSync (useRealtimeSync.tsx:11:41)
+    at RealtimeProvider (RealtimeProvider.tsx:10:3)
+    at renderWithHooks (chunk-RPCDYKBN.js?v=5140c9e7:11548:26)
+    at mountIndeterminateComponent (chunk-RPCDYKBN.js?v=5140c9e7:14926:21)
+    at beginWork (chunk-RPCDYKBN.js?v=5140c9e7:15914:22)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=5140c9e7:19753:22)
+    at performUnitOfWork (chunk-RPCDYKBN.js?v=5140c9e7:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js?v=5140c9e7:19137:13)
+    at renderRootSync (chunk-RPCDYKBN.js?v=5140c9e7:19116:15)Pahami error ini
+(indeks):194 SW registered:  ServiceWorkerRegistration
+client:536 WebSocket connection to 'wss://60ec4291-7139-49fc-b8a9-e4efe04ec781-00-ta7spxym972i.spock.replit.dev/?token=mlp3cQ6xdpC_' failed: 
+setupWebSocket @ client:536Pahami error ini
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=mlp3cQ6xdpC_' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)Pahami error ini
+60ec4291-7139-49fc-b8a9-e4efe04ec781-00-ta7spxym972i.spock.replit.dev/:1 The resource https://60ec4291-7139-49fc-b8a9-e4efe04ec781-00-ta7spxym972i.spock.replit.dev/manifest.json was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Pahami peringatan ini
+60ec4291-7139-49fc-b8a9-e4efe04ec781-00-ta7spxym972i.spock.replit.dev/:1 A preload for 'https://60ec4291-7139-49fc-b8a9-e4efe04ec781-00-ta7spxym972i.spock.replit.dev/manifest.json' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.Pahami peringatan ini
+60ec4291-7139-49fc-b8a9-e4efe04ec781-00-ta7spxym972i.spock.replit.dev/:1 The resource https://60ec4291-7139-49fc-b8a9-e4efe04ec781-00-ta7spxym972i.spock.replit.dev/manifest.json was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Pahami peringatan ini

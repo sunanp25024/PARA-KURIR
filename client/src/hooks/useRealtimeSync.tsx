@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { getWebSocketUrl, createWebSocketConnection } from '@/lib/websocket';
 
 interface RealtimeMessage {
   type: string;
@@ -14,13 +15,13 @@ export const useRealtimeSync = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // Create WebSocket connection
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws-api`;
+    // Create WebSocket connection with proper URL
+    const wsUrl = getWebSocketUrl();
     
     const connectWebSocket = () => {
       try {
-        wsRef.current = new WebSocket(wsUrl);
+        console.log('Connecting to WebSocket:', wsUrl);
+        wsRef.current = createWebSocketConnection(wsUrl);
 
         wsRef.current.onopen = () => {
           console.log('Real-time sync connected');
