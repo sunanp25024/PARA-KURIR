@@ -54,6 +54,192 @@ export type Database = {
         }
         Relationships: []
       }
+      attendance: {
+        Row: {
+          created_at: string
+          foto_absen: string | null
+          id: string
+          jam_keluar: string | null
+          jam_masuk: string | null
+          kurir_id: string
+          kurir_name: string
+          lokasi_absen: string | null
+          status: string | null
+          tanggal: string
+          total_jam: number | null
+        }
+        Insert: {
+          created_at?: string
+          foto_absen?: string | null
+          id?: string
+          jam_keluar?: string | null
+          jam_masuk?: string | null
+          kurir_id: string
+          kurir_name: string
+          lokasi_absen?: string | null
+          status?: string | null
+          tanggal: string
+          total_jam?: number | null
+        }
+        Update: {
+          created_at?: string
+          foto_absen?: string | null
+          id?: string
+          jam_keluar?: string | null
+          jam_masuk?: string | null
+          kurir_id?: string
+          kurir_name?: string
+          lokasi_absen?: string | null
+          status?: string | null
+          tanggal?: string
+          total_jam?: number | null
+        }
+        Relationships: []
+      }
+      kurir_activities: {
+        Row: {
+          activity_type: string
+          created_at: string
+          description: string | null
+          id: string
+          kurir_id: string
+          kurir_name: string
+          lokasi: string | null
+          status: string | null
+          waktu: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          kurir_id: string
+          kurir_name: string
+          lokasi?: string | null
+          status?: string | null
+          waktu?: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          kurir_id?: string
+          kurir_name?: string
+          lokasi?: string | null
+          status?: string | null
+          waktu?: string
+        }
+        Relationships: []
+      }
+      packages: {
+        Row: {
+          alamat_penerima: string
+          alamat_pengirim: string
+          berat: number | null
+          catatan: string | null
+          created_at: string
+          foto_bukti_terkirim: string | null
+          id: string
+          kurir_id: string
+          kurir_name: string
+          nilai_cod: number | null
+          penerima: string
+          pengirim: string
+          resi_number: string
+          status_pengiriman: string | null
+          tanggal_pickup: string | null
+          tanggal_terkirim: string | null
+          updated_at: string
+        }
+        Insert: {
+          alamat_penerima: string
+          alamat_pengirim: string
+          berat?: number | null
+          catatan?: string | null
+          created_at?: string
+          foto_bukti_terkirim?: string | null
+          id?: string
+          kurir_id: string
+          kurir_name: string
+          nilai_cod?: number | null
+          penerima: string
+          pengirim: string
+          resi_number: string
+          status_pengiriman?: string | null
+          tanggal_pickup?: string | null
+          tanggal_terkirim?: string | null
+          updated_at?: string
+        }
+        Update: {
+          alamat_penerima?: string
+          alamat_pengirim?: string
+          berat?: number | null
+          catatan?: string | null
+          created_at?: string
+          foto_bukti_terkirim?: string | null
+          id?: string
+          kurir_id?: string
+          kurir_name?: string
+          nilai_cod?: number | null
+          penerima?: string
+          pengirim?: string
+          resi_number?: string
+          status_pengiriman?: string | null
+          tanggal_pickup?: string | null
+          tanggal_terkirim?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          area: string | null
+          created_at: string
+          email: string
+          id: string
+          lokasi_kerja: string | null
+          name: string
+          password_hash: string
+          phone: string | null
+          role: string
+          status: string | null
+          updated_at: string
+          user_id: string
+          wilayah: string | null
+        }
+        Insert: {
+          area?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          lokasi_kerja?: string | null
+          name: string
+          password_hash: string
+          phone?: string | null
+          role: string
+          status?: string | null
+          updated_at?: string
+          user_id: string
+          wilayah?: string | null
+        }
+        Update: {
+          area?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          lokasi_kerja?: string | null
+          name?: string
+          password_hash?: string
+          phone?: string | null
+          role?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+          wilayah?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

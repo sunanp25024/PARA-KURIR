@@ -46,6 +46,7 @@ import CourierWorkSummary from '@/components/CourierWorkSummary';
 import CourierPerformanceCharts from '@/components/CourierPerformanceCharts';
 import { toast } from '@/hooks/use-toast';
 import { downloadFile, generateSampleData, generateComprehensiveReport, downloadMultipleFiles, generateTemplateFiles } from '@/utils/downloadUtils';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
 
 // Komponen khusus untuk courier dashboard dengan workflow context
 const CourierDashboardContent = () => {
@@ -70,6 +71,9 @@ const Dashboard = () => {
   const [showExcelImport, setShowExcelImport] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const navigate = useNavigate();
+  
+  // Menggunakan data dari Supabase
+  const { users, packages, activities, attendance, loading, refreshData } = useSupabaseData();
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -168,29 +172,57 @@ const Dashboard = () => {
     navigate('/send-notification');
   };
 
-  // Dashboard untuk role lainnya (master-admin, admin, pic) tetap sama
+  // Get statistics from real Supabase data
+  const getTotalStats = () => {
+    const totalUsers = users.length;
+    const totalKurir = users.filter(u => u.role === 'kurir').length;
+    const totalPIC = users.filter(u => u.role === 'pic').length;
+    const totalAdmin = users.filter(u => u.role === 'admin' || u.role === 'master_admin').length;
+    
+    const todayPackages = packages.filter(p => {
+      const today = new Date().toISOString().split('T')[0];
+      return p.tanggal_pickup?.startsWith(today);
+    }).length;
+
+    const deliveredPackages = packages.filter(p => p.status_pengiriman === 'terkirim').length;
+    const pendingPackages = packages.filter(p => p.status_pengiriman === 'pickup' || p.status_pengiriman === 'dalam_perjalanan').length;
+
+    return {
+      totalUsers,
+      totalKurir,
+      totalPIC,
+      totalAdmin,
+      todayPackages,
+      deliveredPackages,
+      pendingPackages
+    };
+  };
+
+  const stats = getTotalStats();
+
+  // Dashboard untuk role lainnya dengan data real dari Supabase
   const getDashboardCards = () => {
     switch (user.role) {
       case 'master-admin':
         return [
-          { title: 'Total Admin', value: '5', icon: Shield, description: 'Admin aktif', color: 'bg-blue-50 text-blue-600' },
-          { title: 'Total PIC', value: '12', icon: Users, description: 'PIC terdaftar', color: 'bg-green-50 text-green-600' },
-          { title: 'Total Kurir', value: '45', icon: User, description: 'Kurir aktif', color: 'bg-purple-50 text-purple-600' },
-          { title: 'Pending Approval', value: '3', icon: Bell, description: 'Menunggu persetujuan', color: 'bg-orange-50 text-orange-600' }
+          { title: 'Total Admin', value: stats.totalAdmin.toString(), icon: Shield, description: 'Admin aktif', color: 'bg-blue-50 text-blue-600' },
+          { title: 'Total PIC', value: stats.totalPIC.toString(), icon: Users, description: 'PIC terdaftar', color: 'bg-green-50 text-green-600' },
+          { title: 'Total Kurir', value: stats.totalKurir.toString(), icon: User, description: 'Kurir aktif', color: 'bg-purple-50 text-purple-600' },
+          { title: 'Paket Hari Ini', value: stats.todayPackages.toString(), icon: Package, description: 'Total paket hari ini', color: 'bg-orange-50 text-orange-600' }
         ];
       case 'admin':
         return [
-          { title: 'Total PIC', value: '12', icon: Users, description: 'PIC terdaftar', color: 'bg-green-50 text-green-600' },
-          { title: 'Total Kurir', value: '45', icon: User, description: 'Kurir aktif', color: 'bg-purple-50 text-purple-600' },
-          { title: 'Paket Hari Ini', value: '156', icon: Package, description: 'Total paket', color: 'bg-blue-50 text-blue-600' },
-          { title: 'Status Approval', value: '2', icon: Bell, description: 'Menunggu review', color: 'bg-orange-50 text-orange-600' }
+          { title: 'Total PIC', value: stats.totalPIC.toString(), icon: Users, description: 'PIC terdaftar', color: 'bg-green-50 text-green-600' },
+          { title: 'Total Kurir', value: stats.totalKurir.toString(), icon: User, description: 'Kurir aktif', color: 'bg-purple-50 text-purple-600' },
+          { title: 'Paket Hari Ini', value: stats.todayPackages.toString(), icon: Package, description: 'Total paket', color: 'bg-blue-50 text-blue-600' },
+          { title: 'Terkirim', value: stats.deliveredPackages.toString(), icon: CheckCircle, description: 'Paket terkirim', color: 'bg-green-50 text-green-600' }
         ];
       case 'pic':
         return [
-          { title: 'Total Kurir', value: '8', icon: User, description: 'Kurir di area', color: 'bg-purple-50 text-purple-600' },
-          { title: 'Paket Hari Ini', value: '32', icon: Package, description: 'Total paket', color: 'bg-blue-50 text-blue-600' },
-          { title: 'Laporan Pending', value: '1', icon: FileText, description: 'Belum selesai', color: 'bg-yellow-50 text-yellow-600' },
-          { title: 'Notifikasi', value: '5', icon: Bell, description: 'Pesan baru', color: 'bg-red-50 text-red-600' }
+          { title: 'Total Kurir', value: stats.totalKurir.toString(), icon: User, description: 'Kurir di area', color: 'bg-purple-50 text-purple-600' },
+          { title: 'Paket Hari Ini', value: stats.todayPackages.toString(), icon: Package, description: 'Total paket', color: 'bg-blue-50 text-blue-600' },
+          { title: 'Terkirim', value: stats.deliveredPackages.toString(), icon: CheckCircle, description: 'Paket terkirim', color: 'bg-green-50 text-green-600' },
+          { title: 'Pending', value: stats.pendingPackages.toString(), icon: Clock, description: 'Paket pending', color: 'bg-yellow-50 text-yellow-600' }
         ];
       default:
         return [];
@@ -245,6 +277,19 @@ const Dashboard = () => {
                 <Badge variant="outline" className="mt-2 px-3 py-1 text-sm font-medium capitalize border-blue-200 text-blue-700">
                   {user.role.replace('-', ' ').toUpperCase()}
                 </Badge>
+                <div className="flex items-center gap-2 mt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={refreshData}
+                    disabled={loading}
+                    className="gap-2"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    Refresh Data
+                  </Button>
+                  {loading && <span className="text-sm text-muted-foreground">Loading...</span>}
+                </div>
               </div>
               {user.role === 'master-admin' && (
                 <Button onClick={handleSendNotification} size="lg" className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md">

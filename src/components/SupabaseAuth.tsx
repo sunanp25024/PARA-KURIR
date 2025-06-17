@@ -78,7 +78,7 @@ const SupabaseAuth = () => {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <img 
-              src="/lovable-uploads/2cf1d03d-190b-4825-8140-747aae69d11b.png" 
+              src="/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png" 
               alt="INSAN MOBILE" 
               className="h-12 w-auto"
             />

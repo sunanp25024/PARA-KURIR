@@ -1,18 +1,19 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { User, Calendar, BarChart3, Settings, LogOut, Menu, X, Users, Bell, CheckSquare, FileText, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
+
 interface SidebarProps {
   userRole: string;
   userName: string;
 }
-const Sidebar = ({
-  userRole,
-  userName
-}: SidebarProps) => {
+
+const Sidebar = ({ userRole, userName }: SidebarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     toast({
@@ -21,12 +22,14 @@ const Sidebar = ({
     });
     navigate('/login');
   };
+
   const getMenuItems = () => {
     const baseItems = [{
       icon: BarChart3,
       label: 'Dashboard',
       path: '/dashboard'
     }];
+
     switch (userRole) {
       case 'master-admin':
         return [...baseItems, {
@@ -100,10 +103,18 @@ const Sidebar = ({
         return baseItems;
     }
   };
+
   const menuItems = getMenuItems();
-  return <>
+
+  return (
+    <>
       {/* Mobile toggle button */}
-      <Button variant="ghost" size="icon" className="fixed top-4 left-4 z-50 md:hidden" onClick={() => setIsOpen(!isOpen)}>
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="fixed top-4 left-4 z-50 md:hidden" 
+        onClick={() => setIsOpen(!isOpen)}
+      >
         {isOpen ? <X /> : <Menu />}
       </Button>
 
@@ -113,7 +124,11 @@ const Sidebar = ({
         {/* Header with Logo */}
         <div className="p-6 border-b border-indigo-800">
           <div className="flex items-center gap-3 mb-4">
-            <img alt="INSAN MOBILE" src="/lovable-uploads/50bffcfa-df01-4f50-b71b-929586db313c.png" className="h-8 w-auto object-fill" />
+            <img 
+              alt="INSAN MOBILE" 
+              src="/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png" 
+              className="h-8 w-auto object-fill" 
+            />
             <div>
               <h1 className="text-lg font-bold">INSAN MOBILE</h1>
               <p className="text-xs text-indigo-200">Aplikasi Mobile</p>
@@ -126,21 +141,31 @@ const Sidebar = ({
         {/* Menu Items */}
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
-            {menuItems.map((item, index) => <li key={index}>
-                <Button variant="ghost" className="w-full justify-start text-white hover:bg-indigo-800" onClick={() => {
-              navigate(item.path);
-              setIsOpen(false);
-            }}>
+            {menuItems.map((item, index) => (
+              <li key={index}>
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-white hover:bg-indigo-800" 
+                  onClick={() => {
+                    navigate(item.path);
+                    setIsOpen(false);
+                  }}
+                >
                   <item.icon className="mr-3 h-4 w-4" />
                   {item.label}
                 </Button>
-              </li>)}
+              </li>
+            ))}
           </ul>
         </nav>
 
         {/* Logout Button */}
         <div className="p-4 border-t border-indigo-800">
-          <Button variant="ghost" className="w-full justify-start text-white hover:bg-red-600" onClick={handleLogout}>
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-white hover:bg-red-600" 
+            onClick={handleLogout}
+          >
             <LogOut className="mr-3 h-4 w-4" />
             Log Out
           </Button>
@@ -148,7 +173,14 @@ const Sidebar = ({
       </div>
 
       {/* Overlay for mobile */}
-      {isOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" onClick={() => setIsOpen(false)} />}
-    </>;
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" 
+          onClick={() => setIsOpen(false)} 
+        />
+      )}
+    </>
+  );
 };
+
 export default Sidebar;
