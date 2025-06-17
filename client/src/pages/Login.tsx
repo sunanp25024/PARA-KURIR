@@ -19,14 +19,10 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Query user from Supabase database
-      const { data: user, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('user_id', id)
-        .single();
+      // Query user from API
+      const user = await apiService.getUserByUserId(id);
 
-      if (error || !user) {
+      if (!user) {
         toast({
           title: "Login Gagal",
           description: "ID tidak ditemukan!",

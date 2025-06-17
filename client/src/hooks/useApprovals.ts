@@ -1,5 +1,20 @@
 import { useState, useEffect } from 'react';
-import { approvalService, ApprovalRequest } from '@/services/approvalService';
+import { apiService } from '@/services/apiService';
+
+export interface ApprovalRequest {
+  id: string;
+  requester_id: string;
+  requester_name: string;
+  request_type: string;
+  target_admin_id: string | null;
+  request_data: any;
+  current_data: any | null;
+  status: 'pending' | 'approved' | 'rejected';
+  approved_by: string | null;
+  approved_at: string | null;
+  created_at: string;
+  notes: string | null;
+}
 import { toast } from '@/hooks/use-toast';
 
 export const useApprovals = () => {
@@ -10,7 +25,7 @@ export const useApprovals = () => {
   const fetchPendingRequests = async () => {
     try {
       setLoading(true);
-      const requests = await approvalService.getPendingRequests();
+      const requests = await apiService.getPendingApprovalRequests();
       setPendingRequests(requests);
     } catch (error) {
       toast({
@@ -26,7 +41,7 @@ export const useApprovals = () => {
   const fetchAllRequests = async () => {
     try {
       setLoading(true);
-      const requests = await approvalService.getAllRequests();
+      const requests = await apiService.getApprovalRequests();
       setAllRequests(requests);
     } catch (error) {
       toast({
@@ -48,14 +63,14 @@ export const useApprovals = () => {
     currentData?: any
   ) => {
     try {
-      await approvalService.createApprovalRequest(
-        requesterId,
-        requesterName,
-        requestType,
-        requestData,
-        targetAdminId,
-        currentData
-      );
+      await apiService.createApprovalRequest({
+        requester_id: requesterId,
+        requester_name: requesterName,
+        request_type: requestType,
+        request_data: JSON.stringify(requestData),
+        target_admin_id: targetAdminId,
+        current_data: currentData ? JSON.stringify(currentData) : null
+      });
       
       toast({
         title: "Request Terkirim",
@@ -80,12 +95,17 @@ export const useApprovals = () => {
     importData: any[]
   ) => {
     try {
-      await approvalService.createBulkImportApprovalRequest(
-        requesterId,
-        requesterName,
-        requestType,
-        importData
-      );
+      await apiService.createApprovalRequest({
+        requester_id: requesterId,
+        requester_name: requesterName,
+        request_type: requestType,
+        request_data: JSON.stringify({
+          importData: importData,
+          totalRecords: importData.length
+        }),
+        target_admin_id: null,
+        current_data: null
+      });
       
       toast({
         title: "Import Request Terkirim",
@@ -105,7 +125,12 @@ export const useApprovals = () => {
 
   const approveRequest = async (requestId: string, approverId: string, notes?: string) => {
     try {
-      await approvalService.updateRequestStatus(requestId, 'approved', approverId, notes);
+      await apiService.updateApprovalRequest(requestId, {
+        status: 'approved',
+        approved_by: approverId,
+        approved_at: new Date().toISOString(),
+        notes: notes
+      });
       toast({
         title: "Request Disetujui",
         description: "Permintaan telah disetujui dan perubahan telah diterapkan",
