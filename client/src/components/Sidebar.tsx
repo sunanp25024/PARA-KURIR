@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { User, Calendar, BarChart3, Settings, LogOut, Menu, X, Users, Bell, CheckSquare, FileText, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
+import { RealtimeStatus } from './RealtimeStatus';
 
 interface SidebarProps {
   userRole: string;
@@ -159,8 +160,11 @@ const Sidebar = ({ userRole, userName }: SidebarProps) => {
           </ul>
         </nav>
 
-        {/* Logout Button */}
+        {/* Real-time Status */}
         <div className="p-4 border-t border-white/20">
+          <div className="mb-3">
+            <RealtimeStatus />
+          </div>
           <Button 
             variant="ghost" 
             className="w-full justify-start text-white hover:bg-red-500/30 transition-all duration-300 rounded-xl backdrop-blur-sm group" 
