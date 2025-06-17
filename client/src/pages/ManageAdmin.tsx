@@ -263,7 +263,7 @@ const ManageAdmin = () => {
     return matchesSearch && matchesStatus && matchesArea;
   });
 
-  const areas = [...new Set(admins.map(admin => admin.area))];
+  const areas = Array.from(new Set(admins.map(admin => admin.area)));
   const activeAdmins = admins.filter(admin => admin.status === 'Aktif').length;
   const totalAdmins = admins.length;
 
