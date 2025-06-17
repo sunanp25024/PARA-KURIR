@@ -31,12 +31,14 @@ const Layout = ({ children }: LayoutProps) => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-background">
       <Sidebar userRole={user.role} userName={user.name} />
       
       <div className="flex-1 md:ml-64">
-        <main className="p-6 h-full overflow-auto">
-          {children}
+        <main className="p-6 h-full overflow-auto bg-gradient-to-br from-background via-background to-secondary/30">
+          <div className="animate-fade-in">
+            {children}
+          </div>
         </main>
       </div>
     </div>
