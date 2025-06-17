@@ -3,7 +3,7 @@
   "name": "INSAN MOBILE - Kurir Professional System",
   "short_name": "PARA KURIR",
   "description": "Sistem manajemen kurir profesional dengan tracking real-time",
-  "start_url": "/",
+  "start_url": "/login",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4F46E5",
@@ -38,7 +38,7 @@
       "name": "Dashboard",
       "short_name": "Dashboard",
       "description": "Akses dashboard utama",
-      "url": "/login",
+      "url": "/dashboard",
       "icons": [
         {
           "src": "/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png",
@@ -50,7 +50,7 @@
       "name": "Kurir Mobile",
       "short_name": "Kurir",
       "description": "Aplikasi kurir mobile",
-      "url": "/auth",
+      "url": "/kurir-mobile",
       "icons": [
         {
           "src": "/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png",
