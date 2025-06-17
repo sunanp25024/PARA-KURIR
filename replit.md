@@ -116,6 +116,15 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Recent Changes:
+- June 17, 2025: Complete Supabase Auth integration with role-based access control
+  - Integrated server-side Supabase authentication with fallback to local database
+  - Implemented comprehensive role-based access control for all routes (master_admin, admin, pic, kurir)
+  - Added ProtectedRoute component for route-level access control
+  - Created TestingGuide component with comprehensive testing instructions for all roles
+  - Activated real-time WebSocket synchronization for all data operations
+  - Fixed React hook errors in AuthContext by removing client-side dynamic imports
+  - Enhanced login interface with tabbed design including testing guide
+  - Verified WebSocket connections working properly on /ws-api endpoint
 - June 17, 2025: Enhanced courier workflow layout with modern UI/UX design
   - Implemented interactive step navigation with visual feedback
   - Added gradient backgrounds and glass morphism effects

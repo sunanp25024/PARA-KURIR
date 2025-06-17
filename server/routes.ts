@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
+import { authenticateWithSupabase } from "./supabase";
 import { insertUserSchema, insertApprovalRequestSchema, insertKurirActivitySchema, insertPackageSchema, insertAttendanceSchema } from "@shared/schema";
 
 // Global WebSocket connections for real-time updates
@@ -22,22 +23,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
-      // Simple authentication - in production, use proper password hashing
+      // First try Supabase authentication
+      const { user: supabaseUser, error: supabaseError } = await authenticateWithSupabase(email, password);
+      
+      if (supabaseUser && !supabaseError) {
+        // Map Supabase user to our user format
+        const user = {
+          id: supabaseUser.id,
+          email: supabaseUser.email,
+          name: supabaseUser.user_metadata.name || 'User',
+          role: supabaseUser.user_metadata.role || 'kurir',
+          wilayah: supabaseUser.user_metadata.wilayah || 'Jakarta',
+          area: supabaseUser.user_metadata.area || 'Pusat',
+          lokasi_kerja: supabaseUser.user_metadata.lokasi_kerja || 'Kantor Pusat',
+          phone: supabaseUser.user_metadata.phone || '081234567890',
+          status: 'aktif'
+        };
+
+        return res.json({
+          user,
+          session: { user_id: user.id }
+        });
+      }
+      
+      // Fallback to local database authentication
       const user = await storage.getUserByUserId(email);
       if (!user) {
         return res.status(401).json({ error: "Invalid credentials" });
       }
       
-      // For demo purposes, accept any password for existing users
-      res.json({
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role
-        },
-        session: { user_id: user.id }
-      });
+      // For demo purposes, accept common passwords
+      if (password === '123456' || password === 'password') {
+        res.json({
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            wilayah: user.wilayah,
+            area: user.area,
+            lokasi_kerja: user.lokasi_kerja,
+            phone: user.phone,
+            status: user.status
+          },
+          session: { user_id: user.id }
+        });
+      } else {
+        res.status(401).json({ error: "Invalid credentials" });
+      }
     } catch (error) {
       res.status(500).json({ error: "Authentication failed" });
     }
