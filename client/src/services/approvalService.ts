@@ -1,5 +1,4 @@
-
-import { supabase } from '@/integrations/supabase/client';
+// Migrated to server-side API calls
 
 export interface ApprovalRequest {
   id: string;
@@ -26,28 +25,25 @@ export const approvalService = {
     targetAdminId?: string,
     currentData?: any
   ) {
-    const { data, error } = await supabase
-      .from('approval_requests')
-      .insert([
-        {
-          requester_id: requesterId,
-          requester_name: requesterName,
-          request_type: requestType,
-          target_admin_id: targetAdminId || null,
-          request_data: requestData,
-          current_data: currentData || null,
-          status: 'pending'
-        }
-      ])
-      .select()
-      .single();
+    const response = await fetch('/api/approval-requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requester_id: requesterId,
+        requester_name: requesterName,
+        request_type: requestType,
+        target_admin_id: targetAdminId || null,
+        request_data: requestData,
+        current_data: currentData || null,
+        status: 'pending'
+      })
+    });
 
-    if (error) {
-      console.error('Error creating approval request:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error('Failed to create approval request');
     }
 
-    return data;
+    return response.json();
   },
 
   // Create bulk approval requests for import data
@@ -57,83 +53,69 @@ export const approvalService = {
     requestType: 'import_pic_data' | 'import_kurir_data',
     importData: any[]
   ) {
-    const { data, error } = await supabase
-      .from('approval_requests')
-      .insert([
-        {
-          requester_id: requesterId,
-          requester_name: requesterName,
-          request_type: requestType,
-          target_admin_id: null,
-          request_data: { importData, totalRecords: importData.length },
-          current_data: null,
-          status: 'pending'
-        }
-      ])
-      .select()
-      .single();
+    const response = await fetch('/api/approval-requests/bulk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requester_id: requesterId,
+        requester_name: requesterName,
+        request_type: requestType,
+        request_data: { import_data: importData },
+        status: 'pending'
+      })
+    });
 
-    if (error) {
-      console.error('Error creating bulk import approval request:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error('Failed to create bulk approval request');
     }
 
-    return data;
+    return response.json();
   },
 
-  // Get all pending approval requests
-  async getPendingRequests() {
-    const { data, error } = await supabase
-      .from('approval_requests')
-      .select('*')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching pending requests:', error);
-      throw error;
+  // Get all approval requests
+  async getApprovalRequests() {
+    const response = await fetch('/api/approval-requests');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch approval requests');
     }
 
-    return data as ApprovalRequest[];
+    return response.json();
   },
 
-  async getAllRequests() {
-    const { data, error } = await supabase
-      .from('approval_requests')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching all requests:', error);
-      throw error;
+  // Get pending approval requests
+  async getPendingApprovalRequests() {
+    const response = await fetch('/api/approval-requests?status=pending');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch pending approval requests');
     }
 
-    return data as ApprovalRequest[];
+    return response.json();
   },
 
+  // Update request status
   async updateRequestStatus(
     requestId: string,
     status: 'approved' | 'rejected',
     approverId: string,
     notes?: string
   ) {
-    const { data, error } = await supabase
-      .from('approval_requests')
-      .update({
+    const response = await fetch(`/api/approval-requests/${requestId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         status,
         approved_by: approverId,
         approved_at: new Date().toISOString(),
         notes: notes || null
       })
-      .eq('id', requestId)
-      .select()
-      .single();
+    });
 
-    if (error) {
-      console.error('Error updating request status:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error('Failed to update request status');
     }
 
-    return data;
+    return response.json();
   }
 };
