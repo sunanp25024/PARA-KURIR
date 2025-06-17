@@ -63,8 +63,8 @@ const Profile = () => {
     return (
       <CourierLayout>
         <div className="space-y-6">
-              {/* Header */}
-              <div className="flex items-center justify-between">
+          {/* Header */}
+          <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight">Profil Saya</h1>
                   <p className="text-muted-foreground">
@@ -193,7 +193,6 @@ const Profile = () => {
                   </Card>
                 </div>
               </div>
-        </div>
       </CourierLayout>
     );
   }

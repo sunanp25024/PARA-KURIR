@@ -107,21 +107,21 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 
-                {/* PIC and above routes */}
+                {/* PIC and above routes + Kurir for specific pages */}
                 <Route path="/attendance" element={
-                  <ProtectedRoute allowedRoles={['master_admin', 'admin', 'pic']}>
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin', 'pic', 'kurir']}>
                     <Attendance />
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/performance" element={
-                  <ProtectedRoute allowedRoles={['master_admin', 'admin', 'pic']}>
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin', 'pic', 'kurir']}>
                     <Performance />
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/notifications" element={
-                  <ProtectedRoute allowedRoles={['master_admin', 'admin', 'pic']}>
+                  <ProtectedRoute allowedRoles={['master_admin', 'admin', 'pic', 'kurir']}>
                     <Notifications />
                   </ProtectedRoute>
                 } />
