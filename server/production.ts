@@ -4,33 +4,29 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import type { Express } from 'express';
 
-// Production-ready CORS configuration for Vercel frontend
+// Development-friendly CORS configuration
 export const corsConfig = cors({
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://para-kurir.vercel.app',
-      'https://para-kurir-*.vercel.app',
-      process.env.FRONTEND_URL,
-    ].filter(Boolean);
+  origin: process.env.NODE_ENV === 'production' ? 
+    (origin, callback) => {
+      const allowedOrigins = [
+        'https://para-kurir.vercel.app',
+        'https://para-kurir-*.vercel.app',
+        process.env.FRONTEND_URL,
+      ].filter(Boolean);
 
-    if (!origin) return callback(null, true);
+      if (!origin) return callback(null, true);
 
-    const isAllowed = allowedOrigins.filter(Boolean).some((allowedOrigin: string) => {
-      if (allowedOrigin.includes('*')) {
-        const pattern = allowedOrigin.replace('*', '.*');
-        return new RegExp(pattern).test(origin);
-      }
-      return allowedOrigin === origin;
-    });
+      const isAllowed = allowedOrigins.some((allowedOrigin: string) => {
+        if (allowedOrigin.includes('*')) {
+          const pattern = allowedOrigin.replace('*', '.*');
+          return new RegExp(pattern).test(origin);
+        }
+        return allowedOrigin === origin;
+      });
 
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+      callback(null, isAllowed);
+    } : 
+    true, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: [
