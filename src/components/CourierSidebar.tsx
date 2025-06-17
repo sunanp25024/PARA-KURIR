@@ -87,6 +87,17 @@ const CourierSidebar = () => {
   return (
     <Sidebar>
       <SidebarHeader className="border-b p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <img 
+            src="/lovable-uploads/2cf1d03d-190b-4825-8140-747aae69d11b.png" 
+            alt="INSAN MOBILE" 
+            className="h-6 w-auto"
+          />
+          <div>
+            <p className="text-sm font-medium">INSAN MOBILE</p>
+            <p className="text-xs text-muted-foreground">Mobile Express</p>
+          </div>
+        </div>
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src="/placeholder.svg" />
@@ -94,7 +105,7 @@ const CourierSidebar = () => {
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{user.name || 'Kurir'}</p>
-            <p className="text-xs text-muted-foreground">INSAN Mobile Express</p>
+            <p className="text-xs text-muted-foreground">Kurir</p>
           </div>
         </div>
       </SidebarHeader>

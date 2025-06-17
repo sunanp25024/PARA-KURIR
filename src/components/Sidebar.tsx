@@ -101,9 +101,19 @@ const Sidebar = ({ userRole, userName }: SidebarProps) => {
         isOpen ? 'translate-x-0' : '-translate-x-full'
       } md:translate-x-0`}>
         
-        {/* Header */}
+        {/* Header with Logo */}
         <div className="p-6 border-b border-indigo-800">
-          <h1 className="text-xl font-bold">INSAN MOBILE</h1>
+          <div className="flex items-center gap-3 mb-4">
+            <img 
+              src="/lovable-uploads/2cf1d03d-190b-4825-8140-747aae69d11b.png" 
+              alt="INSAN MOBILE" 
+              className="h-8 w-auto"
+            />
+            <div>
+              <h1 className="text-lg font-bold">INSAN MOBILE</h1>
+              <p className="text-xs text-indigo-200">Aplikasi Mobile</p>
+            </div>
+          </div>
           <p className="text-sm text-indigo-200">{userName}</p>
           <p className="text-xs text-indigo-300 capitalize">{userRole.replace('-', ' ')}</p>
         </div>
