@@ -172,3 +172,4 @@ const CourierSidebar = () => {
 };
 
 export default CourierSidebar;
+export { CourierSidebar };

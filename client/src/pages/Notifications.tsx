@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bell, Check, X, Clock, User, Package, Shield, Users, AlertCircle } from 'lucide-react';
 import Layout from '@/components/Layout';
-import { CourierSidebar } from '@/components/CourierSidebar';
+import CourierSidebar from '@/components/CourierSidebar';
 import { toast } from '@/hooks/use-toast';
 import { useApprovals } from '@/hooks/useApprovals';
 

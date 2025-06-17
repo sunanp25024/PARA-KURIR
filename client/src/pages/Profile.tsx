@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
-import { CourierSidebar } from '@/components/CourierSidebar';
+import CourierSidebar from '@/components/CourierSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -299,9 +299,123 @@ const Profile = () => {
               </CardContent>
             </Card>
           </div>
+          </div>
+        </main>
+      </div>
+    </div>
+    );
+  }
+
+  return (
+    <Layout>
+      <div className="max-w-4xl mx-auto space-y-6"
+      style={{
+        animation: 'fadeIn 0.6s ease-out'
+      }}>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Profil Saya</h1>
+            <p className="text-muted-foreground">
+              Kelola informasi pribadi dan preferensi akun Anda
+            </p>
+          </div>
+          {!isEditing && (
+            <Button onClick={() => setIsEditing(true)} className="flex items-center gap-2">
+              <Edit className="h-4 w-4" />
+              Edit Profil
+            </Button>
+          )}
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Profile sections for non-kurir users */}
+          <div className="md:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Informasi Pribadi</CardTitle>
+                <CardDescription>
+                  Data pribadi dan kontak yang dapat dihubungi
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src="/placeholder-avatar.jpg" />
+                    <AvatarFallback className="text-xl">{user?.name?.charAt(0) || 'U'}</AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-semibold">{user?.name}</h3>
+                    <Badge variant="secondary">{user?.role?.toUpperCase()}</Badge>
+                    <Button variant="outline" size="sm" className="mt-2">
+                      <Camera className="h-4 w-4 mr-2" />
+                      Ganti Foto
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nama Lengkap</Label>
+                    {isEditing ? (
+                      <Input
+                        id="name"
+                        value={profileData.name}
+                        onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                        <User className="h-4 w-4 text-gray-500" />
+                        <span>{profileData.name}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                      <Mail className="h-4 w-4 text-gray-500" />
+                      <span>{profileData.email}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Nomor Telepon</Label>
+                    {isEditing ? (
+                      <Input
+                        id="phone"
+                        value={profileData.phone}
+                        onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                        <Phone className="h-4 w-4 text-gray-500" />
+                        <span>{profileData.phone}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="joinDate">Tanggal Bergabung</Label>
+                    <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                      <Calendar className="h-4 w-4 text-gray-500" />
+                      <span>{profileData.joinDate}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {isEditing && (
+                  <div className="flex gap-2">
+                    <Button onClick={handleSave}>Simpan Perubahan</Button>
+                    <Button variant="outline" onClick={() => setIsEditing(false)}>Batal</Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </LayoutComponent>
+    </Layout>
   );
 };
 

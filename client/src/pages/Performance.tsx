@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { CourierSidebar } from '@/components/CourierSidebar';
+import CourierSidebar from '@/components/CourierSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -82,7 +82,10 @@ const Performance = () => {
   };
 
   return (
-    <Layout>
+    <div className="flex h-screen bg-background">
+      <CourierSidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 overflow-auto p-6 bg-gradient-to-br from-background via-background to-secondary/30">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
