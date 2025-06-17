@@ -3,7 +3,9 @@ import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { authenticateWithSupabase } from "./supabase";
+import { supabaseStorage } from "./supabaseStorage";
 import { insertUserSchema, insertApprovalRequestSchema, insertKurirActivitySchema, insertPackageSchema, insertAttendanceSchema } from "@shared/schema";
+import multer from 'multer';
 
 // Global WebSocket connections for real-time updates
 const wsConnections = new Set<any>();
@@ -17,7 +19,25 @@ function broadcastUpdate(type: string, data: any) {
   });
 }
 
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  },
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize Supabase Storage bucket
+  await supabaseStorage.createBucketIfNotExists();
+
   // Authentication routes
   app.post("/api/auth/login", async (req, res) => {
     try {
