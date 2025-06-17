@@ -83,7 +83,7 @@ const Attendance = () => {
       <CourierSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 overflow-auto p-6 bg-gradient-to-br from-background via-background to-secondary/30">
-      <div className="space-y-6">
+          <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
