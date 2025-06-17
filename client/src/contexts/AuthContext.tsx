@@ -48,28 +48,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Simplified authentication - will be restored gradually
   const signIn = async (email: string, password: string) => {
-    // Temporary mock authentication for testing
-    const mockUser = { id: '1', email };
-    const mockProfile = {
-      id: '1',
-      user_id: '1',
-      name: 'Test User',
-      email,
-      role: 'admin',
-      wilayah: 'Jakarta',
-      area: 'Pusat',
-      lokasi_kerja: 'Kantor Pusat',
-      phone: '081234567890',
-      status: 'aktif'
-    };
-    
-    setUser(mockUser);
-    setUserProfile(mockProfile);
-    setSession({ user: mockUser });
-    
-    return { data: { user: mockUser, session: { user: mockUser } }, error: null };
+    setLoading(true);
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        return { data: null, error: error.error || 'Login failed' };
+      }
+
+      const result = await response.json();
+      
+      setUser(result.user);
+      setUserProfile({
+        id: result.user.id,
+        user_id: result.user.id,
+        name: result.user.name,
+        email: result.user.email,
+        role: result.user.role,
+        wilayah: result.user.wilayah || 'Jakarta',
+        area: result.user.area || 'Pusat',
+        lokasi_kerja: result.user.lokasi_kerja || 'Kantor Pusat',
+        phone: result.user.phone || '081234567890',
+        status: result.user.status || 'aktif'
+      });
+      setSession(result.session);
+      
+      return { data: result, error: null };
+    } catch (error) {
+      return { data: null, error: 'Network error' };
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signUp = async (email: string, password: string, userData: Partial<UserProfile>) => {
