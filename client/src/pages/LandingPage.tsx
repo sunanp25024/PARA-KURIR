@@ -77,7 +77,7 @@ const LandingPage = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3 sm:space-x-4">
               <div className="bg-white/90 backdrop-blur-md p-2 sm:p-3 rounded-xl shadow-lg border border-gray-200/50">
-                <img src="/lovable-uploads/c005202f-c3fd-4bcd-be23-7edff7d62bb7.png" alt="PARA Logo" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
+                <Truck className="h-8 w-8 sm:h-10 sm:w-10 text-indigo-600" />
               </div>
               <div>
                 <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-indigo-900 to-blue-800 bg-clip-text text-transparent">
