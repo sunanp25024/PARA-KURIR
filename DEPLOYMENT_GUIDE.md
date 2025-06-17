@@ -14,11 +14,15 @@ Your INSAN Mobile courier management system has been successfully migrated to a 
 ### Environment Variables
 ```env
 # Supabase Configuration
-VITE_SUPABASE_URL=https://cpxuossynzfqmuorvkf.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+VITE_SUPABASE_URL=your_supabase_project_url_here
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
 # PWA Configuration (optional)
 VITE_VAPID_PUBLIC_KEY=your_vapid_public_key_here
+
+# Security Configuration
+VITE_APP_ENV=production
+VITE_ENABLE_SECURITY_HEADERS=true
 ```
 
 ## Database Setup

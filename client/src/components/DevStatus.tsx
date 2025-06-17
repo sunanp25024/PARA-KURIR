@@ -9,12 +9,14 @@ export const DevStatus = () => {
     // Check WebSocket connection to our API
     const checkWsConnection = () => {
       try {
-        const ws = new WebSocket(`ws://${window.location.host}/ws-api`);
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${protocol}//${window.location.host}/ws-api`);
         ws.onopen = () => {
           setWsConnected(true);
           ws.close();
         };
         ws.onerror = () => setWsConnected(false);
+        ws.onclose = () => setWsConnected(false);
       } catch {
         setWsConnected(false);
       }
