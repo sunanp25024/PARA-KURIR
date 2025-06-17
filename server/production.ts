@@ -17,7 +17,7 @@ export const corsConfig = cors({
 
     if (!origin) return callback(null, true);
 
-    const isAllowed = allowedOrigins.some(allowedOrigin => {
+    const isAllowed = allowedOrigins.some((allowedOrigin: string) => {
       if (allowedOrigin.includes('*')) {
         const pattern = allowedOrigin.replace('*', '.*');
         return new RegExp(pattern).test(origin);

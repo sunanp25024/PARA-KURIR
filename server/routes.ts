@@ -340,7 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const wss = new WebSocketServer({ 
     server: httpServer,
     path: '/ws-api',
-    verifyClient: (info) => {
+    verifyClient: (info: any) => {
       // Allow connections from Vercel frontend domains
       const origin = info.origin;
       const allowedOrigins = [
