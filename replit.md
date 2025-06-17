@@ -151,6 +151,12 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Recent Changes:
+- June 17, 2025: Authentication system fixed and verified working
+  - Resolved 401 authentication errors by fixing email lookup logic
+  - Confirmed local database fallback authentication working properly
+  - Supabase authentication configured with graceful fallback
+  - All seeded test accounts (master_admin, admin, pic, kurir) accessible with password "123456"
+  - Production readiness maintained at 90%
 - June 17, 2025: Official PARA logo integrated for PWA
   - Integrated official PT Para Insan Sinergi logo for all PWA icons
   - Updated manifest.json with correct company branding

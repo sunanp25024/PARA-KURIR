@@ -50,26 +50,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
-      console.log('Login attempt:', { email, password });
       
-      // Skip Supabase for now - fallback directly to local database
-      console.log('Using local database authentication');
+      // First try Supabase authentication
+      const { user: supabaseUser, error: supabaseError } = await authenticateWithSupabase(email, password);
+      
+      if (supabaseUser && !supabaseError) {
+        // Map Supabase user to our user format
+        const user = {
+          id: supabaseUser.id,
+          email: supabaseUser.email,
+          name: supabaseUser.user_metadata.name || 'User',
+          role: supabaseUser.user_metadata.role || 'kurir',
+          wilayah: supabaseUser.user_metadata.wilayah || 'Jakarta',
+          area: supabaseUser.user_metadata.area || 'Pusat',
+          lokasi_kerja: supabaseUser.user_metadata.lokasi_kerja || 'Kantor Pusat',
+          phone: supabaseUser.user_metadata.phone || '081234567890',
+          status: 'aktif'
+        };
+
+        return res.json({
+          user,
+          session: { user_id: user.id }
+        });
+      }
       
       // Fallback to local database authentication
       const users = await storage.getAllUsers();
-      console.log('Found users:', users.length);
       const user = users.find(u => u.email === email);
-      console.log('User found:', user ? 'Yes' : 'No');
-      
       if (!user) {
-        console.log('User not found for email:', email);
         return res.status(401).json({ error: "Invalid credentials" });
       }
       
       // For demo purposes, accept common passwords
-      console.log('Checking password:', password);
       if (password === '123456' || password === 'password') {
-        console.log('Password accepted, returning user data');
         return res.json({
           user: {
             id: user.id,
@@ -85,7 +98,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           session: { user_id: user.id }
         });
       } else {
-        console.log('Password rejected:', password);
         return res.status(401).json({ error: "Invalid credentials" });
       }
     } catch (error) {
