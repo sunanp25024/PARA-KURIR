@@ -17,7 +17,7 @@ export const corsConfig = cors({
 
     if (!origin) return callback(null, true);
 
-    const isAllowed = allowedOrigins.some((allowedOrigin: string) => {
+    const isAllowed = allowedOrigins.filter(Boolean).some((allowedOrigin: string) => {
       if (allowedOrigin.includes('*')) {
         const pattern = allowedOrigin.replace('*', '.*');
         return new RegExp(pattern).test(origin);
@@ -43,10 +43,12 @@ export const corsConfig = cors({
   ]
 });
 
-// Security headers with Helmet - fixed configuration
+// Security headers with Helmet - development-friendly configuration
 export const securityConfig = helmet({
-  contentSecurityPolicy: false, // Disable CSP for API server
+  contentSecurityPolicy: false, // Disable CSP for development
   crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: false, // Allow cross-origin requests
+  frameguard: { action: 'sameorigin' }, // Allow same-origin frames
   hsts: process.env.NODE_ENV === 'production' ? {
     maxAge: 31536000,
     includeSubDomains: true,
@@ -96,8 +98,10 @@ export const applyProductionMiddleware = (app: Express) => {
   // Trust proxy for production
   app.set('trust proxy', 1);
   
-  // Security first
-  app.use(securityConfig);
+  // Security headers only in production
+  if (process.env.NODE_ENV === 'production') {
+    app.use(securityConfig);
+  }
   
   // CORS configuration
   app.use(corsConfig);
