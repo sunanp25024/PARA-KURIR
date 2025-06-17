@@ -24,6 +24,7 @@ import KurirMobile from "./pages/KurirMobile";
 import ApprovalRequests from "./pages/ApprovalRequests";
 import { AuthProvider } from "./contexts/AuthContext";
 import { WorkflowProvider } from "./contexts/WorkflowContext";
+import { RealtimeProvider } from "./components/RealtimeProvider";
 
 const queryClient = new QueryClient();
 
@@ -31,33 +32,35 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <WorkflowProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/manage-admin" element={<ManageAdmin />} />
-              <Route path="/manage-pic" element={<ManagePIC />} />
-              <Route path="/manage-kurir" element={<ManageKurir />} />
-              <Route path="/attendance" element={<Attendance />} />
-              <Route path="/performance" element={<Performance />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/approval" element={<Approval />} />
-              <Route path="/approval-requests" element={<ApprovalRequests />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/approval-status" element={<ApprovalStatus />} />
-              <Route path="/send-notification" element={<SendNotification />} />
-              <Route path="/kurir-mobile" element={<KurirMobile />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <RealtimeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/manage-admin" element={<ManageAdmin />} />
+                <Route path="/manage-pic" element={<ManagePIC />} />
+                <Route path="/manage-kurir" element={<ManageKurir />} />
+                <Route path="/attendance" element={<Attendance />} />
+                <Route path="/performance" element={<Performance />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/approval" element={<Approval />} />
+                <Route path="/approval-requests" element={<ApprovalRequests />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/approval-status" element={<ApprovalStatus />} />
+                <Route path="/send-notification" element={<SendNotification />} />
+                <Route path="/kurir-mobile" element={<KurirMobile />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </RealtimeProvider>
       </WorkflowProvider>
     </AuthProvider>
   </QueryClientProvider>

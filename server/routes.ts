@@ -188,6 +188,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!pkg) {
         return res.status(404).json({ error: "Package not found" });
       }
+      
+      // Broadcast package update
+      broadcastUpdate('package_updated', pkg);
+      
       res.json(pkg);
     } catch (error) {
       res.status(400).json({ error: "Failed to update package" });
@@ -209,6 +213,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const attendanceData = insertAttendanceSchema.parse(req.body);
       const attendance = await storage.createAttendance(attendanceData);
+      
+      // Broadcast attendance creation
+      broadcastUpdate('attendance_created', attendance);
+      
       res.status(201).json(attendance);
     } catch (error) {
       res.status(400).json({ error: "Invalid attendance data" });
