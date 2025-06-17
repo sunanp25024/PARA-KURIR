@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-
 const Login = () => {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
@@ -15,12 +13,27 @@ const Login = () => {
 
   // Mock login data
   const mockUsers = {
-    'MASTERADMIN2025': { password: '123456', role: 'master-admin', name: 'Master Admin' },
-    'ADMIN2025': { password: '123456', role: 'admin', name: 'Admin User' },
-    'PIC2025': { password: '123456', role: 'pic', name: 'PIC User' },
-    'PISTEST2025': { password: '123456', role: 'kurir', name: 'Kurir Test' }
+    'MASTERADMIN2025': {
+      password: '123456',
+      role: 'master-admin',
+      name: 'Master Admin'
+    },
+    'ADMIN2025': {
+      password: '123456',
+      role: 'admin',
+      name: 'Admin User'
+    },
+    'PIC2025': {
+      password: '123456',
+      role: 'pic',
+      name: 'PIC User'
+    },
+    'PISTEST2025': {
+      password: '123456',
+      role: 'kurir',
+      name: 'Kurir Test'
+    }
   };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -28,7 +41,6 @@ const Login = () => {
     // Simulate API call
     setTimeout(() => {
       const user = mockUsers[id as keyof typeof mockUsers];
-      
       if (user && user.password === password) {
         // Store user data in localStorage
         localStorage.setItem('user', JSON.stringify({
@@ -36,12 +48,10 @@ const Login = () => {
           role: user.role,
           name: user.name
         }));
-        
         toast({
           title: "Login Berhasil",
-          description: `Selamat datang, ${user.name}!`,
+          description: `Selamat datang, ${user.name}!`
         });
-        
         navigate('/dashboard');
       } else {
         toast({
@@ -50,21 +60,14 @@ const Login = () => {
           variant: "destructive"
         });
       }
-      
       setIsLoading(false);
     }, 1000);
   };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+  return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <img 
-              src="/lovable-uploads/2cf1d03d-190b-4825-8140-747aae69d11b.png" 
-              alt="INSAN MOBILE" 
-              className="h-12 w-auto"
-            />
+          <div className="flex justify-center mb-4 my-0">
+            <img alt="INSAN MOBILE" src="/lovable-uploads/72b62909-61bc-430c-9469-be74c6f94f1d.png" className="h-12 w-auto object-fill" />
           </div>
           <CardTitle className="text-2xl font-bold text-indigo-700">INSAN MOBILE</CardTitle>
           <CardDescription>Aplikasi Kurir Professional</CardDescription>
@@ -73,31 +76,13 @@ const Login = () => {
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="id">ID Mitra</Label>
-              <Input
-                id="id"
-                type="text"
-                placeholder="Masukkan ID Anda"
-                value={id}
-                onChange={(e) => setId(e.target.value)}
-                required
-              />
+              <Input id="id" type="text" placeholder="Masukkan ID Anda" value={id} onChange={e => setId(e.target.value)} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Masukkan Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <Input id="password" type="password" placeholder="Masukkan Password" value={password} onChange={e => setPassword(e.target.value)} required />
             </div>
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Memproses...' : 'Login'}
             </Button>
           </form>
@@ -113,8 +98,6 @@ const Login = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default Login;
