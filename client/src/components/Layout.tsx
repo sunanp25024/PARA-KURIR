@@ -21,32 +21,40 @@ const Layout = ({ children }: LayoutProps) => {
     try {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
+      console.log('Layout loaded for user:', parsedUser.role, 'in tab:', sessionStorage.getItem('tab_id'));
     } catch (error) {
       navigate('/login');
     }
 
-    // Listen for user changes in this tab
+    // Listen for user changes in this tab only - reduced frequency
     const handleUserChange = () => {
       const currentUser = sessionStorage.getItem('user');
+      const tabId = sessionStorage.getItem('tab_id');
+      
       if (!currentUser) {
+        console.log('User session ended in tab:', tabId);
         navigate('/login');
       } else {
         try {
           const newUser = JSON.parse(currentUser);
-          setUser(newUser);
+          // Only update if user actually changed to prevent unnecessary re-renders
+          if (newUser.id !== user?.id) {
+            console.log('User switched in tab:', tabId, 'to role:', newUser.role);
+            setUser(newUser);
+          }
         } catch (error) {
           navigate('/login');
         }
       }
     };
 
-    // Check for user changes periodically
-    const interval = setInterval(handleUserChange, 1000);
+    // Check for user changes less frequently to reduce cross-tab interference
+    const interval = setInterval(handleUserChange, 5000);
     
     return () => {
       clearInterval(interval);
     };
-  }, [navigate]);
+  }, [navigate, user?.id]);
 
   if (!user) {
     return <div>Loading...</div>;

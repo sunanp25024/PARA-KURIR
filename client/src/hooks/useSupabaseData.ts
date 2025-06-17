@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiService, type User, type Package, type Activity, type Attendance } from '@/services/apiService';
+import { TabIsolationManager } from '@/utils/tabIsolation';
 
 export const useSupabaseData = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -9,18 +10,9 @@ export const useSupabaseData = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  // Get current session user
+  // Get current session user using tab isolation
   const getCurrentUser = () => {
-    const userData = sessionStorage.getItem('user');
-    if (userData) {
-      try {
-        return JSON.parse(userData);
-      } catch (error) {
-        console.error('Error parsing current user:', error);
-        return null;
-      }
-    }
-    return null;
+    return TabIsolationManager.getCurrentUser();
   };
 
   const fetchUsers = async (user: User | null) => {
@@ -153,6 +145,9 @@ export const useSupabaseData = () => {
     setCurrentUser(user);
     setLoading(true);
     
+    // Log session info for debugging
+    TabIsolationManager.logSessionInfo();
+    
     try {
       await Promise.all([
         fetchUsers(user),
@@ -183,27 +178,18 @@ export const useSupabaseData = () => {
     return () => clearTimeout(timeout);
   }, []);
 
-  // Listen for session storage changes (user switching)
+  // Listen for session storage changes (user switching) - only within same tab
   useEffect(() => {
-    const handleStorageChange = () => {
-      const newUser = getCurrentUser();
-      if (newUser?.id !== currentUser?.id) {
-        refreshData();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also check periodically for session changes within the same tab
+    // Check periodically for session changes within the same tab only
     const interval = setInterval(() => {
       const newUser = getCurrentUser();
       if (newUser?.id !== currentUser?.id) {
+        console.log('Session user changed, refreshing data for tab:', sessionStorage.getItem('session_id'));
         refreshData();
       }
-    }, 1000);
+    }, 2000); // Check every 2 seconds instead of 1
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
   }, [currentUser]);

@@ -32,26 +32,35 @@ export const useRealtimeSync = () => {
             const message: RealtimeMessage = JSON.parse(event.data);
             setLastMessage(message);
             
-            // Invalidate relevant queries based on message type
+            // Get current session ID for tab-specific invalidation
+            const sessionId = sessionStorage.getItem('session_id');
+            const currentUser = sessionStorage.getItem('user');
+            
+            // Only process real-time updates if user is logged in this tab
+            if (!currentUser || !sessionId) {
+              return;
+            }
+            
+            // Invalidate relevant queries with session-specific keys
             switch (message.type) {
               case 'user_created':
               case 'user_updated':
-                queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/users', sessionId] });
                 break;
               case 'approval_request_created':
               case 'approval_request_updated':
-                queryClient.invalidateQueries({ queryKey: ['/api/approval-requests'] });
-                queryClient.invalidateQueries({ queryKey: ['/api/approval-requests/pending'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/approval-requests', sessionId] });
+                queryClient.invalidateQueries({ queryKey: ['/api/approval-requests/pending', sessionId] });
                 break;
               case 'kurir_activity_created':
-                queryClient.invalidateQueries({ queryKey: ['/api/kurir-activities'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/kurir-activities', sessionId] });
                 break;
               case 'package_created':
               case 'package_updated':
-                queryClient.invalidateQueries({ queryKey: ['/api/packages'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/packages', sessionId] });
                 break;
               case 'attendance_created':
-                queryClient.invalidateQueries({ queryKey: ['/api/attendance'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/attendance', sessionId] });
                 break;
               case 'connection':
                 console.log('WebSocket connection confirmed:', message.data);

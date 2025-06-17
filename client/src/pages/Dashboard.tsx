@@ -79,7 +79,9 @@ const Dashboard = () => {
     const userData = sessionStorage.getItem('user');
     if (userData) {
       try {
-        setUser(JSON.parse(userData));
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        console.log('Dashboard loaded for user:', parsedUser.role, 'in tab:', sessionStorage.getItem('tab_id'));
       } catch (error) {
         console.error('Error parsing user data:', error);
         sessionStorage.removeItem('user');
@@ -95,27 +97,35 @@ const Dashboard = () => {
       return () => clearTimeout(timeout);
     }
 
-    // Listen for user changes in this tab (e.g., logout from another component)
+    // Listen for user changes in this tab only - no cross-tab interference
     const handleUserChange = () => {
       const currentUser = sessionStorage.getItem('user');
+      const tabId = sessionStorage.getItem('tab_id');
+      
       if (!currentUser) {
+        console.log('User logged out in tab:', tabId);
         navigate('/');
       } else {
         try {
-          setUser(JSON.parse(currentUser));
+          const parsedUser = JSON.parse(currentUser);
+          // Only update if user actually changed
+          if (parsedUser.id !== user?.id) {
+            console.log('User changed in tab:', tabId, 'from', user?.role, 'to', parsedUser.role);
+            setUser(parsedUser);
+          }
         } catch (error) {
           navigate('/');
         }
       }
     };
 
-    // Check for user changes periodically
-    const interval = setInterval(handleUserChange, 1000);
+    // Check for user changes less frequently to reduce interference
+    const interval = setInterval(handleUserChange, 3000);
     
     return () => {
       clearInterval(interval);
     };
-  }, [navigate]);
+  }, [navigate, user?.id]);
 
   if (!user) {
     return (
