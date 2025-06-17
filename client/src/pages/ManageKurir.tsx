@@ -51,7 +51,7 @@ const ManageKurir = () => {
   // Get user role from localStorage
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userRole = user.role || '';
-  const isMasterAdmin = userRole === 'master_admin';
+  const isMasterAdmin = userRole === 'master-admin';
   const isAdmin = userRole === 'admin';
   const isPIC = userRole === 'pic';
   const canManage = isMasterAdmin || isAdmin;

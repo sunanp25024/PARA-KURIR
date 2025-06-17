@@ -56,11 +56,12 @@ const ManageAdmin = () => {
     area: ''
   });
 
-  // Get current user info (in real app, this would come from auth context)
+  // Get current user info from localStorage
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
   const currentUser = {
-    id: 'ADMIN2025',
-    name: 'Admin User',
-    role: 'Admin' // This determines if approval is needed
+    id: user.user_id || 'ADMIN2025',
+    name: user.name || 'Admin User',
+    role: user.role || 'admin'
   };
 
   const { createApprovalRequest, pendingRequests } = useApprovals();
@@ -113,7 +114,7 @@ const ManageAdmin = () => {
   ]);
 
   // Check if current user needs approval for actions
-  const needsApproval = currentUser.role === 'Admin';
+  const needsApproval = currentUser.role === 'admin';
 
   const handleAddAdmin = async () => {
     if (needsApproval) {
