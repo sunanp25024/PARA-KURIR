@@ -7,6 +7,7 @@ import { supabaseStorage } from "./supabaseStorage";
 import { insertUserSchema, insertApprovalRequestSchema, insertKurirActivitySchema, insertPackageSchema, insertAttendanceSchema } from "@shared/schema";
 import multer from 'multer';
 import { authLimiter, apiLimiter, uploadLimiter, securityHeaders, validateInput, validateEnvironment } from './security';
+import { applyProductionMiddleware, rateLimits } from './production';
 
 // Global WebSocket connections for real-time updates
 const wsConnections = new Set<any>();
