@@ -87,15 +87,15 @@ const Settings: React.FC = () => {
         <main className="flex-1 overflow-auto p-6 bg-gradient-to-br from-background via-background to-secondary/30">
           <div className="space-y-6">
             {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
+            <div className="flex items-center justify-between">
+              <div>
             <h1 className="text-3xl font-bold tracking-tight">Pengaturan</h1>
             <p className="text-muted-foreground">
               Kelola preferensi dan konfigurasi aplikasi Anda
             </p>
-          </div>
-          <Button onClick={handleSave} className="flex items-center gap-2">
-            <Save className="h-4 w-4" />
+              </div>
+              <Button onClick={handleSave} className="flex items-center gap-2">
+                <Save className="h-4 w-4" />
             Simpan Semua
           </Button>
         </div>

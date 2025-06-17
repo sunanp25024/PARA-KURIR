@@ -86,21 +86,19 @@ const Attendance = () => {
           <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
-          <div>
+              <div>
             <h1 className="text-3xl font-bold tracking-tight">Absensi</h1>
             <p className="text-muted-foreground">
               Kelola kehadiran dan waktu kerja Anda
             </p>
-          </div>
-          <Badge variant={isCheckedIn ? "default" : "secondary"} className="px-4 py-2">
-            <Clock className="h-4 w-4 mr-2" />
-            {isCheckedIn ? 'Sedang Bekerja' : 'Belum Check-in'}
-          </Badge>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          {/* Check-in/out Section */}
-          <div className="md:col-span-2 space-y-6">
+              </div>
+              <Badge variant={isCheckedIn ? "default" : "secondary"} className="px-4 py-2">
+                <Clock className="h-4 w-4 mr-2" />
+                {isCheckedIn ? 'Sedang Bekerja' : 'Belum Check-in'}
+              </Badge>
+            <div className="grid gap-6 md:grid-cols-3">
+              {/* Check-in/out Section */}
+              <div className="md:col-span-2 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -264,7 +262,8 @@ const Attendance = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
+              </div>
+            </div>
           </div>
         </main>
       </div>
