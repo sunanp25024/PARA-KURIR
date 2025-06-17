@@ -44,7 +44,7 @@ app.use((req, res, next) => {
     await seedDatabase();
     log("Database seeding completed successfully!");
   } catch (error) {
-    log("Database seeding failed:", error);
+    log("Database seeding failed:", String(error));
     log("Continuing anyway...");
   }
 
@@ -70,7 +70,7 @@ app.use((req, res, next) => {
   // Serve the app on port 5000 with better error handling
   const port = process.env.PORT || 5000;
   
-  server.listen(port, "0.0.0.0", () => {
+  server.listen(Number(port), "0.0.0.0", () => {
     log(`Server running on port ${port}`);
   }).on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
