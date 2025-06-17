@@ -276,6 +276,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // File upload routes for delivery photos
+  app.post("/api/upload/delivery-photo", upload.single('photo'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No photo file provided" });
+      }
+
+      const userId = req.body.userId || 'anonymous';
+      const packageId = req.body.packageId;
+      
+      if (!packageId) {
+        return res.status(400).json({ error: "Package ID is required" });
+      }
+
+      const fileName = `delivery-${packageId}-${Date.now()}.jpg`;
+      
+      const { url, error } = await supabaseStorage.uploadDeliveryPhoto(
+        req.file.buffer,
+        fileName,
+        userId
+      );
+
+      if (error) {
+        return res.status(500).json({ error: `Upload failed: ${error}` });
+      }
+
+      // Update package with photo URL
+      const updatedPackage = await storage.updatePackage(packageId, {
+        foto_bukti_terkirim: url,
+        status_pengiriman: 'terkirim'
+      });
+
+      if (updatedPackage) {
+        broadcastUpdate('package_updated', updatedPackage);
+      }
+
+      res.json({ 
+        success: true, 
+        photoUrl: url,
+        message: "Photo uploaded successfully" 
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // WebSocket server for real-time updates on different path
