@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const usePushNotifications = () => {
@@ -72,15 +71,20 @@ export const usePushNotifications = () => {
 
   const saveSubscriptionToServer = async (subscription: PushSubscription) => {
     try {
-      const { error } = await supabase
-        .from('push_subscriptions')
-        .upsert({
+      const response = await fetch('/api/push-subscriptions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           user_id: user?.id,
           subscription: subscription.toJSON(),
-          updated_at: new Date().toISOString()
-        });
+        }),
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error('Failed to save subscription');
+      }
     } catch (error) {
       console.error('Error saving subscription:', error);
     }
@@ -94,10 +98,9 @@ export const usePushNotifications = () => {
 
         // Remove from server
         if (user) {
-          await supabase
-            .from('push_subscriptions')
-            .delete()
-            .eq('user_id', user.id);
+          await fetch(`/api/push-subscriptions/${user.id}`, {
+            method: 'DELETE',
+          });
         }
       }
     } catch (error) {
@@ -117,18 +120,9 @@ export const usePushNotifications = () => {
         body,
         icon: '/icons/icon-192x192.png',
         badge: '/icons/icon-96x96.png',
-        vibrate: [100, 50, 100],
-        data,
-        actions: [
-          {
-            action: 'view',
-            title: 'View'
-          },
-          {
-            action: 'dismiss',
-            title: 'Dismiss'
-          }
-        ]
+        // vibrate: [100, 50, 100], // Removed - not supported in all browsers
+        data
+        // actions removed for browser compatibility
       });
     } catch (error) {
       console.error('Error showing notification:', error);

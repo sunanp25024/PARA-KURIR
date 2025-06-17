@@ -137,12 +137,16 @@ export const useCamera = () => {
 
   const deletePhoto = async (path: string, bucket: 'profile_pictures' | 'delivery_proofs') => {
     try {
-      const { error } = await supabase.storage
-        .from(bucket)
-        .remove([path]);
+      const response = await fetch('/api/delete-file', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path, bucket }),
+      });
 
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error('Delete failed');
       }
 
       return true;

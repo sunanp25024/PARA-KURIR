@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabaseService } from '@/services/supabaseService';
 
 interface OfflineData {
   id: string;
@@ -87,23 +86,15 @@ export const useOfflineSync = () => {
 
     try {
       const syncPromises = pendingSync.map(async (item) => {
-        switch (item.type) {
-          case 'package':
-            return item.action === 'create' 
-              ? supabaseService.createPackage(item.data)
-              : supabaseService.updatePackage(item.data.id, item.data);
-          
-          case 'attendance':
-            return item.action === 'create'
-              ? supabaseService.createAttendance(item.data)
-              : supabaseService.updateAttendance(item.data.id, item.data);
-          
-          case 'activity':
-            return supabaseService.createKurirActivity(item.data);
-          
-          default:
-            throw new Error(`Unknown sync type: ${item.type}`);
-        }
+        const endpoint = `/api/${item.type}s`;
+        const method = item.action === 'create' ? 'POST' : 'PUT';
+        const url = item.action === 'update' ? `${endpoint}/${item.data.id}` : endpoint;
+        
+        return fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item.data),
+        });
       });
 
       await Promise.all(syncPromises);
