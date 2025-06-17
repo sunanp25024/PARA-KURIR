@@ -110,7 +110,18 @@ export async function seedDatabase() {
     ];
 
     for (const user of users) {
-      await storage.createUser(user);
+      try {
+        // Check if user already exists
+        const existingUser = await storage.getUserByUserId(user.user_id);
+        if (!existingUser) {
+          await storage.createUser(user);
+          console.log(`Created user: ${user.user_id}`);
+        } else {
+          console.log(`User already exists: ${user.user_id}`);
+        }
+      } catch (error) {
+        console.log(`Skipping existing user: ${user.user_id}`);
+      }
     }
     console.log("Users seeded successfully");
 
@@ -146,7 +157,12 @@ export async function seedDatabase() {
     ];
 
     for (const pkg of packages) {
-      await storage.createPackage(pkg);
+      try {
+        await storage.createPackage(pkg);
+        console.log(`Created package: ${pkg.resi_number}`);
+      } catch (error) {
+        console.log(`Package already exists: ${pkg.resi_number}`);
+      }
     }
     console.log("Packages seeded successfully");
 
