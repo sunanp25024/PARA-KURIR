@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface CameraOptions {
@@ -108,27 +107,27 @@ export const useCamera = () => {
         `avatars/${finalFileName}` : 
         `proofs/${finalFileName}`;
 
-      // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, fileBlob, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      // Upload to server storage
+      const formData = new FormData();
+      formData.append('file', fileBlob, finalFileName);
+      formData.append('bucket', bucket);
+      formData.append('path', filePath);
 
-      if (error) {
-        throw error;
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
       }
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(filePath);
+      const result = await response.json();
 
       return {
-        path: data.path,
-        publicUrl,
-        fullPath: data.fullPath
+        path: result.path,
+        publicUrl: result.publicUrl,
+        fullPath: result.fullPath
       };
     } catch (error) {
       console.error('Error uploading photo:', error);

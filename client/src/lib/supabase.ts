@@ -1,24 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+// Supabase has been migrated to Neon PostgreSQL
+// This file is kept for type definitions only
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 10,
-    },
-  },
-})
+// Note: Authentication and database operations now use server-side API routes
+console.log('Supabase client disabled - using server-side database operations')
 
 // Database types for Supabase
 export interface Database {
