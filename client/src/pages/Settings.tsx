@@ -63,16 +63,16 @@ const Settings: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-                <h1 className="text-3xl font-bold tracking-tight">Pengaturan</h1>
-                <p className="text-muted-foreground">
-                  Kelola preferensi dan konfigurasi aplikasi Anda
-                </p>
-              </div>
-              <Button onClick={handleSave} className="flex items-center gap-2">
-                <Save className="h-4 w-4" />
-                Simpan Semua
-              </Button>
-            </div>
+            <h1 className="text-3xl font-bold tracking-tight">Pengaturan</h1>
+            <p className="text-muted-foreground">
+              Kelola preferensi dan konfigurasi aplikasi Anda
+            </p>
+          </div>
+          <Button onClick={handleSave} className="flex items-center gap-2">
+            <Save className="h-4 w-4" />
+            Simpan Semua
+          </Button>
+        </div>
 
             <div className="grid gap-6 md:grid-cols-2">
               {/* Notifikasi */}
@@ -310,8 +310,9 @@ const Settings: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-      </CourierLayout>
-    );
+      </div>
+    </CourierLayout>
+  );
 };
 
 export default Settings;
