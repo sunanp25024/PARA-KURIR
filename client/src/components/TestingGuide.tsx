@@ -23,7 +23,7 @@ export const TestingGuide: React.FC = () => {
     {
       role: 'master_admin',
       email: 'masteradmin@insanmobile.com',
-      password: 'masteradmin123',
+      password: '123456',
       name: 'Master Administrator',
       description: 'Akses penuh ke semua fitur sistem',
       allowedPages: ['Dashboard', 'Manage Admin', 'Manage PIC', 'Manage Kurir', 'Persetujuan', 'Reports', 'Send Notification'],
@@ -33,7 +33,7 @@ export const TestingGuide: React.FC = () => {
     {
       role: 'admin',
       email: 'admin@insanmobile.com',
-      password: 'admin123',
+      password: '123456',
       name: 'Admin User',
       description: 'Akses administrasi dan manajemen kurir',
       allowedPages: ['Dashboard', 'Manage Kurir', 'Approval Requests', 'Reports', 'Send Notification'],
@@ -43,7 +43,7 @@ export const TestingGuide: React.FC = () => {
     {
       role: 'pic',
       email: 'pic@insanmobile.com',
-      password: 'pic123',
+      password: '123456',
       name: 'PIC User',
       description: 'Akses monitoring dan laporan',
       allowedPages: ['Dashboard', 'Attendance', 'Performance', 'Notifications', 'Approval Status'],
@@ -53,7 +53,7 @@ export const TestingGuide: React.FC = () => {
     {
       role: 'kurir',
       email: 'kurir@insanmobile.com',
-      password: 'kurir123',
+      password: '123456',
       name: 'Kurir User',
       description: 'Akses mobile workflow kurir',
       allowedPages: ['Dashboard', 'Kurir Mobile', 'Settings'],
