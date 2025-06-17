@@ -117,110 +117,153 @@ const DailyPackageInput: React.FC<DailyPackageInputProps> = ({ onStepComplete })
   const isValid = total > 0 && (cod + nonCod === total);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Package className="h-5 w-5" />
-          Data Input Paket Harian
-        </CardTitle>
-        <CardDescription>Input jumlah total paket yang akan dikirim hari ini</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Label htmlFor="total">Total Paket</Label>
-            <Input
-              id="total"
-              type="number"
-              value={totalPackages}
-              onChange={(e) => setTotalPackages(e.target.value)}
-              placeholder="0"
-              disabled={isDataSaved}
-            />
-          </div>
-          <div>
-            <Label htmlFor="cod">Paket COD</Label>
-            <Input
-              id="cod"
-              type="number"
-              value={codPackages}
-              onChange={(e) => setCodPackages(e.target.value)}
-              placeholder="0"
-              disabled={isDataSaved}
-            />
-          </div>
-          <div>
-            <Label htmlFor="nonCod">Paket Non COD</Label>
-            <Input
-              id="nonCod"
-              type="number"
-              value={nonCodPackages}
-              onChange={(e) => setNonCodPackages(e.target.value)}
-              placeholder="0"
-              disabled={isDataSaved}
-            />
-          </div>
-        </div>
-
-        {/* Validation Alert */}
-        {total > 0 && !isValid && (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Jumlah tidak sesuai! COD ({cod}) + Non COD ({nonCod}) = {cod + nonCod}, 
-              seharusnya sama dengan Total Paket ({total})
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {isValid && !isDataSaved && (
-          <Alert>
-            <CheckCircle className="h-4 w-4" />
-            <AlertDescription>
-              Data valid! Total: {total}, COD: {cod}, Non COD: {nonCod}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {isDataSaved && (
-          <Alert>
-            <CheckCircle className="h-4 w-4" />
-            <AlertDescription>
-              Data paket harian sudah tersimpan. Total: {total}, COD: {cod}, Non COD: {nonCod}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <div className="flex gap-2">
-          {!isDataSaved ? (
-            <Button 
-              onClick={handleSaveData} 
-              disabled={!isValid}
-              className="flex-1"
-            >
-              Simpan Data Paket
-            </Button>
-          ) : (
-            <div className="flex gap-2 w-full">
-              <Button 
-                onClick={handleProceedToScan} 
-                className="flex-1"
-              >
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Lanjut ke Scan Paket
-              </Button>
-              <Button 
-                onClick={handleReset} 
-                variant="outline"
-                size="sm"
-              >
-                Reset
-              </Button>
+    <div className="space-y-6 max-w-4xl mx-auto">
+      <Card className="card-modern shadow-xl border border-border/50">
+        <CardHeader className="pb-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl">
+              <Package className="h-6 w-6 text-white" />
             </div>
+            <div>
+              <CardTitle className="text-2xl text-foreground">Input Data Paket Harian</CardTitle>
+              <CardDescription className="text-lg text-muted-foreground">
+                Masukkan jumlah paket yang akan dikirim hari ini
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-3">
+              <Label htmlFor="total" className="text-sm font-semibold text-foreground">
+                Total Paket
+              </Label>
+              <Input
+                id="total"
+                type="number"
+                value={totalPackages}
+                onChange={(e) => setTotalPackages(e.target.value)}
+                placeholder="0"
+                min="0"
+                disabled={isDataSaved}
+                className="h-12 text-lg font-medium border-2 focus:border-primary transition-colors"
+              />
+            </div>
+            
+            <div className="space-y-3">
+              <Label htmlFor="cod" className="text-sm font-semibold text-foreground">
+                Paket COD
+              </Label>
+              <Input
+                id="cod"
+                type="number"
+                value={codPackages}
+                onChange={(e) => setCodPackages(e.target.value)}
+                placeholder="0"
+                min="0"
+                disabled={isDataSaved}
+                className="h-12 text-lg font-medium border-2 focus:border-primary transition-colors"
+              />
+            </div>
+            
+            <div className="space-y-3">
+              <Label htmlFor="nonCod" className="text-sm font-semibold text-foreground">
+                Paket Non COD
+              </Label>
+              <Input
+                id="nonCod"
+                type="number"
+                value={nonCodPackages}
+                onChange={(e) => setNonCodPackages(e.target.value)}
+                placeholder="0"
+                min="0"
+                disabled={isDataSaved}
+                className="h-12 text-lg font-medium border-2 focus:border-primary transition-colors"
+              />
+            </div>
+          </div>
+
+          {total > 0 && (
+            <Card className="glass-card p-4">
+              <div className="space-y-3">
+                <h4 className="font-semibold text-foreground mb-3">Validasi Data</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                    <span className="font-medium">Total Paket:</span>
+                    <span className="text-xl font-bold text-primary">{total}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                    <span className="font-medium">COD + Non COD:</span>
+                    <span className={`text-xl font-bold ${isValid ? 'text-green-600' : 'text-red-600'}`}>
+                      {cod + nonCod}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Card>
           )}
-        </div>
-      </CardContent>
-    </Card>
+
+          {total > 0 && !isValid && (
+            <Alert variant="destructive" className="animate-slide-up">
+              <AlertTriangle className="h-5 w-5" />
+              <AlertDescription className="text-base">
+                Jumlah tidak sesuai! COD ({cod}) + Non COD ({nonCod}) = {cod + nonCod}, 
+                seharusnya sama dengan Total Paket ({total})
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {isValid && !isDataSaved && (
+            <Alert className="border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 animate-slide-up">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <AlertDescription className="text-green-800 font-medium text-base">
+                Data valid! Total: {total}, COD: {cod}, Non COD: {nonCod}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {isDataSaved && (
+            <Alert className="border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 shadow-lg animate-slide-up">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <AlertDescription className="text-green-800 font-medium text-lg">
+                Data paket harian berhasil disimpan! Total: {total}, COD: {cod}, Non COD: {nonCod}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            {!isDataSaved ? (
+              <Button 
+                onClick={handleSaveData}
+                disabled={!isValid}
+                className="flex-1 h-12 text-lg font-medium bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 disabled:opacity-50"
+              >
+                <Package className="h-5 w-5 mr-2" />
+                Simpan Data Paket
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  onClick={handleProceedToScan}
+                  className="flex-1 h-12 text-lg font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+                >
+                  <ArrowRight className="h-5 w-5 mr-2" />
+                  Lanjut ke Scan Paket
+                </Button>
+                <Button 
+                  onClick={handleReset}
+                  variant="outline"
+                  className="h-12 text-lg font-medium border-2 hover:bg-muted/50 transition-all duration-200 px-8"
+                >
+                  Reset Data
+                </Button>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

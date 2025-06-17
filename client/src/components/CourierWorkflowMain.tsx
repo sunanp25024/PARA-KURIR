@@ -208,81 +208,141 @@ const CourierWorkflowMain = () => {
   ];
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto p-6">
-      {/* Header dengan Progress */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-          Workflow Harian Kurir
-        </h1>
-        <p className="text-gray-600">Kelola paket harian Anda dengan mudah dan efisien</p>
-      </div>
-
-      {/* Progress Bar */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-        <CardContent className="pt-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-gray-700">Progress Harian</span>
-              <span className="font-semibold text-blue-600">{Math.round(getStepProgress())}%</span>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 p-4 lg:p-6">
+      <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+        
+        {/* Modern Header */}
+        <div className="card-modern p-6 shadow-xl border border-border/50 text-center">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="p-3 bg-gradient-to-r from-primary to-primary/80 rounded-xl">
+              <Truck className="h-8 w-8 text-white" />
             </div>
-            <Progress value={getStepProgress()} className="h-3" />
-            
-            {/* Step Indicators */}
-            <div className="grid grid-cols-5 gap-2 mt-6">
-              {steps.map((step) => {
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                Workflow Harian Kurir
+              </h1>
+              <p className="text-muted-foreground text-lg mt-1">Kelola paket harian dengan efisien</p>
+            </div>
+          </div>
+          
+          {/* Progress Overview */}
+          <div className="glass-card p-4 rounded-xl mt-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-semibold text-foreground">Progress Harian</span>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-primary">{Math.round(getStepProgress())}%</span>
+                <CheckCircle className="h-5 w-5 text-green-500" />
+              </div>
+            </div>
+            <Progress value={getStepProgress()} className="h-3 bg-secondary" />
+          </div>
+        </div>
+
+        {/* Modern Step Navigation */}
+        <Card className="card-modern shadow-xl border border-border/50 overflow-hidden">
+          <CardContent className="p-0">
+            <div className="grid grid-cols-1 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-border/50">
+              {steps.map((step, index) => {
                 const status = getStepStatus(step.key);
+                const isActive = currentStep === step.key;
+                
                 return (
                   <div 
                     key={step.key}
-                    className={`text-center p-3 rounded-lg border transition-all duration-200 ${
-                      status === 'active' 
-                        ? 'bg-blue-100 border-blue-300 shadow-md' 
+                    onClick={() => {
+                      if (status !== 'pending') setCurrentStep(step.key as 'input' | 'scan' | 'delivery' | 'pending' | 'performance');
+                    }}
+                    className={`p-6 text-center transition-all duration-300 cursor-pointer relative ${
+                      isActive 
+                        ? 'bg-gradient-to-br from-primary/10 to-primary/5 border-l-4 border-primary' 
                         : status === 'completed'
-                        ? 'bg-green-100 border-green-300'
-                        : 'bg-gray-50 border-gray-200'
+                        ? 'bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20'
+                        : status === 'pending'
+                        ? 'bg-muted/30 cursor-not-allowed opacity-60'
+                        : 'hover:bg-muted/50'
                     }`}
                   >
-                    <div className="flex justify-center mb-2">
+                    {/* Step Number */}
+                    <div className={`w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center font-bold text-sm ${
+                      status === 'completed' 
+                        ? 'bg-green-500 text-white'
+                        : isActive
+                        ? 'bg-primary text-primary-foreground animate-pulse'
+                        : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {status === 'completed' ? (
+                        <CheckCircle className="h-5 w-5" />
+                      ) : (
+                        index + 1
+                      )}
+                    </div>
+                    
+                    {/* Step Icon */}
+                    <div className="flex justify-center mb-3">
                       {getStepIcon(step.key, status)}
                     </div>
-                    <div className="text-xs font-medium text-gray-700 mb-1">
+                    
+                    {/* Step Info */}
+                    <div className={`font-semibold text-sm mb-2 ${isActive ? 'text-primary' : 'text-foreground'}`}>
                       {step.label}
                     </div>
+                    
                     {step.count !== '' && (
-                      <Badge variant={getStepBadgeVariant(status)} className="text-xs">
+                      <Badge 
+                        variant={status === 'completed' ? 'default' : isActive ? 'secondary' : 'outline'}
+                        className="text-xs font-medium"
+                      >
                         {step.count}
                       </Badge>
+                    )}
+                    
+                    {/* Active Step Indicator */}
+                    {isActive && (
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-primary/80"></div>
                     )}
                   </div>
                 );
               })}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Current Step Indicator */}
-      <Card className="border-2 border-blue-200 bg-blue-50/50">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-3 text-lg">
-            {getStepIcon(currentStep, 'active')}
-            <span className="capitalize">
-              {currentStep === 'input' && 'Input Data Paket'}
-              {currentStep === 'scan' && 'Scan & Kelola Paket'}
-              {currentStep === 'delivery' && 'Proses Pengantaran'}
-              {currentStep === 'pending' && 'Kelola Paket Pending'}
-              {currentStep === 'performance' && 'Ringkasan Performa'}
-            </span>
-            <Badge variant="secondary" className="ml-auto">
-              Step {['input', 'scan', 'delivery', 'pending', 'performance'].indexOf(currentStep) + 1}/5
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-      </Card>
+        {/* Current Step Header */}
+        <Card className="card-modern shadow-lg border border-border/50">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-r from-primary to-primary/80 rounded-xl">
+                  {getStepIcon(currentStep, 'active')}
+                </div>
+                <div>
+                  <CardTitle className="text-2xl text-foreground">
+                    {currentStep === 'input' && 'Input Data Paket'}
+                    {currentStep === 'scan' && 'Scan & Kelola Paket'}
+                    {currentStep === 'delivery' && 'Proses Pengantaran'}
+                    {currentStep === 'pending' && 'Kelola Paket Pending'}
+                    {currentStep === 'performance' && 'Ringkasan Performa'}
+                  </CardTitle>
+                  <p className="text-muted-foreground mt-1">
+                    {currentStep === 'input' && 'Masukkan daftar paket yang akan dikirim hari ini'}
+                    {currentStep === 'scan' && 'Scan barcode/QR code untuk verifikasi paket'}
+                    {currentStep === 'delivery' && 'Proses pengiriman dan dokumentasi'}
+                    {currentStep === 'pending' && 'Kelola paket yang belum terkirim'}
+                    {currentStep === 'performance' && 'Lihat ringkasan pencapaian hari ini'}
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-sm font-medium px-3 py-1">
+                Langkah {['input', 'scan', 'delivery', 'pending', 'performance'].indexOf(currentStep) + 1} dari 5
+              </Badge>
+            </div>
+          </CardHeader>
+        </Card>
 
-      {/* Main Workflow Content */}
-      <div className="min-h-[400px]">
-        {getStepComponent()}
+        {/* Main Content Area */}
+        <div className="animate-slide-up">
+          {getStepComponent()}
+        </div>
       </div>
     </div>
   );
