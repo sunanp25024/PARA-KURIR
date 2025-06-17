@@ -23,7 +23,7 @@ import NotFound from "./pages/NotFound";
 import KurirMobile from "./pages/KurirMobile";
 import ApprovalRequests from "./pages/ApprovalRequests";
 import { AuthProvider } from "./contexts/Auth";
-import { WorkflowProvider } from "./contexts/WorkflowContext";
+import { WorkflowProvider } from "./contexts/WorkflowContextSimple";
 import { RealtimeProvider } from "./components/RealtimeProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DevStatus } from "./components/DevStatus";
