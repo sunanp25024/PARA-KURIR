@@ -449,11 +449,53 @@ const Notifications = () => {
                 </div>
               )}
             </div>
+            </main>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-900">Notifikasi</h1>  
+          <Badge variant="secondary">{notifications.filter(n => !n.read).length} Belum Dibaca</Badge>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Daftar Notifikasi
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {notifications.map((notification) => (
+              <Card key={notification.id} className={`cursor-pointer transition-all hover:shadow-md ${!notification.read ? 'ring-2 ring-blue-200 bg-blue-50' : ''}`}>
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-full ${!notification.read ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                      {notification.icon ? (
+                        <notification.icon className={`h-4 w-4 ${!notification.read ? 'text-blue-600' : 'text-gray-600'}`} />
+                      ) : (
+                        <Bell className={`h-4 w-4 ${!notification.read ? 'text-blue-600' : 'text-gray-600'}`} />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-medium ${!notification.read ? 'text-blue-900' : 'text-gray-900'}`}>
+                        {notification.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </CardContent>
         </Card>
-      </div>
-    </Layout>
-  );
+        </div>
+      </Layout>
+    );
 };
 
 export default Notifications;

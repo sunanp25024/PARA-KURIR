@@ -86,7 +86,7 @@ const Settings: React.FC = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 overflow-auto p-6 bg-gradient-to-br from-background via-background to-secondary/30">
           <div className="space-y-6">
-        {/* Header */}
+            {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Pengaturan</h1>
@@ -399,7 +399,7 @@ const Settings: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+          </div>
         </main>
       </div>
     </div>
