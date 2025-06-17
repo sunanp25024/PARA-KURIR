@@ -113,9 +113,26 @@ const PendingReturnPackages: React.FC<PendingReturnPackagesProps> = ({ onStepCom
           )}
 
           {pendingItems.length === 0 && pendingPackages.length > 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
-              <p>Semua paket pending sudah dikembalikan ke gudang</p>
+            <div className="space-y-4">
+              <Alert className="border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <AlertDescription className="text-green-800 font-medium">
+                  Semua paket pending sudah dikembalikan ke gudang
+                </AlertDescription>
+              </Alert>
+              
+              <Card className="card-modern border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 shadow-xl">
+                <CardContent className="pt-6">
+                  <Button 
+                    onClick={() => onStepComplete?.()}
+                    size="lg"
+                    className="w-full h-16 text-xl font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+                  >
+                    <CheckCircle className="h-6 w-6 mr-3" />
+                    Selesai - Lanjut ke Ringkasan Performa
+                  </Button>
+                </CardContent>
+                </Card>
             </div>
           )}
 
