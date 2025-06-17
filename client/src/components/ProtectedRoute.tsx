@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/SimpleAuthContext';
 import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
@@ -13,7 +13,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   allowedRoles = [], 
   redirectTo = '/login' 
 }) => {
-  const { user, userProfile, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -23,17 +23,17 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  if (!user || !userProfile) {
+  if (!user) {
     return <Navigate to={redirectTo} replace />;
   }
 
-  if (allowedRoles.length > 0 && !allowedRoles.includes(userProfile.role)) {
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Akses Ditolak</h2>
           <p className="text-gray-600">Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-          <p className="text-sm text-gray-500 mt-2">Role Anda: {userProfile.role}</p>
+          <p className="text-sm text-gray-500 mt-2">Role Anda: {user.role}</p>
         </div>
       </div>
     );
