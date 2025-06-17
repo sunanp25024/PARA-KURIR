@@ -78,9 +78,23 @@ const Dashboard = () => {
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
-      setUser(JSON.parse(userData));
+      try {
+        setUser(JSON.parse(userData));
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('user');
+        navigate('/');
+      }
+    } else {
+      // Add timeout to prevent infinite loading on user data
+      const timeout = setTimeout(() => {
+        console.warn('User data not found in localStorage, redirecting to login');
+        navigate('/');
+      }, 2000);
+      
+      return () => clearTimeout(timeout);
     }
-  }, []);
+  }, [navigate]);
 
   if (!user) {
     return (

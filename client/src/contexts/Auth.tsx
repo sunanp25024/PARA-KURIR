@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface User {
   id: string;
@@ -20,6 +20,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Check for existing user session on app start
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
+
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
@@ -36,6 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const result = await response.json();
       setUser(result.user);
+      
+      // Save user data to localStorage for persistence
+      localStorage.setItem('user', JSON.stringify(result.user));
+      
       return { data: result, error: null };
     } catch (error) {
       return { data: null, error: 'Network error' };
@@ -46,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = () => {
     setUser(null);
+    localStorage.removeItem('user');
   };
 
   return (
