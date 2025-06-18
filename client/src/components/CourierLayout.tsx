@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CourierSidebar from '@/components/CourierSidebar';
+import { usePlatform } from '@/hooks/usePlatform';
 
 interface CourierLayoutProps {
   children: React.ReactNode;
@@ -9,6 +10,7 @@ interface CourierLayoutProps {
 const CourierLayout = ({ children }: CourierLayoutProps) => {
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
+  const { platform, responsiveClasses } = usePlatform();
 
   useEffect(() => {
     const userData = sessionStorage.getItem('user');
@@ -60,12 +62,17 @@ const CourierLayout = ({ children }: CourierLayoutProps) => {
   }
 
   return (
-    <div className="min-h-screen flex w-full">
-      <CourierSidebar />
-      <main className="flex-1 p-6 overflow-auto bg-gradient-to-br from-background via-background to-secondary/30">
-        <div className="animate-fade-in">
+    <div className={`${responsiveClasses.container} flex w-full ${platform.isMobile ? 'flex-col' : ''}`}>
+      {!platform.isMobile && <CourierSidebar />}
+      <main className={`flex-1 ${responsiveClasses.main} overflow-auto ${platform.isMobile ? '' : 'bg-gradient-to-br from-background via-background to-secondary/30'} safe-area-top safe-area-bottom`}>
+        <div className={`animate-fade-in ${platform.isMobile ? 'max-w-none' : 'max-w-7xl mx-auto'}`}>
           {children}
         </div>
+        {platform.isMobile && (
+          <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border safe-area-bottom">
+            <CourierSidebar />
+          </div>
+        )}
       </main>
     </div>
   );

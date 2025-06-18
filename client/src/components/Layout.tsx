@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import { usePlatform } from '@/hooks/usePlatform';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,6 +11,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
+  const { platform, responsiveClasses } = usePlatform();
 
   useEffect(() => {
     const userData = sessionStorage.getItem('user');

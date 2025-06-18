@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Platform-specific CSS Variables */
+:root {
+  --safe-area-inset-top: 0px;
+  --safe-area-inset-bottom: 0px;
+  --touch-target-size: 32px;
+}
+
 /* PWA and Mobile Optimizations */
 @layer base {
   html {
