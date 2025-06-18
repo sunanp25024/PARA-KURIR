@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SidebarProvider } from '@/components/ui/sidebar';
 import CourierSidebar from '@/components/CourierSidebar';
 
 interface CourierLayoutProps {
@@ -61,16 +60,14 @@ const CourierLayout = ({ children }: CourierLayoutProps) => {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <CourierSidebar />
-        <main className="flex-1 p-6 overflow-auto bg-gradient-to-br from-background via-background to-secondary/30">
-          <div className="animate-fade-in">
-            {children}
-          </div>
-        </main>
-      </div>
-    </SidebarProvider>
+    <div className="min-h-screen flex w-full">
+      <CourierSidebar />
+      <main className="flex-1 p-6 overflow-auto bg-gradient-to-br from-background via-background to-secondary/30">
+        <div className="animate-fade-in">
+          {children}
+        </div>
+      </main>
+    </div>
   );
 };
 

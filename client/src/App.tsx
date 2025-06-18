@@ -2,6 +2,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
@@ -35,10 +36,11 @@ const App = () => (
     <AuthProvider>
       <WorkflowProvider>
         <RealtimeProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+          <SidebarProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
               <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<LandingPage />} />
@@ -151,7 +153,8 @@ const App = () => (
               </Routes>
               <DevStatus />
             </BrowserRouter>
-          </TooltipProvider>
+            </TooltipProvider>
+          </SidebarProvider>
         </RealtimeProvider>
       </WorkflowProvider>
     </AuthProvider>
