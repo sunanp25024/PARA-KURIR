@@ -1,5 +1,6 @@
 import React from 'react';
 import { PWAStatusBar } from './PWAStatusBar';
+import { usePlatform } from '@/hooks/usePlatform';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface MobileLayoutProps {
