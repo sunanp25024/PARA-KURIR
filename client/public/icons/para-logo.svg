@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <style>
+      .logo-text { fill: #3B82F6; font-family: 'Arial', sans-serif; font-weight: bold; }
+      .logo-subtext { fill: #F59E0B; font-family: 'Arial', sans-serif; font-size: 12px; }
+      .logo-decorative { fill: none; stroke-width: 3; }
+      .logo-decorative-1 { stroke: #3B82F6; }
+      .logo-decorative-2 { stroke: #F59E0B; }
+      .logo-decorative-3 { stroke: #06B6D4; }
+    </style>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="2"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="150" cy="200" r="8" class="logo-decorative logo-decorative-1"/>
+  <circle cx="180" cy="180" r="6" class="logo-decorative logo-decorative-2"/>
+  <circle cx="210" cy="200" r="7" class="logo-decorative logo-decorative-3"/>
+  <circle cx="130" cy="240" r="9" class="logo-decorative logo-decorative-2"/>
+  <circle cx="160" cy="270" r="6" class="logo-decorative logo-decorative-1"/>
+  <circle cx="190" cy="290" r="8" class="logo-decorative logo-decorative-3"/>
+  <circle cx="110" cy="280" r="7" class="logo-decorative logo-decorative-1"/>
+  
+  <!-- Main PARA text -->
+  <text x="180" y="250" class="logo-text" font-size="64">PARA</text>
+  
+  <!-- Subtitle -->
+  <text x="180" y="280" class="logo-subtext">PT PARA INSAN SINERGI</text>
+</svg>
