@@ -2,11 +2,11 @@ import React from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
 import { usePlatform } from '@/hooks/usePlatform';
 
-interface ModernButtonProps extends ButtonProps {
+interface ModernButtonProps extends Omit<ButtonProps, 'variant'> {
   icon?: React.ReactNode;
   loading?: boolean;
   fullWidthOnMobile?: boolean;
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'ghost' | 'outline';
+  customVariant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'ghost' | 'outline';
 }
 
 export const ModernButton: React.FC<ModernButtonProps> = ({
@@ -15,14 +15,14 @@ export const ModernButton: React.FC<ModernButtonProps> = ({
   icon,
   loading = false,
   fullWidthOnMobile = false,
-  variant = 'primary',
+  customVariant = 'primary',
   disabled,
   ...props
 }) => {
   const { platform } = usePlatform();
 
   const getButtonVariant = () => {
-    switch (variant) {
+    switch (customVariant) {
       case 'primary':
         return 'btn-primary';
       case 'secondary':
@@ -44,7 +44,7 @@ export const ModernButton: React.FC<ModernButtonProps> = ({
     ${platform.isMobile ? 'text-base py-4 px-6' : 'text-sm py-3 px-8'}
     ${loading || disabled ? 'opacity-50 cursor-not-allowed' : ''}
     transition-all duration-300 ease-out transform hover:scale-[1.02] active:scale-[0.98]
-    focus:outline-none focus:ring-4 focus:ring-primary/30
+    focus:outline-none focus:ring-4 focus:ring-indigo-500/30
     relative overflow-hidden
   `;
 

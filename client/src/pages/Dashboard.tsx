@@ -456,13 +456,13 @@ const Dashboard = () => {
                 }}
               >
                 {/* Gradient Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-50/20 via-transparent to-indigo-50/20 dark:from-primary-900/10 dark:to-indigo-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/20 via-transparent to-purple-50/20 dark:from-indigo-900/10 dark:to-purple-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 
                 <CardHeader className="relative pb-4">
                   <div className="flex items-start justify-between">
                     <div className="space-y-3 flex-1">
                       <div className="flex items-center gap-3">
-                        <div className="p-3 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-xl shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
+                        <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
                           <card.icon className="h-6 w-6 text-white" />
                         </div>
                         <div>
@@ -488,13 +488,13 @@ const Dashboard = () => {
                       </div>
                       <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-xs">+12% dari bulan lalu</span>
                     </div>
-                    <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
                   </div>
                   
                   {/* Progress Bar */}
                   <div className="mt-4 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                     <div 
-                      className="bg-gradient-to-r from-primary-500 to-indigo-600 h-1.5 rounded-full transition-all duration-1000 ease-out"
+                      className="bg-gradient-to-r from-indigo-500 to-purple-600 h-1.5 rounded-full transition-all duration-1000 ease-out"
                       style={{ width: `${Math.random() * 40 + 60}%` }}
                     ></div>
                   </div>

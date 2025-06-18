@@ -263,10 +263,10 @@
   }
   
   .card-gradient {
-    @apply bg-gradient-to-br from-white via-primary-50/30 to-gray-50 rounded-2xl;
-    @apply border border-primary/10 shadow-lg backdrop-blur-sm;
-    @apply hover:shadow-xl hover:from-primary-50/50 transition-all duration-300;
-    @apply dark:from-gray-800 dark:via-primary-900/30 dark:to-gray-900;
+    @apply bg-gradient-to-br from-white via-indigo-50/30 to-gray-50 rounded-2xl;
+    @apply border border-indigo-200/50 shadow-lg backdrop-blur-sm;
+    @apply hover:shadow-xl hover:from-indigo-50/50 transition-all duration-300;
+    @apply dark:from-gray-800 dark:via-indigo-900/30 dark:to-gray-900;
   }
   
   .card-glass {
@@ -277,10 +277,10 @@
 
   /* Modern Professional Button System */
   .btn-primary {
-    @apply bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800;
+    @apply bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800;
     @apply text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl;
     @apply transition-all duration-300 ease-out transform hover:scale-[1.02] active:scale-[0.98];
-    @apply focus:outline-none focus:ring-4 focus:ring-primary/30;
+    @apply focus:outline-none focus:ring-4 focus:ring-indigo-500/30;
     @apply relative overflow-hidden;
   }
   
@@ -355,9 +355,9 @@
   }
   
   .badge-primary {
-    @apply bg-gradient-to-r from-primary-500 to-primary-600 text-white text-xs font-semibold;
+    @apply bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold;
     @apply px-4 py-2 rounded-full shadow-lg backdrop-blur-sm;
-    @apply border border-primary-400/20 hover:shadow-primary-500/25 hover:shadow-lg;
+    @apply border border-indigo-400/20 hover:shadow-indigo-500/25 hover:shadow-lg;
     @apply transition-all duration-300;
   }
   
@@ -415,9 +415,9 @@
 
   /* Modern Typography System */
   .text-display {
-    @apply text-5xl font-bold tracking-tight bg-gradient-to-r from-gray-900 via-primary-800 to-gray-900;
+    @apply text-5xl font-bold tracking-tight bg-gradient-to-r from-gray-900 via-indigo-800 to-gray-900;
     @apply bg-clip-text text-transparent leading-tight;
-    @apply dark:from-white dark:via-primary-300 dark:to-white;
+    @apply dark:from-white dark:via-indigo-300 dark:to-white;
   }
   
   .text-heading-1 {
@@ -554,7 +554,7 @@
 /* Modern Professional Utilities */
 @layer utilities {
   .text-gradient-modern {
-    @apply bg-gradient-to-r from-primary-600 via-primary-500 to-indigo-600 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-indigo-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent;
     background-size: 200% 200%;
     animation: gradient-shift 3s ease-in-out infinite;
   }
@@ -614,6 +614,6 @@
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px var(--primary); }
-  50% { box-shadow: 0 0 20px var(--primary), 0 0 30px var(--primary); }
+  0%, 100% { box-shadow: 0 0 5px #4f46e5; }
+  50% { box-shadow: 0 0 20px #4f46e5, 0 0 30px #4f46e5; }
 }

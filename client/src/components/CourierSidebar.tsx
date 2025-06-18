@@ -125,12 +125,12 @@ const CourierSidebar = () => {
 
   return (
     <Sidebar className="w-80 bg-glass border-modern shadow-modern-xl">
-      <SidebarHeader className="p-8 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-br from-primary-50/80 via-white/90 to-indigo-50/80 dark:from-gray-800/90 dark:via-gray-900/90 dark:to-primary-900/30 backdrop-blur-xl">
+      <SidebarHeader className="p-8 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-br from-indigo-50/80 via-white/90 to-purple-50/80 dark:from-gray-800/90 dark:via-gray-900/90 dark:to-indigo-900/30 backdrop-blur-xl">
         <div className="flex items-center gap-5">
           <div className="relative">
             <Avatar className="h-16 w-16 border-3 border-white/50 shadow-modern-lg backdrop-blur-sm">
               <AvatarImage src="/placeholder-avatar.jpg" />
-              <AvatarFallback className="bg-gradient-to-br from-primary-500 to-indigo-600 text-white font-bold text-xl">
+              <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-xl">
                 {user?.name?.charAt(0)?.toUpperCase() || 'K'}
               </AvatarFallback>
             </Avatar>
@@ -150,7 +150,7 @@ const CourierSidebar = () => {
         <div className="mt-6 p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl backdrop-blur-sm border border-white/20 dark:border-gray-700/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-lg">
+              <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
                 <Package className="h-4 w-4 text-white" />
               </div>
               <div>
@@ -172,7 +172,7 @@ const CourierSidebar = () => {
       <SidebarContent className="p-6 bg-gradient-to-b from-gray-50/50 via-white/80 to-gray-50/30 dark:from-gray-900/50 dark:via-gray-800/80 dark:to-gray-900/30 backdrop-blur-sm">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-6 px-3 flex items-center gap-2">
-            <div className="w-1 h-4 bg-gradient-to-b from-primary-500 to-indigo-600 rounded-full"></div>
+            <div className="w-1 h-4 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full"></div>
             Menu Navigasi
           </SidebarGroupLabel>
           <SidebarGroupContent>
