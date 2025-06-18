@@ -33,9 +33,13 @@ export const ModernDashboard: React.FC<ModernDashboardProps> = ({ userRole, user
       deliveredPackages,
       pendingPackages,
       activeUsers,
+      packagesArray,
+      usersArray,
+      attendanceArray,
       deliveryRate: totalPackages > 0 ? Math.round((deliveredPackages / totalPackages) * 100) : 0
     };
   };
+
 
   const stats = getDashboardStats();
 
@@ -82,7 +86,7 @@ export const ModernDashboard: React.FC<ModernDashboardProps> = ({ userRole, user
           },
           {
             title: 'Daily Operations',
-            value: attendanceArray.length || 0,
+            value: stats.attendanceArray.length || 0,
             icon: BarChart3,
             gradient: 'amber' as const,
             description: 'Active today'
@@ -107,7 +111,7 @@ export const ModernDashboard: React.FC<ModernDashboardProps> = ({ userRole, user
           },
           {
             title: 'Active Couriers',
-            value: usersArray.filter((u: any) => u.role === 'kurir' && u.status === 'aktif').length || 0,
+            value: stats.usersArray.filter((u: any) => u.role === 'kurir' && u.status === 'aktif').length || 0,
             icon: UserCheck,
             gradient: 'cyan' as const,
             description: 'Working today'
@@ -146,7 +150,7 @@ export const ModernDashboard: React.FC<ModernDashboardProps> = ({ userRole, user
           },
           {
             title: 'Team Members',
-            value: usersArray.filter((u: any) => u.role === 'kurir').length || 0,
+            value: stats.usersArray.filter((u: any) => u.role === 'kurir').length || 0,
             icon: Users,
             gradient: 'amber' as const,
             description: 'Managed couriers'
@@ -157,21 +161,21 @@ export const ModernDashboard: React.FC<ModernDashboardProps> = ({ userRole, user
         return [
           {
             title: 'My Packages',
-            value: packagesArray.filter((p: any) => p.kurir_id === userName).length || 0,
+            value: stats.packagesArray.filter((p: any) => p.kurir_id === userName).length || 0,
             icon: Package,
             gradient: 'blue' as const,
             description: 'Assigned to you'
           },
           {
             title: 'Delivered',
-            value: packagesArray.filter((p: any) => p.kurir_id === userName && p.status_pengiriman === 'terkirim').length || 0,
+            value: stats.packagesArray.filter((p: any) => p.kurir_id === userName && p.status_pengiriman === 'terkirim').length || 0,
             icon: CheckSquare,
             gradient: 'purple' as const,
             description: 'Completed today'
           },
           {
             title: 'Pending',
-            value: packagesArray.filter((p: any) => p.kurir_id === userName && p.status_pengiriman === 'pending').length || 0,
+            value: stats.packagesArray.filter((p: any) => p.kurir_id === userName && p.status_pengiriman === 'pending').length || 0,
             icon: Clock,
             gradient: 'amber' as const,
             description: 'To be delivered'
