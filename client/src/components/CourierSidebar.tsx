@@ -124,29 +124,55 @@ const CourierSidebar = () => {
   }
 
   return (
-    <Sidebar className="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700">
-      <SidebarHeader className="p-6 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800">
-        <div className="flex items-center gap-4">
+    <Sidebar className="w-80 bg-glass border-modern shadow-modern-xl">
+      <SidebarHeader className="p-8 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-br from-primary-50/80 via-white/90 to-indigo-50/80 dark:from-gray-800/90 dark:via-gray-900/90 dark:to-primary-900/30 backdrop-blur-xl">
+        <div className="flex items-center gap-5">
           <div className="relative">
-            <Avatar className="h-14 w-14 border-2 border-white shadow-md">
+            <Avatar className="h-16 w-16 border-3 border-white/50 shadow-modern-lg backdrop-blur-sm">
               <AvatarImage src="/placeholder-avatar.jpg" />
-              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-lg">
+              <AvatarFallback className="bg-gradient-to-br from-primary-500 to-indigo-600 text-white font-bold text-xl">
                 {user?.name?.charAt(0)?.toUpperCase() || 'K'}
               </AvatarFallback>
             </Avatar>
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-3 border-white rounded-full shadow-lg animate-pulse"></div>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-slate-900 dark:text-white text-lg truncate">{user?.name || 'Kurir'}</h3>
-            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium capitalize">{user?.role || 'kurir'}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Online</p>
+            <h3 className="font-bold text-gray-900 dark:text-white text-xl truncate">{user?.name || 'Kurir'}</h3>
+            <p className="text-sm text-gradient-modern font-semibold capitalize">{user?.role || 'kurir'}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Online & Active</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Modern Status Bar */}
+        <div className="mt-6 p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl backdrop-blur-sm border border-white/20 dark:border-gray-700/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-lg">
+                <Package className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Hari Ini</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">24 Paket</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-gray-500 dark:text-gray-400">Progress</p>
+              <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">85%</p>
+            </div>
+          </div>
+          <div className="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div className="bg-gradient-to-r from-emerald-500 to-green-500 h-2 rounded-full w-[85%] transition-all duration-1000"></div>
           </div>
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="p-4 bg-slate-50/50 dark:bg-slate-900/50">
+      <SidebarContent className="p-6 bg-gradient-to-b from-gray-50/50 via-white/80 to-gray-50/30 dark:from-gray-900/50 dark:via-gray-800/80 dark:to-gray-900/30 backdrop-blur-sm">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3 px-2">
+          <SidebarGroupLabel className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-6 px-3 flex items-center gap-2">
+            <div className="w-1 h-4 bg-gradient-to-b from-primary-500 to-indigo-600 rounded-full"></div>
             Menu Navigasi
           </SidebarGroupLabel>
           <SidebarGroupContent>

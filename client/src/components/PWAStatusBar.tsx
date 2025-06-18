@@ -24,34 +24,46 @@ export const PWAStatusBar: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg">
+    <div className="w-full bg-glass backdrop-blur-xl border-b border-gray-200/30 dark:border-gray-700/30 shadow-modern">
       <div className="safe-area-top" />
-      <div className="px-4 py-3">
+      <div className="px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-sm" />
-              <span className="text-sm font-bold">INSAN Mobile</span>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-xl shadow-lg">
+                <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+              </div>
+              <div>
+                <span className="text-lg font-bold text-gray-900 dark:text-white">INSAN Mobile</span>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Kurir Management System</p>
+              </div>
             </div>
-            <div className="h-4 w-px bg-slate-600"></div>
-            <span className="text-xs text-slate-300 font-medium">Kurir Management</span>
           </div>
-          <div className="flex items-center space-x-3 text-xs font-medium">
-            <div className="flex items-center space-x-1">
+          
+          <div className="flex items-center space-x-4">
+            <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-full backdrop-blur-sm border ${
+              isOnline 
+                ? 'bg-emerald-50/80 border-emerald-200/50 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-700/50 dark:text-emerald-300' 
+                : 'bg-red-50/80 border-red-200/50 text-red-700 dark:bg-red-900/30 dark:border-red-700/50 dark:text-red-300'
+            }`}>
               {isOnline ? (
                 <>
-                  <Wifi className="h-3 w-3 text-emerald-400" />
-                  <span className="text-emerald-400">Online</span>
+                  <Wifi className="h-3 w-3" />
+                  <span className="text-xs font-semibold">Online</span>
                 </>
               ) : (
                 <>
-                  <WifiOff className="h-3 w-3 text-red-400" />
-                  <span className="text-red-400">Offline</span>
+                  <WifiOff className="h-3 w-3" />
+                  <span className="text-xs font-semibold">Offline</span>
                 </>
               )}
             </div>
-            <div className="h-3 w-px bg-slate-600"></div>
-            <span className="text-white">{currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+            
+            <div className="px-3 py-1.5 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-full border border-white/20 dark:border-gray-700/20">
+              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
           </div>
         </div>
       </div>

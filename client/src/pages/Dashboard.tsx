@@ -439,11 +439,15 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Professional Stats Cards */}
-          <div className="grid-stats">
+          {/* Modern Stats Cards */}
+          <div className="grid-stats mt-12">
             {dashboardCards.map((card, index) => (
-              <Card key={index} className="card-professional hover:shadow-professional-lg cursor-pointer group scale-in border-0 shadow-professional"
-                style={{ animationDelay: `${index * 0.1}s` }}
+              <Card key={index} 
+                className="card-modern hover:shadow-modern-xl cursor-pointer group relative overflow-hidden border-0"
+                style={{ 
+                  animationDelay: `${index * 0.1}s`,
+                  animation: 'fadeIn 0.6s ease-out forwards'
+                }}
                 onClick={() => {
                   toast({
                     title: card.title,
@@ -451,24 +455,48 @@ const Dashboard = () => {
                   });
                 }}
               >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                  <div className="space-y-1">
-                    <CardTitle className="text-caption font-semibold text-slate-600 dark:text-slate-400">{card.title}</CardTitle>
-                    <div className="text-heading-2 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {card.value}
+                {/* Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-50/20 via-transparent to-indigo-50/20 dark:from-primary-900/10 dark:to-indigo-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <CardHeader className="relative pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-3 flex-1">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-xl shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
+                          <card.icon className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-caption font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{card.title}</CardTitle>
+                          <div className="text-heading-2 font-bold text-gray-900 dark:text-white group-hover:text-gradient-modern transition-all duration-300 mt-1">
+                            {card.value}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl group-hover:from-blue-100 group-hover:to-indigo-100 dark:group-hover:from-blue-900/30 dark:group-hover:to-indigo-900/30 transition-all duration-300">
-                    <card.icon className="h-6 w-6 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300" />
-                  </div>
                 </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-caption text-slate-500 dark:text-slate-400">
+                
+                <CardContent className="relative pt-0">
+                  <p className="text-body-small text-gray-600 dark:text-gray-300 mb-4">
                     {card.description}
                   </p>
-                  <div className="flex items-center mt-3 text-xs">
-                    <TrendingUp className="h-3 w-3 text-emerald-500 mr-1" />
-                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">+12% dari bulan lalu</span>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
+                        <TrendingUp className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-xs">+12% dari bulan lalu</span>
+                    </div>
+                    <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></div>
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className="mt-4 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                    <div 
+                      className="bg-gradient-to-r from-primary-500 to-indigo-600 h-1.5 rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${Math.random() * 40 + 60}%` }}
+                    ></div>
                   </div>
                 </CardContent>
               </Card>
