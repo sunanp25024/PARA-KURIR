@@ -6,23 +6,27 @@ import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 export const PWAStatusBar: React.FC = () => {
-  const { isOnline, syncStatus, pendingSync, forceSyncNow } = useOfflineSync();
-  const { permission, requestPermission } = usePushNotifications();
+  const [isVisible, setIsVisible] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-  const getSyncStatusIcon = () => {
-    switch (syncStatus) {
-      case 'syncing':
-        return <Download className="h-4 w-4 animate-spin" />;
-      case 'success':
-        return <Check className="h-4 w-4 text-green-600" />;
-      case 'error':
-        return <AlertCircle className="h-4 w-4 text-red-600" />;
-      default:
-        return isOnline ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />;
-    }
-  };
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
 
-  const getStatusText = () => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
     if (syncStatus === 'syncing') return 'Syncing...';
     if (syncStatus === 'success') return 'Synced';
     if (syncStatus === 'error') return 'Sync failed';

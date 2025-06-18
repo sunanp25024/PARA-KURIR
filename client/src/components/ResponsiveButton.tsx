@@ -1,46 +1,57 @@
 import React from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
 import { usePlatform } from '@/hooks/usePlatform';
-import { cn } from '@/lib/utils';
 
 interface ResponsiveButtonProps extends ButtonProps {
   touchOptimized?: boolean;
   fullWidthOnMobile?: boolean;
+  professional?: boolean;
 }
 
 export const ResponsiveButton: React.FC<ResponsiveButtonProps> = ({
   children,
-  className,
-  touchOptimized = false,
+  className = '',
+  touchOptimized = true,
   fullWidthOnMobile = false,
+  professional = true,
+  variant = 'default',
   ...props
 }) => {
-  const { platform, responsiveClasses } = usePlatform();
+  const { platform } = usePlatform();
 
-  const mobileClasses = platform.isMobile ? [
-    touchOptimized && 'touch-target',
-    fullWidthOnMobile && 'w-full',
-    'text-base h-12 px-6'
-  ].filter(Boolean).join(' ') : '';
+  const getProfessionalVariant = () => {
+    if (!professional) return className;
+    
+    switch (variant) {
+      case 'default':
+        return `btn-primary ${className}`;
+      case 'secondary':
+        return `btn-secondary ${className}`;
+      case 'destructive':
+        return `btn-danger ${className}`;
+      case 'outline':
+        return `btn-secondary ${className}`;
+      case 'ghost':
+        return `hover:bg-slate-100 dark:hover:bg-slate-800 ${className}`;
+      default:
+        return className;
+    }
+  };
 
-  const tabletClasses = platform.isTablet ? 'h-11 px-5 text-sm' : '';
-  const desktopClasses = platform.isDesktop ? 'h-10 px-4 text-sm' : '';
+  const responsiveClasses = `
+    ${getProfessionalVariant()}
+    ${touchOptimized && platform.isMobile ? 'touch-friendly' : ''}
+    ${fullWidthOnMobile && platform.isMobile ? 'w-full' : ''}
+    ${platform.isMobile ? 'text-base py-3' : 'text-sm py-2'}
+  `;
 
   return (
     <Button
-      className={cn(
-        responsiveClasses.button,
-        mobileClasses,
-        tabletClasses,
-        desktopClasses,
-        'transition-all duration-200',
-        className
-      )}
+      className={responsiveClasses}
+      variant={professional ? 'ghost' : variant}
       {...props}
     >
       {children}
     </Button>
   );
 };
-
-export default ResponsiveButton;

@@ -452,14 +452,24 @@ const Dashboard = () => {
                 }}
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
-                  <div className={`p-3 rounded-xl ${card.color} group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
-                    <card.icon className="h-5 w-5" />
+                  <div className="space-y-1">
+                    <CardTitle className="text-caption font-semibold text-slate-600 dark:text-slate-400">{card.title}</CardTitle>
+                    <div className="text-heading-2 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {card.value}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl group-hover:from-blue-100 group-hover:to-indigo-100 dark:group-hover:from-blue-900/30 dark:group-hover:to-indigo-900/30 transition-all duration-300">
+                    <card.icon className="h-6 w-6 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300" />
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{card.value}</div>
-                  <p className="text-sm text-muted-foreground">{card.description}</p>
+                <CardContent className="pt-0">
+                  <p className="text-caption text-slate-500 dark:text-slate-400">
+                    {card.description}
+                  </p>
+                  <div className="flex items-center mt-3 text-xs">
+                    <TrendingUp className="h-3 w-3 text-emerald-500 mr-1" />
+                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">+12% dari bulan lalu</span>
+                  </div>
                 </CardContent>
               </Card>
             ))}
