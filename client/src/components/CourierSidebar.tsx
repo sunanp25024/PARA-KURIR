@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Sidebar,
@@ -21,33 +21,42 @@ import {
   Settings,
   Bell,
   LogOut,
-  Package
+  Package,
+  Home,
+  Menu,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
+import { usePlatform } from '@/hooks/usePlatform';
 
-const menuItems = [
-  {
-    title: "Workflow Harian",
-    url: "/dashboard",
-    icon: Package,
-    isActive: true
-  },
-  {
-    title: "Absensi",
-    url: "/attendance",
-    icon: Clock,
-  },
-  {
-    title: "Performa",
-    url: "/performance",
-    icon: BarChart3,
-  },
-  {
-    title: "Profil Saya",
-    url: "/profile",
-    icon: User,
+const CourierSidebar = () => {
+  const navigate = useNavigate();
+  const { platform, responsiveClasses } = usePlatform();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const menuItems = [
+    {
+      title: "Workflow Harian",
+      url: "/dashboard",
+      icon: platform.isMobile ? Home : Package,
+      isActive: true
+    },
+    {
+      title: "Absensi",
+      url: "/attendance",
+      icon: Clock,
+    },
+    {
+      title: "Performa",
+      url: "/performance",
+      icon: BarChart3,
+    },
+    {
+      title: "Profil Saya",
+      url: "/profile",
+      icon: User,
   },
   {
     title: "Notifikasi",

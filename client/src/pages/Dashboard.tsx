@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
+import { usePlatform } from '@/hooks/usePlatform';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,6 +60,7 @@ const Dashboard = () => {
   const [showExcelImport, setShowExcelImport] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const navigate = useNavigate();
+  const { platform, responsiveClasses } = usePlatform();
   
   // Menggunakan data dari Supabase
   const { users, packages, activities, attendance, loading, refreshData } = useSupabaseData();
@@ -135,14 +137,21 @@ const Dashboard = () => {
   // Dashboard khusus untuk kurir dengan layout yang berbeda
   if (user.role === 'kurir') {
     return (
-      <div className="flex h-screen bg-background">
-        <CourierSidebar />
+      <div className={`${responsiveClasses.container} flex ${platform.isMobile ? 'flex-col' : ''}`}>
+        {!platform.isMobile && <CourierSidebar />}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-auto p-6 bg-gradient-to-br from-background via-background to-secondary/30">
-            <WorkflowProvider>
-              <CourierWorkflowMain />
-            </WorkflowProvider>
+          <main className={`flex-1 overflow-auto ${responsiveClasses.main} ${platform.isMobile ? '' : 'bg-gradient-to-br from-background via-background to-secondary/30'} safe-area-top safe-area-bottom`}>
+            <div className={`${platform.isMobile ? 'max-w-none' : 'max-w-7xl mx-auto'}`}>
+              <WorkflowProvider>
+                <CourierWorkflowMain />
+              </WorkflowProvider>
+            </div>
           </main>
+          {platform.isMobile && (
+            <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border safe-area-bottom">
+              <CourierSidebar />
+            </div>
+          )}
         </div>
       </div>
     );

@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { User, Calendar, BarChart3, Settings, LogOut, Menu, X, Users, Bell, CheckSquare, FileText, Shield } from 'lucide-react';
+import { User, Calendar, BarChart3, Settings, LogOut, Menu, X, Users, Bell, CheckSquare, FileText, Shield, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { RealtimeStatus } from './RealtimeStatus';
+import { usePlatform } from '@/hooks/usePlatform';
 
 interface SidebarProps {
   userRole: string;
@@ -14,6 +15,7 @@ interface SidebarProps {
 const Sidebar = ({ userRole, userName }: SidebarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const { platform, responsiveClasses } = usePlatform();
 
   const handleLogout = () => {
     sessionStorage.removeItem('user');
@@ -26,7 +28,7 @@ const Sidebar = ({ userRole, userName }: SidebarProps) => {
 
   const getMenuItems = () => {
     const baseItems = [{
-      icon: BarChart3,
+      icon: platform.isMobile ? Home : BarChart3,
       label: 'Dashboard',
       path: '/dashboard'
     }];
@@ -111,20 +113,87 @@ const Sidebar = ({ userRole, userName }: SidebarProps) => {
 
   const menuItems = getMenuItems();
 
+  if (platform.isMobile) {
+    return (
+      <>
+        {/* Mobile toggle button */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="fixed top-4 left-4 z-50 lg:hidden touch-target safe-area-top" 
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
+
+        {/* Mobile sidebar overlay */}
+        {isOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden" 
+            onClick={() => setIsOpen(false)} 
+          />
+        )}
+
+        {/* Mobile sidebar */}
+        <div className={`fixed left-0 top-0 h-full w-80 sidebar-gradient text-white transform transition-transform duration-300 ease-in-out z-40 shadow-modern-xl safe-area-top safe-area-bottom ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div className="p-6 border-b border-white/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <div className="w-8 h-8 bg-white rounded-md"></div>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold">INSAN MOBILE</h1>
+                <p className="text-sm text-white/70">Aplikasi Mobile</p>
+              </div>
+            </div>
+            <div className="glass-card rounded-lg p-4">
+              <p className="text-base font-medium text-white">{userName}</p>
+              <p className="text-sm text-white/80 capitalize">{userRole.replace('-', ' ')}</p>
+            </div>
+          </div>
+
+          <nav className="flex-1 p-4 overflow-y-auto">
+            <ul className="space-y-3">
+              {menuItems.map((item, index) => (
+                <li key={index}>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-white hover:bg-white/20 transition-all duration-300 rounded-xl h-14 px-4 text-base touch-target" 
+                    onClick={() => {
+                      navigate(item.path);
+                      setIsOpen(false);
+                    }}
+                  >
+                    <item.icon className="mr-4 h-6 w-6" />
+                    {item.label}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="p-4 border-t border-white/20">
+            <div className="mb-4">
+              <RealtimeStatus />
+            </div>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-white hover:bg-red-500/30 transition-all duration-300 rounded-xl h-14 px-4 text-base touch-target" 
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-4 h-6 w-6" />
+              Log Out
+            </Button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
-      {/* Mobile toggle button */}
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="fixed top-4 left-4 z-50 md:hidden" 
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {isOpen ? <X /> : <Menu />}
-      </Button>
-
-      {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-full w-64 sidebar-gradient text-white transform transition-transform duration-300 ease-in-out z-40 shadow-modern-xl ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+      {/* Desktop sidebar */}
+      <div className={`fixed left-0 top-0 h-full w-64 sidebar-gradient text-white transform transition-transform duration-300 ease-in-out z-40 shadow-modern-xl translate-x-0`}>
         
         {/* Header with Logo */}
         <div className="p-6 border-b border-white/20 backdrop-blur-sm">

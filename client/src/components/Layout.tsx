@@ -63,16 +63,13 @@ const Layout = ({ children }: LayoutProps) => {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className={`${responsiveClasses.container} flex ${platform.isMobile ? 'flex-col' : ''}`}>
       <Sidebar userRole={user.role} userName={user.name} />
-      
-      <div className="flex-1 md:ml-64">
-        <main className="p-6 h-full overflow-auto bg-gradient-to-br from-background via-background to-secondary/30">
-          <div className="animate-fade-in">
-            {children}
-          </div>
-        </main>
-      </div>
+      <main className={`flex-1 ${platform.isMobile ? 'ml-0' : 'md:ml-64'} ${responsiveClasses.main} overflow-auto safe-area-top safe-area-bottom`}>
+        <div className={`${platform.isMobile ? 'max-w-none' : 'max-w-7xl mx-auto'}`}>
+          {children}
+        </div>
+      </main>
     </div>
   );
 };
