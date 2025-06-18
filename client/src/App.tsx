@@ -2,7 +2,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
@@ -28,7 +27,6 @@ import { WorkflowProvider } from "./contexts/WorkflowContextSimple";
 import { RealtimeProvider } from "./components/RealtimeProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DevStatus } from "./components/DevStatus";
-import { RealtimeSync } from "./components/RealtimeSync";
 
 const queryClient = new QueryClient();
 
@@ -37,11 +35,10 @@ const App = () => (
     <AuthProvider>
       <WorkflowProvider>
         <RealtimeProvider>
-          <SidebarProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
               <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<LandingPage />} />
@@ -153,10 +150,8 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <DevStatus />
-              <RealtimeSync />
             </BrowserRouter>
-            </TooltipProvider>
-          </SidebarProvider>
+          </TooltipProvider>
         </RealtimeProvider>
       </WorkflowProvider>
     </AuthProvider>

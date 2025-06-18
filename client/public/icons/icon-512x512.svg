@@ -1,12 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="86" fill="#FFFFFF"/>
-  <circle cx="150" cy="192" r="10" fill="#3B82F6"/>
-  <circle cx="180" cy="172" r="8" fill="#F59E0B"/>
-  <circle cx="210" cy="192" r="9" fill="#06B6D4"/>
-  <circle cx="128" cy="232" r="12" fill="#F59E0B"/>
-  <circle cx="158" cy="268" r="8" fill="#3B82F6"/>
-  <circle cx="188" cy="288" r="10" fill="#06B6D4"/>
-  <circle cx="108" cy="272" r="9" fill="#3B82F6"/>
-  <text x="180" y="260" fill="#3B82F6" font-family="Arial" font-weight="bold" font-size="64">PARA</text>
-  <text x="180" y="290" fill="#F59E0B" font-family="Arial" font-size="20">PT PARA INSAN SINERGI</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="64" fill="#8b5cf6"/>
+  <text x="50%" y="50%" text-anchor="middle" dy="0.35em" fill="white" font-family="Arial, sans-serif" font-size="85" font-weight="bold">PARA</text>
 </svg>
