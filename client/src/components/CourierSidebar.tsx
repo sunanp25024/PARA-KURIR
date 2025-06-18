@@ -83,66 +83,103 @@ const CourierSidebar = () => {
 
   if (platform.isMobile) {
     return (
-      <div className="flex justify-around items-center p-2 bg-background border-t border-border">
+      <div className="flex justify-around items-center p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 shadow-lg">
         {menuItems.slice(0, 4).map((item) => (
           <Button
             key={item.title}
             variant="ghost"
-            className="flex flex-col items-center gap-1 h-16 w-16 p-2 touch-target"
+            className={`
+              flex flex-col items-center gap-2 h-16 w-16 p-2 rounded-xl transition-all duration-200
+              ${item.isActive 
+                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }
+            `}
             onClick={() => navigate(item.url)}
           >
-            <item.icon className="h-5 w-5" />
-            <span className="text-xs">{item.title.split(' ')[0]}</span>
+            <div className={`
+              p-2 rounded-lg transition-all duration-200
+              ${item.isActive 
+                ? 'bg-blue-500 text-white shadow-sm' 
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+              }
+            `}>
+              <item.icon className="h-4 w-4" />
+            </div>
+            <span className="text-xs font-medium">{item.title.split(' ')[0]}</span>
           </Button>
         ))}
         <Button
           variant="ghost"
-          className="flex flex-col items-center gap-1 h-16 w-16 p-2 touch-target text-red-600"
+          className="flex flex-col items-center gap-2 h-16 w-16 p-2 rounded-xl transition-all duration-200 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
           onClick={handleLogout}
         >
-          <LogOut className="h-5 w-5" />
-          <span className="text-xs">Logout</span>
+          <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+            <LogOut className="h-4 w-4" />
+          </div>
+          <span className="text-xs font-medium">Logout</span>
         </Button>
       </div>
     );
   }
 
   return (
-    <Sidebar className="w-72 border-r border-border bg-gradient-to-b from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
-      <SidebarHeader className="p-6 border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-12 w-12 border-2 border-blue-200 dark:border-blue-800">
-            <AvatarImage src="/placeholder-avatar.jpg" />
-            <AvatarFallback className="bg-blue-500 text-white font-semibold">
-              {user?.name?.charAt(0)?.toUpperCase() || 'K'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <h3 className="font-semibold text-foreground">{user?.name || 'Kurir'}</h3>
-            <p className="text-sm text-muted-foreground capitalize">{user?.role || 'kurir'}</p>
+    <Sidebar className="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700">
+      <SidebarHeader className="p-6 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Avatar className="h-14 w-14 border-2 border-white shadow-md">
+              <AvatarImage src="/placeholder-avatar.jpg" />
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-lg">
+                {user?.name?.charAt(0)?.toUpperCase() || 'K'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg truncate">{user?.name || 'Kurir'}</h3>
+            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium capitalize">{user?.role || 'kurir'}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Online</p>
           </div>
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="p-4">
+      <SidebarContent className="p-4 bg-slate-50/50 dark:bg-slate-900/50">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Menu Utama
+          <SidebarGroupLabel className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3 px-2">
+            Menu Navigasi
           </SidebarGroupLabel>
-          <SidebarGroupContent className="mt-2">
-            <SidebarMenu className="space-y-1">
-              {menuItems.map((item) => (
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-2">
+              {menuItems.map((item, index) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     onClick={() => navigate(item.url)}
                     className={`
-                      w-full justify-start h-11 px-3 rounded-lg transition-colors
-                      hover:bg-blue-100 dark:hover:bg-blue-900/50
-                      ${item.isActive ? 'bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : ''}
+                      w-full justify-start h-12 px-4 rounded-xl transition-all duration-200 group
+                      ${item.isActive 
+                        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/25' 
+                        : 'hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm border border-transparent hover:border-slate-200 dark:hover:border-slate-700'
+                      }
                     `}
                   >
-                    <item.icon className="h-5 w-5 mr-3" />
-                    <span className="font-medium">{item.title}</span>
+                    <div className={`
+                      p-2 rounded-lg mr-3 transition-all duration-200
+                      ${item.isActive 
+                        ? 'bg-white/20 text-white' 
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 dark:group-hover:bg-blue-900/20 dark:group-hover:text-blue-400'
+                      }
+                    `}>
+                      <item.icon className="h-4 w-4" />
+                    </div>
+                    <span className={`font-medium text-sm ${item.isActive ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`}>
+                      {item.title}
+                    </span>
+                    {item.isActive && (
+                      <div className="ml-auto">
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                      </div>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -151,14 +188,16 @@ const CourierSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-border/50">
+      <SidebarFooter className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
         <Button
           onClick={handleLogout}
           variant="ghost"
-          className="w-full justify-start h-11 px-3 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
+          className="w-full justify-start h-12 px-4 rounded-xl transition-all duration-200 group border border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
         >
-          <LogOut className="h-5 w-5 mr-3" />
-          <span className="font-medium">Logout</span>
+          <div className="p-2 rounded-lg mr-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 group-hover:bg-red-200 dark:group-hover:bg-red-900/50 transition-all duration-200">
+            <LogOut className="h-4 w-4" />
+          </div>
+          <span className="font-medium text-sm text-red-600 dark:text-red-400">Logout</span>
         </Button>
       </SidebarFooter>
     </Sidebar>

@@ -439,10 +439,10 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Stats Cards */}
-          <div className={`grid ${platform.isMobile ? 'grid-cols-2 gap-4' : platform.isTablet ? 'grid-cols-3 gap-6' : 'grid-cols-4 gap-6'}`}>
+          {/* Professional Stats Cards */}
+          <div className="grid-stats">
             {dashboardCards.map((card, index) => (
-              <Card key={index} className={`${responsiveClasses.card} hover:shadow-xl transition-all duration-300 cursor-pointer group animate-scale-in border border-border/50`}
+              <Card key={index} className="card-professional hover:shadow-professional-lg cursor-pointer group scale-in border-0 shadow-professional"
                 style={{ animationDelay: `${index * 0.1}s` }}
                 onClick={() => {
                   toast({
