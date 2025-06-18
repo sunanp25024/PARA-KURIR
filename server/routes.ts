@@ -11,10 +11,20 @@ import { authLimiter, apiLimiter, uploadLimiter, securityHeaders, validateInput,
 // Global WebSocket connections for real-time updates
 const wsConnections = new Set<any>();
 
-function broadcastUpdate(type: string, data: any) {
-  const message = JSON.stringify({ type, data, timestamp: new Date().toISOString() });
-  wsConnections.forEach(ws => {
+function broadcastUpdate(type: string, data: any, excludeUserId?: string) {
+  const message = JSON.stringify({ 
+    type, 
+    ...data, 
+    timestamp: new Date().toISOString(),
+    userId: excludeUserId 
+  });
+  
+  wsConnections.forEach((ws: any) => {
     if (ws.readyState === 1) { // WebSocket.OPEN
+      // Don't broadcast to the user who initiated the change
+      if (excludeUserId && ws.userId === excludeUserId) {
+        return;
+      }
       ws.send(message);
     }
   });
@@ -309,7 +319,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Broadcast package update
-      broadcastUpdate('package_updated', pkg);
+      broadcastUpdate('package_update', { 
+        packageId: pkg.id, 
+        status: pkg.status, 
+        kurirId: pkg.kurirId 
+      }, req.headers['user-id'] as string);
       
       res.json(pkg);
     } catch (error) {
@@ -333,8 +347,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const attendanceData = insertAttendanceSchema.parse(req.body);
       const attendance = await storage.createAttendance(attendanceData);
       
-      // Broadcast attendance creation
-      broadcastUpdate('attendance_created', attendance);
+      // Broadcast attendance update
+      broadcastUpdate('attendance_update', { 
+        kurirId: attendance.kurirId, 
+        kurirName: attendance.kurirName,
+        checkIn: attendance.checkIn
+      }, req.headers['user-id'] as string);
       
       res.status(201).json(attendance);
     } catch (error) {
@@ -397,16 +415,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     path: '/ws-api' // Use different path to avoid conflicts
   });
   
-  wss.on('connection', (ws) => {
+  wss.on('connection', (ws: any) => {
     console.log('New WebSocket connection established on /ws-api');
     wsConnections.add(ws);
+    
+    ws.on('message', (message: any) => {
+      try {
+        const data = JSON.parse(message.toString());
+        if (data.type === 'auth') {
+          ws.userId = data.userId;
+          ws.userRole = data.role;
+          console.log(`User ${data.userId} (${data.role}) authenticated on WebSocket`);
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    });
     
     ws.on('close', () => {
       wsConnections.delete(ws);
       console.log('WebSocket connection closed');
     });
     
-    ws.on('error', (error) => {
+    ws.on('error', (error: any) => {
       console.error('WebSocket error:', error);
       wsConnections.delete(ws);
     });
@@ -414,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Send initial connection confirmation
     ws.send(JSON.stringify({ 
       type: 'connection', 
-      data: { status: 'connected' },
+      status: 'connected',
       timestamp: new Date().toISOString()
     }));
   });

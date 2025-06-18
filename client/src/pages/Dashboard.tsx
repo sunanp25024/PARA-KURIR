@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/Auth';
 import Layout from '@/components/Layout';
+import { CourierLayout } from '@/components/CourierLayout';
+import { ModernLayout } from '@/components/ModernLayout';
+import { ModernCard } from '@/components/ModernCard';
+import { ModernButton } from '@/components/ModernButton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { motion } from 'framer-motion';
 import { 
   Package, 
   Truck, 
@@ -47,6 +53,7 @@ import CourierPerformanceCharts from '@/components/CourierPerformanceCharts';
 import { toast } from '@/hooks/use-toast';
 import { downloadFile, generateSampleData, generateComprehensiveReport, downloadMultipleFiles, generateTemplateFiles } from '@/utils/downloadUtils';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
+import { ModernDashboard } from '@/components/ModernDashboard';
 
 // Komponen khusus untuk courier dashboard dengan workflow context
 const CourierDashboardContent = () => {
