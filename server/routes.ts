@@ -321,8 +321,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Broadcast package update
       broadcastUpdate('package_update', { 
         packageId: pkg.id, 
-        status: pkg.status, 
-        kurirId: pkg.kurirId 
+        status: pkg.status_pengiriman, 
+        kurirId: pkg.kurir_id 
       }, req.headers['user-id'] as string);
       
       res.json(pkg);
@@ -349,9 +349,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Broadcast attendance update
       broadcastUpdate('attendance_update', { 
-        kurirId: attendance.kurirId, 
-        kurirName: attendance.kurirName,
-        checkIn: attendance.checkIn
+        kurirId: attendance.kurir_id, 
+        kurirName: attendance.kurir_name,
+        checkIn: attendance.jam_masuk
       }, req.headers['user-id'] as string);
       
       res.status(201).json(attendance);

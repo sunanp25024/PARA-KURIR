@@ -19,10 +19,14 @@ export const ModernDashboard: React.FC<ModernDashboardProps> = ({ userRole, user
   const { data: activities } = useQuery({ queryKey: ['/api/activities'] });
 
   const getDashboardStats = () => {
-    const totalPackages = packages?.length || 0;
-    const deliveredPackages = packages?.filter((p: any) => p.status === 'delivered').length || 0;
-    const pendingPackages = packages?.filter((p: any) => p.status === 'pending').length || 0;
-    const activeUsers = users?.filter((u: any) => u.status === 'aktif').length || 0;
+    const packagesArray = Array.isArray(packages) ? packages : [];
+    const usersArray = Array.isArray(users) ? users : [];
+    const attendanceArray = Array.isArray(attendance) ? attendance : [];
+    
+    const totalPackages = packagesArray.length || 0;
+    const deliveredPackages = packagesArray.filter((p: any) => p.status_pengiriman === 'terkirim').length || 0;
+    const pendingPackages = packagesArray.filter((p: any) => p.status_pengiriman === 'pending').length || 0;
+    const activeUsers = usersArray.filter((u: any) => u.status === 'aktif').length || 0;
     
     return {
       totalPackages,
@@ -78,7 +82,7 @@ export const ModernDashboard: React.FC<ModernDashboardProps> = ({ userRole, user
           },
           {
             title: 'Daily Operations',
-            value: attendance?.length || 0,
+            value: attendanceArray.length || 0,
             icon: BarChart3,
             gradient: 'amber' as const,
             description: 'Active today'
@@ -103,7 +107,7 @@ export const ModernDashboard: React.FC<ModernDashboardProps> = ({ userRole, user
           },
           {
             title: 'Active Couriers',
-            value: users?.filter((u: any) => u.role === 'kurir' && u.status === 'aktif').length || 0,
+            value: usersArray.filter((u: any) => u.role === 'kurir' && u.status === 'aktif').length || 0,
             icon: UserCheck,
             gradient: 'cyan' as const,
             description: 'Working today'
@@ -142,7 +146,7 @@ export const ModernDashboard: React.FC<ModernDashboardProps> = ({ userRole, user
           },
           {
             title: 'Team Members',
-            value: users?.filter((u: any) => u.role === 'kurir').length || 0,
+            value: usersArray.filter((u: any) => u.role === 'kurir').length || 0,
             icon: Users,
             gradient: 'amber' as const,
             description: 'Managed couriers'
@@ -153,21 +157,21 @@ export const ModernDashboard: React.FC<ModernDashboardProps> = ({ userRole, user
         return [
           {
             title: 'My Packages',
-            value: packages?.filter((p: any) => p.kurirId === userName).length || 0,
+            value: packagesArray.filter((p: any) => p.kurir_id === userName).length || 0,
             icon: Package,
             gradient: 'blue' as const,
             description: 'Assigned to you'
           },
           {
             title: 'Delivered',
-            value: packages?.filter((p: any) => p.kurirId === userName && p.status === 'delivered').length || 0,
+            value: packagesArray.filter((p: any) => p.kurir_id === userName && p.status_pengiriman === 'terkirim').length || 0,
             icon: CheckSquare,
             gradient: 'purple' as const,
             description: 'Completed today'
           },
           {
             title: 'Pending',
-            value: packages?.filter((p: any) => p.kurirId === userName && p.status === 'pending').length || 0,
+            value: packagesArray.filter((p: any) => p.kurir_id === userName && p.status_pengiriman === 'pending').length || 0,
             icon: Clock,
             gradient: 'amber' as const,
             description: 'To be delivered'

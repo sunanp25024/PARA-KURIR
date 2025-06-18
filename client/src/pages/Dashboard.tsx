@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/Auth';
 import Layout from '@/components/Layout';
-import { CourierLayout } from '@/components/CourierLayout';
+import CourierLayout from '@/components/CourierLayout';
 import { ModernLayout } from '@/components/ModernLayout';
 import { ModernCard } from '@/components/ModernCard';
 import { ModernButton } from '@/components/ModernButton';
