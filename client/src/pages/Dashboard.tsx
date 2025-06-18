@@ -48,19 +48,7 @@ import { toast } from '@/hooks/use-toast';
 import { downloadFile, generateSampleData, generateComprehensiveReport, downloadMultipleFiles, generateTemplateFiles } from '@/utils/downloadUtils';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 
-// Komponen khusus untuk courier dashboard dengan workflow context
-const CourierDashboardContent = () => {
-  return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <CourierSidebar />
-        <main className="flex-1 p-6 overflow-auto">
-          <CourierWorkflowMain />
-        </main>
-      </div>
-    </SidebarProvider>
-  );
-};
+// Remove the duplicate CourierDashboardContent component since we're using CourierWorkflowMain directly
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
@@ -152,7 +140,7 @@ const Dashboard = () => {
         <div className="flex-1 flex flex-col overflow-hidden">
           <main className="flex-1 overflow-auto p-6 bg-gradient-to-br from-background via-background to-secondary/30">
             <WorkflowProvider>
-              <CourierDashboardContent />
+              <CourierWorkflowMain />
             </WorkflowProvider>
           </main>
         </div>
