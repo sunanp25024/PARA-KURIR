@@ -28,6 +28,7 @@ import { WorkflowProvider } from "./contexts/WorkflowContextSimple";
 import { RealtimeProvider } from "./components/RealtimeProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DevStatus } from "./components/DevStatus";
+import { RealtimeSync } from "./components/RealtimeSync";
 
 const queryClient = new QueryClient();
 
@@ -152,6 +153,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <DevStatus />
+              <RealtimeSync />
             </BrowserRouter>
             </TooltipProvider>
           </SidebarProvider>
